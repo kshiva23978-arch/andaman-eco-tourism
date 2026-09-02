@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Modern Antiqua";
+  src: url("/fonts/Modern_Antiqua/ModernAntiqua-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 html {
   height: 100%;
 }
@@ -46,4 +54,8 @@ a {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.hero-title {
+  font-family: "Modern Antiqua", serif;
 }

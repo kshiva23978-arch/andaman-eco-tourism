@@ -1,4 +1,6 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { IconFeatureCard } from "@/components/ui/IconFeatureCard";
@@ -9,6 +11,8 @@ import {
   getDestinationsBySlugs,
 } from "@/lib/data/destinations";
 import { featuredActivitySlugs, getActivitiesBySlugs } from "@/lib/data/activities";
+import DestinationCarousel from "@/components/destinations/DestinationCarousel";
+import { FlyingBird } from "@/components/ui/FlyingBird";
 
 const ECO_GUIDELINES = [
   {
@@ -33,44 +37,295 @@ const ECO_GUIDELINES = [
   },
 ];
 
-const HERO_IMAGE =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDrKID6eEyprXJNAg1Hvwt_ex0TGweOGnFgTDrwirMGe2DlU9S3MQ5oVz3_KXo0u3aTgxia7t8RK24115W9shT69Zdn_fVpEXSJCdSeUeKZY6uEEZINZpGPZRy8oI-0IogfOi1GMb6wxfOdt7K-NTACI1hcOGB2EoDSf3h9vEHW6CoO_c36qAVZVz_l5_VqHisEiMcFvVhHuOOVg-jHqDFFpO22zvnH_P1ChRcRkJQv5-2dpdbJ3S20Sx95b_KW94HWtvywvPBtr8Dg";
+const HERO_VIDEO = "/videos/bg-banner.mp4";
+
+const MAP_HOTSPOTS = [
+  { slug: "saddle-peak-national-park", label: "North Andaman", x: 36, y: 17 },
+  { slug: "ross-and-smith-islands", label: "Ross & Smith", x: 63, y: 20 },
+  { slug: "limestone-caves-baratang", label: "Baratang", x: 34, y: 44 },
+  { slug: "mud-volcanoes-of-shyamnagar", label: "Rangat", x: 58, y: 51 },
+  { slug: "cuthbert-bay-beach-wildlife-sanctuary", label: "Middle Andaman", x: 56, y: 62 },
+  { slug: "jolly-buoy-island", label: "Jolly Buoy", x: 74, y: 76 },
+  { slug: "radhanagar-beach", label: "Havelock", x: 77, y: 61 },
+  { slug: "elephanta-beach", label: "Elephanta", x: 71, y: 83 },
+  { slug: "mount-manipur-national-park", label: "South Andaman", x: 31, y: 74 },
+  { slug: "kalapathar-beach-little-andaman", label: "Little Andaman", x: 82, y: 88 },
+];
+
+const destinations = [
+  {
+    name: "Havelock Island",
+    image: "/images/havelock.jpg",
+    description: "White sand beaches & crystal-clear waters",
+    video: "/videos/fish.mp4",
+  },
+  {
+    name: "Neil Island",
+    image: "/images/neil.jpg",
+    description: "Peaceful beaches & beautiful dive sites",
+    video: "/videos/bg-banner.mp4",
+  },
+  {
+    name: "Baratang Island",
+    image: "/images/baratang.jpg",
+    description: "Mangroves, caves & mud volcanoes",
+  },
+  {
+    name: "Little Andaman",
+    image: "/images/little-andaman.jpg",
+    description: "Waterfalls, surfing & nature",
+  },
+  {
+    name: "North Andaman",
+    image: "/images/north-andaman.jpg",
+    description: "Waterfalls, surfing & nature",
+  },
+  {
+    name: "Middle Andaman",
+    image: "/images/north-andaman.jpg",
+    description: "Waterfalls, surfing & nature",
+  },
+];
 
 export default function Home() {
   const featuredDestinations = getDestinationsBySlugs(featuredDestinationSlugs);
   const featuredActivities = getActivitiesBySlugs(featuredActivitySlugs);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const destinationRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const dragState = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
+  const heroSectionRef = useRef<HTMLElement | null>(null);
+  const activeDestination = destinations[activeSlide];
+  const heroBackgroundVideo = activeDestination?.video ?? HERO_VIDEO;
+  const isDefaultHeroVideo = !activeDestination?.video;
+
+  useEffect(() => {
+    const section = heroSectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHeroVisible(entry.isIntersecting);
+      },
+      {
+        threshold: 0.3,
+      }
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isHeroVisible) return;
+
+    const interval = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % destinations.length);
+    }, 10000);
+
+    return () => window.clearInterval(interval);
+  }, [isHeroVisible]);
+
+  useEffect(() => {
+    const card = destinationRefs.current[activeSlide];
+    const carousel = carouselRef.current;
+
+    if (!card || !carousel) return;
+
+    const cardRect = card.getBoundingClientRect();
+    const carouselRect = carousel.getBoundingClientRect();
+    const offset = cardRect.left - carouselRect.left;
+
+    carousel.scrollTo({
+      left: carousel.scrollLeft + offset - 12,
+      behavior: "smooth",
+    });
+  }, [activeSlide]);
+
+  const handleDotClick = (index: number) => {
+    setActiveSlide(index);
+    destinationRefs.current[index]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  };
+
+  const handleCardClick = (index: number) => {
+    setActiveSlide(index);
+    destinationRefs.current[index]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  };
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    dragState.current = {
+      isDown: true,
+      startX: event.clientX,
+      scrollLeft: carousel.scrollLeft,
+    };
+    carousel.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const carousel = carouselRef.current;
+    if (!carousel || !dragState.current.isDown) return;
+
+    const dx = event.clientX - dragState.current.startX;
+    carousel.scrollLeft = dragState.current.scrollLeft - dx;
+  };
+
+  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    const carousel = carouselRef.current;
+    if (!carousel || !dragState.current.isDown) return;
+
+    dragState.current.isDown = false;
+    carousel.releasePointerCapture(event.pointerId);
+
+    const cardWidth = 240 + 16;
+    const nextIndex = Math.round(carousel.scrollLeft / cardWidth);
+    setActiveSlide(Math.min(Math.max(nextIndex, 0), destinations.length - 1));
+  };
 
   return (
     <>
       {/* Hero */}
-      <section className="relative min-h-[500px] md:h-[819px] flex items-center overflow-hidden py-20 md:py-0">
+      <section
+        ref={heroSectionRef}
+        className="relative min-h-[500px] flex items-center overflow-hidden py-14 md:h-[819px] md:py-0"
+      >
         <div className="absolute inset-0 z-0">
-          <Image
-            src={HERO_IMAGE}
-            alt="Andaman Archipelago"
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
+          <video
+            key={`${HERO_VIDEO}-default`}
+            src={HERO_VIDEO}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out ${
+              isDefaultHeroVideo ? "opacity-100" : "opacity-0"
+            }`}
+            aria-label="Default Andaman background video"
+          />
+          <video
+            key={heroBackgroundVideo}
+            src={heroBackgroundVideo}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out ${
+              isDefaultHeroVideo ? "opacity-0" : "opacity-100"
+            }`}
+            aria-label={`${activeDestination?.name ?? "Andaman Archipelago"} background video`}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-primary/40 to-transparent" />
         </div>
-        <div className="relative z-10 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-white">
-          <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
-            <h1 className="font-headline-xl text-3xl md:text-headline-xl mb-6 leading-tight">
-              Discover Andaman &amp; Nicobar Islands
-            </h1>
-            <p className="font-body-lg text-lg md:text-body-lg mb-8 opacity-90 max-w-2xl">
-              A journey into pristine nature, vibrant culture, and sustainable
-              adventures
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
-              <Button href="/destinations" variant="white" size="lg">
-                Explore Destinations
-              </Button>
-              <Button href="/activities" variant="outline-white" size="lg">
-                Plan Your Journey
-              </Button>
+
+        <div className="relative z-10 w-full max-w-container-fluid mx-auto px-margin-mobile md:px-margin-desktop text-white">
+          <div className="grid items-center gap-8 md:grid-cols-[1.2fr_0.8fr] md:gap-10">
+            <div className="w-full max-w-[980px] text-left">
+              <h1 className="hero-title mb-4 text-3xl leading-tight md:mb-6 md:text-headline-xl">
+                Discover Andaman &amp; Nicobar Islands
+              </h1>
+              <p className="mb-6 max-w-xl text-base opacity-90 md:mb-8 md:text-lg md:text-body-lg">
+                A journey into pristine nature, vibrant culture, and sustainable
+                adventures
+              </p>
+              <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
+                <Button href="/destinations" variant="white" size="lg">
+                  Explore Destinations
+                </Button>
+                <Button href="/activities" variant="outline-white" size="lg">
+                  Plan Your Journey
+                </Button>
+              </div>
+
+              <div
+                ref={carouselRef}
+                className="mt-6 w-full max-w-full pt-4 pb-1 pl-1 pr-1 active:cursor-grabbing md:max-w-[900px] md:pt-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerLeave={handlePointerUp}
+              >
+                <div className="flex w-max gap-3 md:gap-4">
+                  {destinations.map((destination, index) => (
+                    <div
+                      key={destination.name}
+                      ref={(element) => {
+                        destinationRefs.current[index] = element;
+                      }}
+                      onClick={() => handleCardClick(index)}
+                      className={`group relative h-[220px] w-[180px] flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl border-2 transition-all duration-300 md:h-[300px] md:w-[240px] ${
+                        index === activeSlide
+                          ? "border-white shadow-[0_0_0_2px_rgba(255,255,255,0.25)]"
+                          : "border-transparent"
+                      }`}
+                    >
+                      <img
+                        src={destination.image}
+                        alt={destination.name}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+
+                      <div className="absolute bottom-0 p-4 text-white md:p-5">
+                        <h3 className="text-lg font-bold md:text-xl">{destination.name}</h3>
+                        <p className="mt-2 text-xs md:text-sm">{destination.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-2 flex items-center justify-center gap-2">
+                {destinations.map((destination, index) => (
+                  <button
+                    key={`${destination.name}-dot`}
+                    type="button"
+                    onClick={() => handleDotClick(index)}
+                    className={`h-2.5 w-2.5 rounded-full transition-all ${
+                      index === activeSlide ? "bg-white" : "bg-white/40"
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                    aria-pressed={index === activeSlide}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-[510px] md:w-[510px]">
+              <div className="absolute -inset-4 rounded-[28px] bg-white/10 blur-2xl" />
+              <div className="relative overflow-hidden rounded-[28px] border border-white/20 bg-white/10 backdrop-blur-sm shadow-2xl">
+                <div className="relative">
+                  <img
+                    src="/images/map/andaman-map.png"
+                    alt="Andaman and Nicobar Islands map"
+                    className="h-auto w-full object-cover"
+                  />
+
+                  {MAP_HOTSPOTS.map(({ slug, label, x, y }) => (
+                    <Link
+                      key={slug}
+                      href={`/destinations/${slug}`}
+                      aria-label={`Open ${label} destination`}
+                      className="group absolute -translate-x-1/2 -translate-y-1/2"
+                      style={{ left: `${x}%`, top: `${y}%` }}
+                    >
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-primary shadow-lg transition-transform group-hover:scale-125" />
+                      <span className="sr-only">{label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -93,20 +348,14 @@ export default function Home() {
               </span>
             </Link>
           </div>
-          <div className="flex flex-row overflow-x-auto gap-gutter pb-6 no-scrollbar snap-x snap-mandatory">
-            {featuredDestinations.map((destination) => (
-              <DestinationCard
-                key={destination.slug}
-                destination={destination}
-                variant="carousel"
-              />
-            ))}
+          <div className="w-full">
+            <DestinationCarousel featuredDestinations={featuredDestinations} />
           </div>
         </div>
       </section>
 
       {/* Featured Activities */}
-      <section className="py-20 md:py-24 bg-white">
+      <section className="py-20 md:py-24 bg-[url('/images/bg/bg-1.jpg')] bg-cover bg-center" >
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-4">
             <div className="max-w-2xl text-center md:text-left w-full">
