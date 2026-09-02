@@ -23,8 +23,7 @@ export function SiteHeader() {
       <div className="flex flex-wrap justify-between items-center w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4">
         <Link
           href="/"
-          className="font-headline-md text-headline-md text-primary font-bold tracking-tight"
-        >
+className="font-headline-md text-headline-sm sm:text-headline-md text-primary font-bold tracking-tight"        >
           Andaman &amp; Nicobar Ecotourism
         </Link>
 
