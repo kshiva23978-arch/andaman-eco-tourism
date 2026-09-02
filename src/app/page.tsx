@@ -229,7 +229,7 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 w-full max-w-container-fluid mx-auto px-margin-mobile md:px-margin-desktop text-white">
-          <div className="grid items-center gap-8 md:grid-cols-[1.2fr_0.8fr] md:gap-10">
+          <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-[1.2fr_0.8fr] md:gap-10">
             <div className="w-full max-w-[980px] text-left">
               <h1 className="hero-title mb-4 text-3xl leading-tight md:mb-6 md:text-headline-xl">
                 Discover Andaman &amp; Nicobar Islands
@@ -249,7 +249,7 @@ export default function Home() {
 
               <div
                 ref={carouselRef}
-                className="mt-6 w-full max-w-full pt-4 pb-1 pl-1 pr-1 active:cursor-grabbing md:max-w-[900px] md:pt-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                className="mt-6 w-full max-w-full overflow-x-auto overscroll-x-contain pt-4 pb-1 pl-1 pr-1 active:cursor-grabbing md:max-w-[900px] md:pt-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
