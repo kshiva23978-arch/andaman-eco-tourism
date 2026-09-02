@@ -13,6 +13,8 @@ import {
 import { featuredActivitySlugs, getActivitiesBySlugs } from "@/lib/data/activities";
 import DestinationCarousel from "@/components/destinations/DestinationCarousel";
 import { FlyingBird } from "@/components/ui/FlyingBird";
+import { ScrollFrameSequence } from "@/components/ui/ScrollFrameSequence";
+import { DecorativeLeaf } from "@/components/ui/DecorativeLeaf";
 
 const ECO_GUIDELINES = [
   {
@@ -54,81 +56,40 @@ const MAP_HOTSPOTS = [
 
 const destinations = [
   {
-    name: "Havelock Island",
-    image: "/images/havelock.jpg",
-    description: "White sand beaches & crystal-clear waters",
+    name: "Fish video", 
+    image: "/images/destinations/coral-fish.jpg",
     video: "/videos/fish.mp4",
   },
   {
-    name: "Neil Island",
-    image: "/images/neil.jpg",
-    description: "Peaceful beaches & beautiful dive sites",
+    name: "Turtle video",
+    image: "/images/destinations/turtle.jpg",
     video: "/videos/bg-banner.mp4",
   },
   {
-    name: "Baratang Island",
-    image: "/images/baratang.jpg",
-    description: "Mangroves, caves & mud volcanoes",
+    name: "Bird video",
+    image: "/images/destinations/crab-bird.jpg",
     video: "/videos/bird-fish.mp4",
 
   },
   {
-    name: "Little Andaman",
-    image: "/images/little-andaman.jpg",
-    description: "Waterfalls, surfing & nature",
+    name: "Sunset video",
+    image: "/images/destinations/sunset.jpg",
     video: "/videos/sun-set.mp4",
   },
-  {
-    name: "North Andaman",
-    image: "/images/north-andaman.jpg",
-    description: "Waterfalls, surfing & nature",
-  },
-  {
-    name: "Middle Andaman",
-    image: "/images/north-andaman.jpg",
-    description: "Waterfalls, surfing & nature",
-  },
+
 ];
 
 export default function Home() {
   const featuredDestinations = getDestinationsBySlugs(featuredDestinationSlugs);
   const featuredActivities = getActivitiesBySlugs(featuredActivitySlugs);
   const [activeSlide, setActiveSlide] = useState(0);
-  const [isHeroVisible, setIsHeroVisible] = useState(true);
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const destinationRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const dragState = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
+  const dragState = useRef({ isDown: false, isDragging: false, startX: 0, scrollLeft: 0 });
   const heroSectionRef = useRef<HTMLElement | null>(null);
   const activeDestination = destinations[activeSlide];
   const heroBackgroundVideo = activeDestination?.video ?? HERO_VIDEO;
   const isDefaultHeroVideo = !activeDestination?.video;
-
-  useEffect(() => {
-    const section = heroSectionRef.current;
-    if (!section) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsHeroVisible(entry.isIntersecting);
-      },
-      {
-        threshold: 0.3,
-      }
-    );
-
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isHeroVisible) return;
-
-    const interval = window.setInterval(() => {
-      setActiveSlide((current) => (current + 1) % destinations.length);
-    }, 10000);
-
-    return () => window.clearInterval(interval);
-  }, [isHeroVisible]);
 
   useEffect(() => {
     const card = destinationRefs.current[activeSlide];
@@ -145,6 +106,10 @@ export default function Home() {
       behavior: "smooth",
     });
   }, [activeSlide]);
+
+  const handleVideoEnded = () => {
+    setActiveSlide((current) => (current + 1) % destinations.length);
+  };
 
   const handleDotClick = (index: number) => {
     setActiveSlide(index);
@@ -170,10 +135,10 @@ export default function Home() {
 
     dragState.current = {
       isDown: true,
+      isDragging: false,
       startX: event.clientX,
       scrollLeft: carousel.scrollLeft,
     };
-    carousel.setPointerCapture(event.pointerId);
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -181,6 +146,13 @@ export default function Home() {
     if (!carousel || !dragState.current.isDown) return;
 
     const dx = event.clientX - dragState.current.startX;
+
+    if (!dragState.current.isDragging) {
+      if (Math.abs(dx) < 5) return;
+      dragState.current.isDragging = true;
+      carousel.setPointerCapture(event.pointerId);
+    }
+
     carousel.scrollLeft = dragState.current.scrollLeft - dx;
   };
 
@@ -188,7 +160,12 @@ export default function Home() {
     const carousel = carouselRef.current;
     if (!carousel || !dragState.current.isDown) return;
 
+    const wasDragging = dragState.current.isDragging;
     dragState.current.isDown = false;
+    dragState.current.isDragging = false;
+
+    if (!wasDragging) return;
+
     carousel.releasePointerCapture(event.pointerId);
 
     const cardWidth = 240 + 16;
@@ -221,8 +198,8 @@ export default function Home() {
             src={heroBackgroundVideo}
             autoPlay
             muted
-            loop
             playsInline
+            onEnded={handleVideoEnded}
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out ${
               isDefaultHeroVideo ? "opacity-0" : "opacity-100"
             }`}
@@ -230,6 +207,8 @@ export default function Home() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-primary/40 to-transparent" />
         </div>
+
+        <DecorativeLeaf className="bottom-6 left-4 md:bottom-10 md:left-8" rotate={-25} size={110} opacity={0.22} />
 
         <div className="relative z-10 w-full max-w-container-fluid mx-auto px-margin-mobile md:px-margin-desktop text-white">
           <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-[1.2fr_0.8fr] md:gap-10">
@@ -277,13 +256,9 @@ export default function Home() {
                         alt={destination.name}
                         className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                       />
-
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
-                      <div className="absolute bottom-0 p-4 text-white md:p-5">
-                        <h3 className="text-lg font-bold md:text-xl">{destination.name}</h3>
-                        <p className="mt-2 text-xs md:text-sm">{destination.description}</p>
-                      </div>
+                    
                     </div>
                   ))}
                 </div>
@@ -333,8 +308,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+      
        {/* Featured Destinations */}
-      <section className="py-12 md:py-20 bg-surface-container-low">
+      <section className="relative overflow-hidden py-12 md:py-20 bg-surface-container-low">
+        <DecorativeLeaf className="top-8 right-6 md:top-12 md:right-16" rotate={65} size={130} opacity={0.16} />
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
             <h2 className="font-headline-lg text-2xl md:text-headline-lg text-primary tracking-tight">
@@ -354,20 +331,24 @@ export default function Home() {
             <DestinationCarousel featuredDestinations={featuredDestinations} />
           </div>
         </div>
+                <DecorativeLeaf className="bottom-6 left-4 md:bottom-10 md:left-8" rotate={-25} size={110} opacity={0.22} />
       </section>
 
       {/* Featured Activities */}
-      <section className="py-20 md:py-24 bg-[url('/images/bg/bg-1.jpg')] bg-cover bg-center" >
+      <section className="relative overflow-hidden py-20 md:py-24 bg-[url('/images/bg/forest-bg.jpg')] bg-cover bg-center bg-fixed">
+        <DecorativeLeaf className="bottom-8 right-4 md:bottom-14 md:right-14" rotate={195} flip size={150} opacity={0.2} />
+
+        <div className="absolute inset-0 -z-10 " />
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-4">
             <div className="max-w-2xl text-center md:text-left w-full">
-              <h2 className="font-headline-lg text-2xl md:text-headline-lg text-primary mb-4">
+              <h2 className="font-headline-lg text-2xl md:text-headline-lg text-white mb-4">
                 Featured Eco-Activities
               </h2>
             </div>
             <Link
               href="/activities"
-              className="flex items-center gap-2 text-primary font-label-md text-label-md group mx-auto md:mx-0"
+              className="flex items-center gap-2 text-white font-label-md text-label-md group mx-auto md:mx-0"
             >
               Explore Activities Guide
               <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">
@@ -382,9 +363,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+    
 
       {/* Eco-Guidelines */}
-      <section className="py-20 md:py-24 bg-surface">
+      <section className="relative overflow-hidden py-20 md:py-24 bg-surface">
+        <DecorativeLeaf className="top-6 left-4 md:top-10 md:left-10" rotate={-60} size={120} opacity={0.15} />
+        <DecorativeLeaf className="bottom-6 right-4 md:bottom-12 md:right-20" rotate={110} flip size={160} opacity={0.15} />
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="flex flex-col md:flex-row gap-12 md:gap-16">
             <div className="md:w-1/3 text-center md:text-left">
@@ -396,6 +380,15 @@ export default function Home() {
                 commitment to responsibility. Please adhere to these official
                 guidelines to help preserve our natural heritage.
               </p>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4020881.2782082744!2d90.59024351827024!3d10.209710012395053!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3064a00f2b650ff3%3A0xce80055648fccb2c!2sAndaman%20and%20Nicobar%20Islands!5e0!3m2!1sen!2sin!4v1788341773220!5m2!1sen!2sin"
+                width="400"
+                height="300"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+              ></iframe>
             </div>
             <div className="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
               {ECO_GUIDELINES.map((guideline) => (
@@ -405,6 +398,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+
+              
     </>
   );
 }

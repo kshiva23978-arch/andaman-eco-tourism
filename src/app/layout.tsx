@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Public_Sans } from "next/font/google";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SmoothScroll } from "@/components/ui/SmoothScroll";
 import "./globals.css";
 
 const publicSans = Public_Sans({
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="font-body-md text-body-md antialiased flex flex-col min-h-screen">
+        <SmoothScroll />
         <SiteHeader />
         <main className="flex-grow">{children}</main>
         <SiteFooter />
