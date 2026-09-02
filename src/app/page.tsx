@@ -69,11 +69,14 @@ const destinations = [
     name: "Baratang Island",
     image: "/images/baratang.jpg",
     description: "Mangroves, caves & mud volcanoes",
+    video: "/videos/bird-fish.mp4",
+
   },
   {
     name: "Little Andaman",
     image: "/images/little-andaman.jpg",
     description: "Waterfalls, surfing & nature",
+    video: "/videos/sun-set.mp4",
   },
   {
     name: "North Andaman",
@@ -330,8 +333,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Featured Destinations */}
+       {/* Featured Destinations */}
       <section className="py-12 md:py-20 bg-surface-container-low">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
