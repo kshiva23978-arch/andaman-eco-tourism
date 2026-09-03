@@ -6,6 +6,60 @@ export interface FeatureBullet {
   text: string;
 }
 
+export type WatermarkPosition =
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right"
+  | "top-center"
+  | "bottom-center"
+  | "center";
+
+export interface WatermarkConfig {
+  src: string;
+  /** Where in the section it sits. Defaults auto-cycle through the 4 corners if omitted. */
+  position?: WatermarkPosition;
+  /** Height in px (width scales to match, aspect preserved). Default 160. */
+  size?: number;
+  /** Tailwind opacity step (5, 10, 15, 20 ...). Default 10. */
+  opacity?: number;
+}
+
+export type WatermarkInput = string | string[] | WatermarkConfig | WatermarkConfig[];
+
+const POSITION_CLASSES: Record<WatermarkPosition, string> = {
+  "top-left": "top-0 left-0",
+  "top-right": "top-0 right-0",
+  "bottom-left": "bottom-0 left-0",
+  "bottom-right": "bottom-0 right-0",
+  "top-center": "top-0 left-1/2 -translate-x-1/2",
+  "bottom-center": "bottom-0 left-1/2 -translate-x-1/2",
+  center: "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
+};
+
+/** Corner slots auto-assigned (in order) to watermarks that don't specify a position. */
+const AUTO_POSITIONS: WatermarkPosition[] = [
+  "bottom-right",
+  "top-left",
+  "bottom-left",
+  "top-right",
+];
+
+function normalizeWatermarks(input: WatermarkInput | undefined): Required<WatermarkConfig>[] {
+  if (!input) return [];
+  const list = Array.isArray(input) ? input : [input];
+
+  return list.map((item, index) => {
+    const config = typeof item === "string" ? { src: item } : item;
+    return {
+      src: config.src,
+      position: config.position ?? AUTO_POSITIONS[index % AUTO_POSITIONS.length],
+      size: config.size ?? 160,
+      opacity: config.opacity ?? 10,
+    };
+  });
+}
+
 export function AlternatingFeatureSection({
   href,
   image,
@@ -18,6 +72,7 @@ export function AlternatingFeatureSection({
   reverse = false,
   bgClassName = "bg-surface",
   tone = "light",
+  watermark,
 }: {
   href?: string;
   image: string;
@@ -30,7 +85,10 @@ export function AlternatingFeatureSection({
   reverse?: boolean;
   bgClassName?: string;
   tone?: "light" | "dark";
+  /** Optional faint decorative illustration(s). A plain string/array auto-cycles corners; pass `{ src, position, size, opacity }` (or an array of those) for explicit control. */
+  watermark?: WatermarkInput;
 }) {
+  const watermarks = normalizeWatermarks(watermark);
   const isDark = tone === "dark";
   const bodyColor = isDark ? "opacity-90" : "text-on-surface-variant";
   const iconColor = isDark ? "" : "text-primary";
@@ -38,8 +96,20 @@ export function AlternatingFeatureSection({
   const linkColor = isDark ? "text-on-primary" : "text-primary";
 
   return (
-    <section className={`py-16 ${bgClassName} ${isDark ? "text-on-primary" : ""}`}>
-      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 gap-gutter items-center">
+    <section className={`relative py-16 ${bgClassName} ${isDark ? "text-on-primary" : ""}`}>
+      {watermarks.map((wm, index) => (
+        <Image
+          key={`${wm.src}-${index}`}
+          src={wm.src}
+          alt=""
+          aria-hidden="true"
+          width={wm.size}
+          height={wm.size}
+          className={`absolute w-auto object-contain pointer-events-none ${POSITION_CLASSES[wm.position]}`}
+          style={{ height: wm.size, opacity: wm.opacity / 100 }}
+        />
+      ))}
+      <div className="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 gap-gutter items-center">
         <div className={`order-2 ${reverse ? "md:order-2" : "md:order-1"}`}>
           <div className="flex items-center gap-3 mb-4">
             {icon ? (

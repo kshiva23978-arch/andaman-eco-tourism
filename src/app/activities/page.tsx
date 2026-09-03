@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { AlternatingFeatureSection } from "@/components/ui/AlternatingFeatureSection";
+import Link from "next/link";
+import { AlternatingFeatureSection, type WatermarkInput } from "@/components/ui/AlternatingFeatureSection";
 import { getActivityBySlug } from "@/lib/data/activities";
 
 export const metadata: Metadata = {
@@ -10,34 +11,74 @@ export const metadata: Metadata = {
 };
 
 const HERO_IMAGE =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuA_HC49PveLb3FAk7v_Si0NlK9rEoU7L76rB7GtakvKBqzw_5Q7jLWKBt33y1-TV2_kjU8LeMsxVUMvTOeAX85v1aOhW5tpU5KU-PN3tuJ2CPAlQIYdcmczPmbWNMB0QlucDKYMSrM4e6DHW-0FW7LCHl0etkIUJVhX1dvLlcfZL8lWZQ8LnrAQK7bquwFQfouImGnzs4QzGrM2B_t0kcSluwbjw6Qsnd36WlV6pT3GgWzeD2qTHLg8B6QJRtn1_5oSQ4sFTKz7xsmp";
+  "/images/bg/activity-bg.png";
 
 interface GuideEntry {
   slug: string;
   bg: string;
   reverse: boolean;
   tone: "light" | "dark";
+  watermark?: WatermarkInput;
 }
 
 const MARINE_ACTIVITIES: GuideEntry[] = [
-  { slug: "scuba-snorkeling", bg: "bg-surface-container-lowest", reverse: false, tone: "light" },
-  { slug: "sustainable-boating", bg: "bg-surface", reverse: true, tone: "light" },
-  { slug: "ocean-surfing", bg: "bg-surface-container-low", reverse: false, tone: "light" },
-  { slug: "glass-bottom-boating", bg: "bg-surface", reverse: true, tone: "light" },
+  {
+    slug: "scuba-snorkeling",
+    bg: "bg-surface-container-lowest",
+    reverse: false,
+    tone: "light",
+    watermark: [
+      { src: "/images/illustrations/scuba-diver.png", position: "bottom-left", size: 200, opacity: 100 },
+    ],
+  },
+  { slug: "sustainable-boating", bg: "bg-surface", reverse: true, tone: "light",
+    watermark: [
+      { src: "/images/illustrations/sustainable-boat.png", position: "bottom-right", size: 200, opacity: 100 },
+    ],
+   },
+  { slug: "ocean-surfing", bg: "bg-surface-container-low", reverse: false, tone: "light",
+    watermark: [
+      { src: "/images/illustrations/surfing.png", position: "bottom-left", size: 200, opacity: 100 },
+    ],
+   },
+  { slug: "glass-bottom-boating", bg: "bg-surface", reverse: true, tone: "light"
+    
+   },
 ];
 
 const TERRESTRIAL_ACTIVITIES: GuideEntry[] = [
-  { slug: "rainforest-trekking", bg: "bg-surface-container-low", reverse: false, tone: "light" },
-  { slug: "mangrove-walks", bg: "bg-surface", reverse: true, tone: "light" },
-  { slug: "quiet-water-kayaking", bg: "bg-primary", reverse: false, tone: "dark" },
-  { slug: "avian-observation", bg: "bg-surface", reverse: true, tone: "light" },
-  { slug: "dark-sky-stargazing", bg: "bg-tertiary", reverse: false, tone: "dark" },
+  { slug: "rainforest-trekking", bg: "bg-surface-container-low", reverse: false, tone: "light",
+    watermark: [
+      { src: "/images/illustrations/rainforest-walk.png", position: "bottom-left", size: 180, opacity: 100 },
+    ],
+   },
+  { slug: "mangrove-walks", bg: "bg-surface", reverse: true, tone: "light",
+    watermark: [
+      { src: "/images/illustrations/mangrove.png", position: "bottom-right", size: 200, opacity: 100 },
+    ],
+    
+   },
+  { slug: "quiet-water-kayaking", bg: "bg-primary", reverse: false, tone: "dark",
+    watermark: [
+      { src: "/images/illustrations/kayaking.png", position: "bottom-left", size: 300, opacity: 100 },
+    ],
+   },
+  { slug: "avian-observation", bg: "bg-surface", reverse: true, tone: "light",
+    watermark: [
+      { src: "/images/illustrations/bird.png", position: "top-right", size: 200, opacity: 100 },
+    ],
+   },
+  { slug: "dark-sky-stargazing", bg: "bg-blue-950", reverse: false, tone: "dark",
+    watermark: [
+      { src: "/images/illustrations/telescope-2.png", position: "bottom-left", size: 200, opacity: 100 },
+    ],
+   },
 ];
 
 function GuideSections({ entries }: { entries: GuideEntry[] }) {
   return (
     <>
-      {entries.map(({ slug, bg, reverse, tone }) => {
+      {entries.map(({ slug, bg, reverse, tone, watermark }) => {
         const activity = getActivityBySlug(slug);
         if (!activity) return null;
         return (
@@ -57,6 +98,7 @@ function GuideSections({ entries }: { entries: GuideEntry[] }) {
             reverse={reverse}
             bgClassName={bg}
             tone={tone}
+            watermark={watermark}
           />
         );
       })}
@@ -68,25 +110,61 @@ export default function ActivitiesGuidePage() {
   return (
     <>
       {/* Hero */}
-      <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 mb-8">
-        <div className="relative h-[400px] w-full overflow-hidden rounded-xl">
-          <Image
-            src={HERO_IMAGE}
-            alt="Andaman Islands"
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent flex flex-col justify-end p-8 md:p-12">
-            <h1 className="font-headline-xl text-3xl md:text-headline-xl text-white mb-4">
-              Activities Guide
-            </h1>
-            <p className="font-body-lg text-body-lg text-white/90 max-w-2xl">
-              Discover the natural wonders of the archipelago through
-              responsible exploration and scientific conservation practices.
-            </p>
+      <section className="relative h-[450px] md:h-[520px] w-full overflow-hidden">
+        <Image
+          src={HERO_IMAGE}
+          alt="Andaman Islands"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-blue/50 to-transparent" />
+
+        <div className="relative z-10 h-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop flex flex-col justify-center">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="material-symbols-outlined text-white text-[20px]">
+              eco
+            </span>
+            <span className="font-label-md text-label-md text-white uppercase tracking-widest">
+              Experiences That Connect You With Nature
+            </span>
           </div>
+
+          <h1 className="font-headline-xl text-3xl md:text-headline-xl text-white mb-4">
+           Activities Guide
+
+          </h1>
+
+          <div className="h-1 w-16 bg-secondary rounded-full mb-6" />
+
+          <p className="font-body-lg text-white/90 max-w-xl text-lg md:text-xl mb-8">
+           Discover the natural wonders of the archipelago through responsible exploration and scientific conservation practices.
+          </p>
+
+          <Link
+            href="#marine-activities"
+            className="inline-flex w-fit items-center gap-2 rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary/90"
+          >
+            Explore Activities
+            <span className="material-symbols-outlined text-[20px]">
+              arrow_forward
+            </span>
+          </Link>
+        </div>
+
+        {/* Wave divider */}
+        <div className="absolute inset-x-0 bottom-0 z-10 leading-none">
+          <svg
+            viewBox="0 0 1440 100"
+            preserveAspectRatio="none"
+            className="h-[50px] w-full md:h-[90px]"
+          >
+            <path
+              className="fill-surface"
+              d="M0,64 C240,120 480,0 720,32 C960,64 1200,112 1440,48 L1440,100 L0,100 Z"
+            />
+          </svg>
         </div>
       </section>
 
@@ -141,7 +219,7 @@ export default function ActivitiesGuidePage() {
         </div>
       </section>
 
-      <SectionDivider label="Marine Activities" />
+      <SectionDivider id="marine-activities" label="Marine Activities" />
       <GuideSections entries={MARINE_ACTIVITIES} />
 
       <SectionDivider label="Terrestrial Activities" />
@@ -193,9 +271,12 @@ export default function ActivitiesGuidePage() {
   );
 }
 
-function SectionDivider({ label }: { label: string }) {
+function SectionDivider({ label, id }: { label: string; id?: string }) {
   return (
-    <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mb-12">
+    <section
+      id={id}
+      className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mb-12 scroll-mt-24"
+    >
       <div className="border-b border-outline-variant pb-6">
         <span className="font-label-md text-label-md text-secondary uppercase tracking-widest">
           {label}
