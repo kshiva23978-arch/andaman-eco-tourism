@@ -16,7 +16,7 @@ export function DecorativeLeaf({
   return (
     <img
       src="/images/bg/leaf.png"
-      alt=""
+      alt="floating-leaf"
       aria-hidden="true"
       width={size}
       height={size}

@@ -41,18 +41,35 @@ const ECO_GUIDELINES = [
 
 const HERO_VIDEO = "/videos/bg-banner.mp4";
 
-const MAP_HOTSPOTS = [
-  { slug: "saddle-peak-national-park", label: "North Andaman", x: 36, y: 17 },
-  { slug: "ross-and-smith-islands", label: "Ross & Smith", x: 63, y: 20 },
-  { slug: "limestone-caves-baratang", label: "Baratang", x: 34, y: 44 },
-  { slug: "mud-volcanoes-of-shyamnagar", label: "Rangat", x: 58, y: 51 },
-  { slug: "cuthbert-bay-beach-wildlife-sanctuary", label: "Middle Andaman", x: 56, y: 62 },
-  { slug: "jolly-buoy-island", label: "Jolly Buoy", x: 74, y: 76 },
-  { slug: "radhanagar-beach", label: "Havelock", x: 77, y: 61 },
-  { slug: "elephanta-beach", label: "Elephanta", x: 71, y: 83 },
-  { slug: "mount-manipur-national-park", label: "South Andaman", x: 31, y: 74 },
-  { slug: "kalapathar-beach-little-andaman", label: "Little Andaman", x: 82, y: 88 },
+const MAP_HOTSPOTS: Array<{
+  slug: string;
+  label: string;
+  x: number;
+  y: number;
+  dir: "tl" | "tr" | "bl" | "br" | "l" | "r" | "t" | "b";
+}> = [
+  { slug: "saddle-peak-national-park", label: "Saddle Peak", x: 50, y: 67, dir: "l" },
+  { slug: "ross-and-smith-islands", label: "Ross & Smith", x: 69, y: 17, dir: "tr" },
+  { slug: "limestone-caves-baratang", label: "Limestone Caves", x: 54, y: 53, dir: "l" },
+  { slug: "cuthbert-bay-beach-wildlife-sanctuary", label: "Cuthbert Bay", x: 62, y: 36, dir: "tr" },
+  { slug: "mud-volcanoes-of-shyamnagar", label: "Mud Volcanoes", x: 56, y: 53, dir: "tr" },
+  { slug: "elephanta-beach", label: "Elephanta Beach", x: 61, y: 58, dir: "tr" },
+  { slug: "radhanagar-beach", label: "Radhanagar Beach", x: 63, y: 61, dir: "r" },
+  { slug: "mount-manipur-national-park", label: "Mount Manipur", x: 50, y: 68, dir: "r" },
+  { slug: "jolly-buoy-island", label: "Jolly Buoy", x: 41, y: 76, dir: "bl" },
+  { slug: "kalapathar-beach-little-andaman", label: "Kalapathar Beach Little Andaman", x: 40, y: 85, dir: "br" },
 ];
+
+const LEADER_DIRS = {
+  tl: { x: -1, y: -1 },
+  tr: { x: 1, y: -1 },
+  bl: { x: -1, y: 1 },
+  br: { x: 1, y: 1 },
+  l: { x: -1, y: 0 },
+  r: { x: 1, y: 0 },
+  t: { x: 0, y: -1 },
+  b: { x: 0, y: 1 },
+} as const;
 
 const destinations = [
   {
@@ -285,23 +302,67 @@ export default function Home() {
               <div className="relative overflow-hidden rounded-[28px] border border-white/20 bg-white/10 backdrop-blur-sm shadow-2xl">
                 <div className="relative">
                   <img
-                    src="/images/map/andaman-map.png"
+                    src="/images/map/andaman-map-2.png"
                     alt="Andaman and Nicobar Islands map"
                     className="h-auto w-full object-cover"
                   />
 
-                  {MAP_HOTSPOTS.map(({ slug, label, x, y }) => (
-                    <Link
-                      key={slug}
-                      href={`/destinations/${slug}`}
-                      aria-label={`Open ${label} destination`}
-                      className="group absolute -translate-x-1/2 -translate-y-1/2"
-                      style={{ left: `${x}%`, top: `${y}%` }}
-                    >
-                      <span className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-primary shadow-lg transition-transform group-hover:scale-125" />
-                      <span className="sr-only">{label}</span>
-                    </Link>
-                  ))}
+                  {MAP_HOTSPOTS.map(({ slug, label, x, y, dir }) => {
+                    const { x: dx, y: dy } = LEADER_DIRS[dir];
+                    const leaderLength = 26;
+                    const mag = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const endX = (dx / mag) * leaderLength;
+                    const endY = (dy / mag) * leaderLength;
+
+                    return (
+                      <Link
+                        key={slug}
+                        href={`/destinations/${slug}`}
+                        aria-label={`Open ${label} destination`}
+                        className="group absolute -translate-x-1/2 -translate-y-1/2"
+                        style={{ left: `${x}%`, top: `${y}%` }}
+                      >
+                        <span className="absolute left-0 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary shadow-lg transition-transform group-hover:scale-125" />
+                        <svg
+                          className="absolute left-0 top-0 overflow-visible"
+                          width="1"
+                          height="1"
+                        >
+                          <defs>
+                            <marker
+                              id={`arrow-${slug}`}
+                              markerWidth="6"
+                              markerHeight="6"
+                              refX="5"
+                              refY="3"
+                              orient="auto"
+                            >
+                              <path d="M0,0 L6,3 L0,6 z" className="fill-white/80" />
+                            </marker>
+                          </defs>
+                          <line
+                            x1={endX}
+                            y1={endY}
+                            x2="0"
+                            y2="0"
+                            className="stroke-white/80"
+                            strokeWidth="1.5"
+                            markerEnd={`url(#arrow-${slug})`}
+                          />
+                        </svg>
+                        <span
+                          className="absolute whitespace-nowrap rounded-md bg-white/95 px-2 py-0.5 text-[10px] font-semibold text-gray-900 shadow-md transition-transform group-hover:scale-105"
+                          style={{
+                            left: `${endX}px`,
+                            top: `${endY}px`,
+                            transform: `translate(${dx < 0 ? "-100%" : dx > 0 ? "0%" : "-50%"}, ${dy < 0 ? "-100%" : dy > 0 ? "0%" : "-50%"})`,
+                          }}
+                        >
+                          {label}
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             </div>

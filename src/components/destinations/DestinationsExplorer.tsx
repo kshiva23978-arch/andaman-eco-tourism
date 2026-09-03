@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { DestinationCard } from "@/components/destinations/DestinationCard";
 import { regions } from "@/lib/data/destinations";
 import type { Destination } from "@/lib/types";
+import { DecorativeLeaf } from "../ui/DecorativeLeaf";
 
 export function DestinationsExplorer({
   destinations,
@@ -62,13 +63,19 @@ export function DestinationsExplorer({
         </div>
       </section>
 
-      <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+      <section className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-            {filtered.map((destination) => (
-              <DestinationCard key={destination.slug} destination={destination} />
-            ))}
-          </div>
+          <>
+            <DecorativeLeaf className="top-4 left-4 md:top-8 md:left-8" rotate={-60} size={110} opacity={0.22} />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+              {filtered.map((destination) => (
+                <DestinationCard key={destination.slug} destination={destination} />
+              ))}
+            </div>
+
+            <DecorativeLeaf className="bottom-6 right-4 md:bottom-10 md:right-14" rotate={110} flip size={110} opacity={0.22} />
+          </>
         ) : (
           <p className="text-on-surface-variant font-body-md text-body-md py-12 text-center">
             No destinations match your filters. Try a different region or

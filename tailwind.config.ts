@@ -108,6 +108,15 @@ const config: Config = {
           { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "700" },
         ],
       },
+      keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+      },
+      animation: {
+        float: "float 5s ease-in-out infinite",
+      },
     },
   },
   plugins: [],

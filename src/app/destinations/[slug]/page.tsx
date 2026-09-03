@@ -27,6 +27,27 @@ export async function generateMetadata({
   };
 }
 
+function GoogleMapFrame({ title }: { title: string }) {
+  const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(
+    `${title}, Andaman and Nicobar Islands, India`
+  )}&t=k&output=embed`;
+
+  return (
+    <div className="w-full h-[240px] sm:h-[320px] md:h-[400px] overflow-hidden rounded-2xl">
+      <iframe
+        src={mapUrl}
+        width="100%"
+        height="100%"
+        style={{ border: 0 }}
+        loading="lazy"
+        allowFullScreen
+        referrerPolicy="strict-origin-when-cross-origin"
+        title={title}
+      />
+    </div>
+  );
+}
+
 function BulletGrid({
   items,
   icon,
@@ -38,9 +59,8 @@ function BulletGrid({
 }) {
   return (
     <ul
-      className={`grid grid-cols-1 ${
-        columns === 2 ? "md:grid-cols-2" : ""
-      } gap-4`}
+      className={`grid grid-cols-1 ${columns === 2 ? "md:grid-cols-2" : ""
+        } gap-4`}
     >
       {items.map((item) => (
         <li
@@ -88,20 +108,43 @@ export default async function DestinationDetailPage({
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end pb-16 px-margin-mobile md:px-margin-desktop">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end pb-16 px-margin-mobile md:px-margin-desktop">
+
           <div className="max-w-container-max mx-auto w-full">
-            <Chip variant="glass" className="mb-4">
-              {destination.region}
-            </Chip>
-            <h1 className="font-headline-xl text-white mb-4 text-4xl md:text-[56px] md:leading-[1.05]">
-              {destination.title}
-            </h1>
-            <p className="font-body-lg text-white/90 max-w-2xl text-lg md:text-[22px]">
-              {destination.overview}
-            </p>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
+
+              {/* Left - 8 columns */}
+              <div className="md:col-span-8">
+                <Chip variant="glass" className="mb-4">
+                  {destination.region}
+                </Chip>
+
+                <h1 className="font-headline-xl text-white mb-4 text-4xl md:text-[56px] md:leading-[1.05]">
+                  {destination.title}
+                </h1>
+
+                <p className="font-body-lg text-white/90 max-w-2xl text-lg md:text-[22px]">
+                  {destination.overview}
+                </p>
+              </div>
+
+              {/* Right - 4 columns (map, desktop only — see mobile card below) */}
+              <div className="hidden md:block md:col-span-4 bg-white/90 backdrop-blur-md p-2 rounded-lg border border-outline-variant">
+                <GoogleMapFrame title={destination.title} />
+              </div>
+
+            </div>
           </div>
+
         </div>
       </section>
+
+      {/* Map card, mobile only — kept out of the hero overlay so it doesn't overflow the fixed hero height */}
+      <div className="md:hidden max-w-container-max mx-auto px-margin-mobile pt-4">
+        <div className="bg-white p-2 rounded-lg border border-outline-variant">
+          <GoogleMapFrame title={destination.title} />
+        </div>
+      </div>
 
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4">
         <Breadcrumbs
@@ -157,6 +200,8 @@ export default async function DestinationDetailPage({
             </div>
             <div className="lg:col-span-4">
               <div className="bg-surface-container-lowest p-6 border border-outline-variant rounded-lg">
+
+
                 <span className="material-symbols-outlined text-primary text-[32px] block mb-4">
                   location_on
                 </span>
