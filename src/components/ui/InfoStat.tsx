@@ -38,9 +38,14 @@ export function InfoStat({
         <button
           type="button"
           onClick={() => setExpanded((prev) => !prev)}
-          className="mt-2 inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline underline-offset-2"
+          className="mt-2 inline-flex items-center gap-1 font-label-md text-label-md text-primary"
         >
-          {expanded ? "Read less" : "Read more"}
+          <span className="group">
+            <span className="group-hover:underline underline-offset-2">
+              {expanded ? "Read less" : "Read more"}
+            </span>
+          </span>
+
           <span className="material-symbols-outlined text-[18px]">
             {expanded ? "expand_less" : "expand_more"}
           </span>
