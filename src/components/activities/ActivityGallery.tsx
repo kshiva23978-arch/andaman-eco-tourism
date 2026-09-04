@@ -57,7 +57,7 @@ export default function ActivityGallery({
         setSelectedImage((prev) => prev === null ? null : prev === 0 ? images.length - 1 : prev - 1);
 
     useEffect(() => {
-        if (selectedImage !== null) return;
+        if (selectedImage === null) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") closeLightbox();
