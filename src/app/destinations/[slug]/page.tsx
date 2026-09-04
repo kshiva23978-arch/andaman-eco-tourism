@@ -7,7 +7,7 @@ import { Chip } from "@/components/ui/Chip";
 import { InfoStat } from "@/components/ui/InfoStat";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { destinations, getDestinationBySlug } from "@/lib/data/destinations";
-import { firstClause, findNearbyDestination } from "@/lib/format";
+import { findNearbyDestination } from "@/lib/format";
 
 export function generateStaticParams() {
   return destinations.map((destination) => ({ slug: destination.slug }));
@@ -160,12 +160,12 @@ export default async function DestinationDetailPage({
       {/* Key Info Grid */}
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
-          <InfoStat label="Best Time to Visit" value={firstClause(destination.bestTime, 64)} color="secondary" />
-          <InfoStat label="Timing" value={firstClause(destination.timing, 64)} />
-          <InfoStat label="Entry Fee" value={firstClause(destination.fees, 64)} />
-          <InfoStat label="Permits" value={firstClause(destination.permits, 64)} />
+          <InfoStat label="Best Time to Visit" value={destination.bestTime} color="secondary" />
+          <InfoStat label="Timing" value={destination.timing} />
+          <InfoStat label="Entry Fee" value={destination.fees} />
+          <InfoStat label="Permits" value={destination.permits} />
           <InfoStat label="Range & Division" value={destination.rangeDivision || "—"} />
-          <InfoStat label="Nearest Hospital" value={firstClause(destination.hospital, 64)} color="error" />
+          <InfoStat label="Nearest Hospital" value={destination.hospital} color="error" />
         </div>
       </section>
 

@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 export default function DestinationsPage() {
   return (
     <div className="relative">
-      <FloatingPhotoStack side="left" />
-      <FloatingPhotoStack side="right" />
+      <DecorativeLeaf className="top-6 left-4 md:top-64 md:left-9" rotate={-25} size={110} opacity={0.22} />
+
 
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 mb-4">
         <div className="border-l-4 border-primary pl-6 py-2">

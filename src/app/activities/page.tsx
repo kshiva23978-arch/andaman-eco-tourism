@@ -41,7 +41,10 @@ const MARINE_ACTIVITIES: GuideEntry[] = [
       { src: "/images/illustrations/surfing.png", position: "bottom-left", size: 200, opacity: 100 },
     ],
    },
-  { slug: "glass-bottom-boating", bg: "bg-surface", reverse: true, tone: "light"
+  { slug: "glass-bottom-boating", bg: "bg-surface", reverse: true, tone: "light",
+    watermark: [
+      { src: "/images/illustrations/glass-bottom-1.png", position: "bottom-right", size: 200, opacity: 100 },
+    ],
     
    },
 ];
