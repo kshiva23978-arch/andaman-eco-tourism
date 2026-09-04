@@ -147,7 +147,8 @@ export default async function DestinationDetailPage({
         </div>
       </div>
 
-      <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4">
+      <section className="bg-sky-400/60 ">
+        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4 ">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
@@ -156,10 +157,11 @@ export default async function DestinationDetailPage({
             { label: destination.title },
           ]}
         />
+        </div>
       </section>
 
       {/* Key Info Grid */}
-      <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8">
+      <section className="max-w-container-max  mx-auto px-margin-mobile md:px-margin-desktop py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
           <InfoStat label="Best Time to Visit" value={destination.bestTime} color="secondary" />
           <InfoStat label="Timing" value={destination.timing} />

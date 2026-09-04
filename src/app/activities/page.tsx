@@ -63,7 +63,7 @@ const TERRESTRIAL_ACTIVITIES: GuideEntry[] = [
    },
   { slug: "quiet-water-kayaking", bg: "bg-primary", reverse: false, tone: "dark",
     watermark: [
-      { src: "/images/illustrations/kayaking.png", position: "bottom-left", size: 300, opacity: 100 },
+      { src: "/images/illustrations/kayaking-1.png", position: "bottom-left", size: 300, opacity: 100 },
     ],
    },
   { slug: "avian-observation", bg: "bg-surface", reverse: true, tone: "light",
