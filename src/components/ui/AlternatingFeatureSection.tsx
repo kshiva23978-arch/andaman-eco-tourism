@@ -105,7 +105,7 @@ export function AlternatingFeatureSection({
           aria-hidden="true"
           width={wm.size}
           height={wm.size}
-          className={`absolute w-auto object-contain pointer-events-none sm:display-none ${POSITION_CLASSES[wm.position]}`}
+          className={`absolute hidden w-auto object-contain pointer-events-none md:block ${POSITION_CLASSES[wm.position]}`}
           style={{ height: wm.size, opacity: wm.opacity / 100 }}
         />
       ))}
