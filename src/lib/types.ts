@@ -32,6 +32,7 @@ export interface Destination {
   safetyTips: string[];
   whatToSee: string[];
   image: string;
+  galleryImages?: string[];
 }
 
 export interface ActivityEquipmentGroup {

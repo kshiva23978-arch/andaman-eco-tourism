@@ -8,6 +8,7 @@ import { InfoStat } from "@/components/ui/InfoStat";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { destinations, getDestinationBySlug } from "@/lib/data/destinations";
 import { findNearbyDestination } from "@/lib/format";
+import { DestinationGallery } from "@/components/destinations/DestinationGallery";
 
 export function generateStaticParams() {
   return destinations.map((destination) => ({ slug: destination.slug }));
@@ -166,6 +167,17 @@ export default async function DestinationDetailPage({
           <InfoStat label="Permits" value={destination.permits} />
           <InfoStat label="Range & Division" value={destination.rangeDivision || "—"} />
           <InfoStat label="Nearest Hospital" value={destination.hospital} color="error" />
+        </div>
+      </section>
+
+      <section className="bg-white ">
+        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8">
+                  <SectionHeading icon="album">{destination.title} Gallery</SectionHeading>
+
+        <DestinationGallery
+          images={destination.galleryImages ?? [destination.image]}
+          title={destination.title}
+        />
         </div>
       </section>
 
