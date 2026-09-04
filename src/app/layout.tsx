@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Public_Sans } from "next/font/google";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
 import "./globals.css";
 
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="font-body-md text-body-md antialiased flex flex-col min-h-screen">
+        <PageLoader />
         <SmoothScroll />
         <SiteHeader />
         <main className="flex-grow">{children}</main>
