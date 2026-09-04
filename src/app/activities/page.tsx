@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Fragment } from "react";
 import { AlternatingFeatureSection, type WatermarkInput } from "@/components/ui/AlternatingFeatureSection";
 import { getActivityBySlug } from "@/lib/data/activities";
+import { DecorativeLeaf } from "@/components/ui/DecorativeLeaf";
 
 export const metadata: Metadata = {
   title: "Activities Guide",
@@ -85,8 +87,9 @@ function GuideSections({ entries }: { entries: GuideEntry[] }) {
         const activity = getActivityBySlug(slug);
         if (!activity) return null;
         return (
+          <Fragment key={slug}>
+      <DecorativeLeaf className="top-6 left-4 md:top-64 md:left-9" rotate={-25} size={110} opacity={0.22} />
           <AlternatingFeatureSection
-            key={slug}
             href={`/activities/${activity.slug}`}
             image={activity.heroImage}
             imageAlt={activity.title}
@@ -103,6 +106,9 @@ function GuideSections({ entries }: { entries: GuideEntry[] }) {
             tone={tone}
             watermark={watermark}
           />
+                <DecorativeLeaf className="bottom-6 right-4 md:bottom-86 md:right-9" rotate={-25} size={110} opacity={0.22} />
+
+          </Fragment>
         );
       })}
     </>

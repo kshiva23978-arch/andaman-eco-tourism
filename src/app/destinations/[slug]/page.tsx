@@ -147,7 +147,7 @@ export default async function DestinationDetailPage({
         </div>
       </div>
 
-      <section className="bg-sky-400/60 ">
+      <section className="bg-surface-container-high ">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4 ">
         <Breadcrumbs
           items={[

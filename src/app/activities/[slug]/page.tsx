@@ -11,6 +11,8 @@ import {
   getActivityBySlug,
 } from "@/lib/data/activities";
 import { getDestinationsBySlugs } from "@/lib/data/destinations";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import ActivityGallery from "@/components/activities/ActivityGallery";
 
 export function generateStaticParams() {
   return activities.map((activity) => ({ slug: activity.slug }));
@@ -75,7 +77,8 @@ export default async function ActivityDetailPage({
         </div>
       </header>
 
-      <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4">
+      <section className="bg-surface-container-high ">
+        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4 ">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
@@ -83,6 +86,7 @@ export default async function ActivityDetailPage({
             { label: activity.title },
           ]}
         />
+        </div>
       </section>
 
       {/* Overview & Bento Grid */}
@@ -179,6 +183,18 @@ export default async function ActivityDetailPage({
           </div>
         </div>
       </section>
+
+
+       <section className="bg-white ">
+              <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8">
+                        <SectionHeading icon="album">{activity.title} Gallery</SectionHeading>
+      
+              <ActivityGallery
+                images={activity.galleryImages ?? [activity.heroImage]}
+                title={activity.title}
+              />
+              </div>
+            </section>
 
       {/* Available Destinations */}
       {availableAt.length > 0 ? (

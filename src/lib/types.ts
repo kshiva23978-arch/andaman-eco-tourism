@@ -63,4 +63,5 @@ export interface Activity {
   guideBody: string;
   guideCallout?: string;
   guideBullets?: string[];
+  galleryImages?: string[];
 }

@@ -107,140 +107,140 @@ export function DestinationGallery({
           ) : null}
 
           <div className={images.length > 1 ? "hidden sm:block" : ""}>
-          {images.length === 1 ? (
-            <div className="relative h-[280px] sm:h-[400px] overflow-hidden rounded-2xl">
-              <GalleryTile
-                src={images[0]}
-                alt={title}
-                index={0}
-                onOpen={setSelectedImage}
-                sizes="100vw"
-                priority
-                className="h-full w-full rounded-2xl"
-              />
-            </div>
-          ) : images.length === 2 ? (
-            <div className="grid h-[280px] sm:h-[320px] lg:h-[400px] grid-cols-2 gap-2 overflow-hidden rounded-2xl">
-              <GalleryTile
-                src={images[0]}
-                alt={title}
-                index={0}
-                onOpen={setSelectedImage}
-                sizes="50vw"
-                priority
-                className="h-full w-full rounded-l-2xl"
-              />
-              <GalleryTile
-                src={images[1]}
-                alt={title}
-                index={1}
-                onOpen={setSelectedImage}
-                sizes="50vw"
-                className="h-full w-full rounded-r-2xl"
-              />
-            </div>
-          ) : images.length === 3 ? (
-            <div className="grid h-[320px] sm:h-[360px] lg:h-[500px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
-              <GalleryTile
-                src={images[0]}
-                alt={title}
-                index={0}
-                onOpen={setSelectedImage}
-                sizes="50vw"
-                priority
-                className="col-span-2 row-span-2 rounded-l-2xl"
-              />
-              <GalleryTile
-                src={images[1]}
-                alt={title}
-                index={1}
-                onOpen={setSelectedImage}
-                sizes="50vw"
-                className="col-span-2 rounded-tr-2xl"
-              />
-              <GalleryTile
-                src={images[2]}
-                alt={title}
-                index={2}
-                onOpen={setSelectedImage}
-                sizes="50vw"
-                className="col-span-2 rounded-br-2xl"
-              />
-            </div>
-          ) : images.length === 4 ? (
-            <div className="grid h-[320px] sm:h-[360px] lg:h-[500px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
-              <GalleryTile
-                src={images[0]}
-                alt={title}
-                index={0}
-                onOpen={setSelectedImage}
-                sizes="50vw"
-                priority
-                className="col-span-2 row-span-2 rounded-l-2xl"
-              />
-              <GalleryTile
-                src={images[1]}
-                alt={title}
-                index={1}
-                onOpen={setSelectedImage}
-                sizes="50vw"
-                className="col-span-2 rounded-tr-2xl"
-              />
-              <GalleryTile
-                src={images[2]}
-                alt={title}
-                index={2}
-                onOpen={setSelectedImage}
-                sizes="25vw"
-                className=""
-              />
-              <GalleryTile
-                src={images[3]}
-                alt={title}
-                index={3}
-                onOpen={setSelectedImage}
-                sizes="25vw"
-                className="rounded-br-2xl"
-              />
-            </div>
-          ) : (
-            <div className="grid h-[320px] sm:h-[360px] lg:h-[500px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
-              <GalleryTile
-                src={images[0]}
-                alt={title}
-                index={0}
-                onOpen={setSelectedImage}
-                sizes="50vw"
-                priority
-                className="col-span-2 row-span-2 rounded-l-2xl"
-              />
-              {images.slice(1, 5).map((src, i) => {
-                const index = i + 1;
-                const isLastVisible = index === 4;
-                const remaining = images.length - 5;
-                const corner =
-                  index === 2 ? "rounded-tr-2xl" : index === 4 ? "rounded-br-2xl" : "";
+            {images.length === 1 ? (
+              <div className="relative h-[280px] sm:h-[400px] overflow-hidden rounded-2xl">
+                <GalleryTile
+                  src={images[0]}
+                  alt={title}
+                  index={0}
+                  onOpen={setSelectedImage}
+                  sizes="100vw"
+                  priority
+                  className="h-full w-full rounded-2xl"
+                />
+              </div>
+            ) : images.length === 2 ? (
+              <div className="grid h-[280px] sm:h-[320px] lg:h-[400px] grid-cols-2 gap-2 overflow-hidden rounded-2xl">
+                <GalleryTile
+                  src={images[0]}
+                  alt={title}
+                  index={0}
+                  onOpen={setSelectedImage}
+                  sizes="50vw"
+                  priority
+                  className="h-full w-full rounded-l-2xl"
+                />
+                <GalleryTile
+                  src={images[1]}
+                  alt={title}
+                  index={1}
+                  onOpen={setSelectedImage}
+                  sizes="50vw"
+                  className="h-full w-full rounded-r-2xl"
+                />
+              </div>
+            ) : images.length === 3 ? (
+              <div className="grid h-[320px] sm:h-[360px] lg:h-[500px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
+                <GalleryTile
+                  src={images[0]}
+                  alt={title}
+                  index={0}
+                  onOpen={setSelectedImage}
+                  sizes="50vw"
+                  priority
+                  className="col-span-2 row-span-2 rounded-l-2xl"
+                />
+                <GalleryTile
+                  src={images[1]}
+                  alt={title}
+                  index={1}
+                  onOpen={setSelectedImage}
+                  sizes="50vw"
+                  className="col-span-2 rounded-tr-2xl"
+                />
+                <GalleryTile
+                  src={images[2]}
+                  alt={title}
+                  index={2}
+                  onOpen={setSelectedImage}
+                  sizes="50vw"
+                  className="col-span-2 rounded-br-2xl"
+                />
+              </div>
+            ) : images.length === 4 ? (
+              <div className="grid h-[320px] sm:h-[360px] lg:h-[500px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
+                <GalleryTile
+                  src={images[0]}
+                  alt={title}
+                  index={0}
+                  onOpen={setSelectedImage}
+                  sizes="50vw"
+                  priority
+                  className="col-span-2 row-span-2 rounded-l-2xl"
+                />
+                <GalleryTile
+                  src={images[1]}
+                  alt={title}
+                  index={1}
+                  onOpen={setSelectedImage}
+                  sizes="50vw"
+                  className="col-span-2 rounded-tr-2xl"
+                />
+                <GalleryTile
+                  src={images[2]}
+                  alt={title}
+                  index={2}
+                  onOpen={setSelectedImage}
+                  sizes="25vw"
+                  className=""
+                />
+                <GalleryTile
+                  src={images[3]}
+                  alt={title}
+                  index={3}
+                  onOpen={setSelectedImage}
+                  sizes="25vw"
+                  className="rounded-br-2xl"
+                />
+              </div>
+            ) : (
+              <div className="grid h-[320px] sm:h-[360px] lg:h-[500px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
+                <GalleryTile
+                  src={images[0]}
+                  alt={title}
+                  index={0}
+                  onOpen={setSelectedImage}
+                  sizes="50vw"
+                  priority
+                  className="col-span-2 row-span-2 rounded-l-2xl"
+                />
+                {images.slice(1, 5).map((src, i) => {
+                  const index = i + 1;
+                  const isLastVisible = index === 4;
+                  const remaining = images.length - 5;
+                  const corner =
+                    index === 2 ? "rounded-tr-2xl" : index === 4 ? "rounded-br-2xl" : "";
 
-                return (
-                  <div key={src + index} className={`relative overflow-hidden ${corner}`}>
-                    <GalleryTile
-                      src={src}
-                      alt={title}
-                      index={index}
-                      onOpen={setSelectedImage}
-                      sizes="25vw"
-                      className="h-full w-full"
-                    />
-                    {isLastVisible && remaining > 0 ? (
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 font-headline-md text-white">
-                        +{remaining}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  return (
+                    <div key={src + index} className={`relative overflow-hidden ${corner}`}>
+                      <GalleryTile
+                        src={src}
+                        alt={title}
+                        index={index}
+                        onOpen={setSelectedImage}
+                        sizes="25vw"
+                        className="h-full w-full"
+                      />
+                      {isLastVisible && remaining > 0 ? (
+                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 font-headline-md text-white">
+                          +{remaining}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </section>
