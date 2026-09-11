@@ -7,9 +7,13 @@ import type { Destination } from "@/lib/types";
 export function DestinationCard({
   destination,
   variant = "grid",
+  isActive = false,
+  onExpand,
 }: {
   destination: Destination;
   variant?: "grid" | "carousel";
+  isActive?: boolean;
+  onExpand?: () => void;
 }) {
   const href = `/destinations/${destination.slug}`;
 
@@ -17,31 +21,50 @@ export function DestinationCard({
     return (
       <Link
         href={href}
-        className="min-w-[300px] md:min-w-[400px] snap-start bg-white border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-colors flex flex-col"
+        onClick={(event) => {
+          if (!isActive && onExpand) {
+            event.preventDefault();
+            onExpand();
+          }
+        }}
+        className={`group relative h-[380px] shrink-0 snap-center overflow-hidden rounded-2xl shadow-xl transition-all duration-500 ease-out md:h-[420px] ${
+          isActive
+            ? "w-[300px] md:w-[380px]"
+            : "w-[220px] opacity-80 md:w-[260px]"
+        }`}
       >
-        <div className="h-56 overflow-hidden relative">
-          <Image
-            src={destination.image}
-            alt={destination.title}
-            fill
-            className="object-cover hover:scale-105 transition-transform duration-500"
-            sizes="(min-width: 768px) 400px, 300px"
-          />
-        </div>
-        <div className="p-6 flex flex-col flex-grow text-center md:text-left">
-          <div className="flex flex-col md:flex-row justify-between items-center md:items-start mb-4 gap-2">
-            <h3 className="font-headline-md text-xl md:text-headline-md text-on-surface">
+        <Image
+          src={destination.image}
+          alt={destination.title}
+          fill
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          sizes="(min-width: 768px) 400px, 300px"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+
+        <div className="absolute inset-x-0 bottom-0 flex flex-col">
+          <div className="p-5 pb-3">
+            <Chip variant="primary" className="mb-2">
+              {destination.region}
+            </Chip>
+            <h3 className="font-headline-md text-xl text-white">
               {destination.title}
             </h3>
-            <Chip variant="primary">{destination.region}</Chip>
+            <p
+              className={`font-body-md text-body-sm text-white/85 overflow-hidden transition-all duration-500 ease-out ${
+                isActive ? "mt-2 max-h-24 opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
+              {destination.overview}
+            </p>
           </div>
-          <p className="font-body-md text-body-md text-on-surface-variant flex-grow line-clamp-3">
-            {destination.overview}
-          </p>
-          <div className="mt-6 flex items-center justify-center md:justify-start text-primary font-label-md text-label-md">
-            Learn More
-            <span className="material-symbols-outlined ml-1 text-sm">
-              chevron_right
+
+          <div className="flex items-center justify-between border-t border-white/20 px-5 py-3">
+            <span className="font-label-md text-label-md text-white">
+              Know More
+            </span>
+            <span className="material-symbols-outlined text-[18px] text-white transition-transform duration-300 group-hover:translate-x-1">
+              arrow_forward
             </span>
           </div>
         </div>

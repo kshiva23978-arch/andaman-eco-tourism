@@ -59,3 +59,31 @@ a {
 .hero-title {
   font-family: "Modern Antiqua", serif;
 }
+
+@keyframes kenburns {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.12);
+  }
+}
+
+.animate-kenburns {
+  animation: kenburns 16s ease-in-out infinite alternate;
+}
+
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hero-fade-up {
+  animation: hero-fade-up 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
