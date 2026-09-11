@@ -418,6 +418,7 @@ export default function Home() {
           <DragScrollRow
             className="flex flex-row overflow-x-auto gap-gutter pb-6 no-scrollbar snap-x snap-mandatory"
             loopCount={featuredActivities.length}
+            revealOnScroll
           >
             {[...featuredActivities, ...featuredActivities, ...featuredActivities].map(
               (activity, index) => (

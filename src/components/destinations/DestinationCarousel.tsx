@@ -143,7 +143,9 @@ export default function DestinationCarousel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [n]);
 
+  // Only hijack pointer events for mouse (click-drag). Touch keeps native momentum scrolling.
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse") return;
     const container = carouselRef.current;
     if (!container) return;
 
@@ -164,6 +166,7 @@ export default function DestinationCarousel({
   const DRAG_THRESHOLD = 6;
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse") return;
     const container = carouselRef.current;
     if (!container || !dragState.current.isDown) return;
 
@@ -180,6 +183,7 @@ export default function DestinationCarousel({
   };
 
   const stopDragging = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse") return;
     const container = carouselRef.current;
     if (!container) return;
 
@@ -204,7 +208,7 @@ export default function DestinationCarousel({
         onPointerCancel={stopDragging}
         onDragStart={handleDragStart}
         className="flex flex-row items-center overflow-x-auto gap-6 px-[10%] py-10 no-scrollbar snap-x snap-mandatory cursor-grab active:cursor-grabbing select-none"
-        style={{ touchAction: "pan-y" }}
+        style={{ touchAction: "pan-x pan-y" }}
       >
         {extendedDestinations.map((destination, index) => (
           <DestinationCard

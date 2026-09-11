@@ -2,17 +2,26 @@
 
 import { useLayoutEffect, useRef } from "react";
 import type { ReactNode } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export function DragScrollRow({
   children,
   className = "",
   loopCount,
+  revealOnScroll = false,
 }: {
   children: ReactNode;
   className?: string;
   /** Pass the real (pre-tripled) item count to enable infinite-loop scrolling.
    * Children must render three consecutive copies of the same set. */
   loopCount?: number;
+  /** Fade each card in (opacity only, no position shift) as the row scrolls into view. */
+  revealOnScroll?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef({ isDown: false, startX: 0, scrollLeft: 0, hasDragged: false });
@@ -105,7 +114,31 @@ export function DragScrollRow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loopCount]);
 
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container || !revealOnScroll) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        container.children,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 0.7,
+          ease: "power2.out",
+          stagger: 0.08,
+          scrollTrigger: { trigger: container, start: "top 90%" },
+        }
+      );
+    });
+
+    return () => ctx.revert();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealOnScroll]);
+
+  // Only hijack pointer events for mouse (click-drag). Touch keeps native momentum scrolling.
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse") return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -120,6 +153,7 @@ export function DragScrollRow({
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse") return;
     const container = containerRef.current;
     if (!container || !dragState.current.isDown) return;
 
@@ -136,6 +170,7 @@ export function DragScrollRow({
   };
 
   const stopDragging = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse") return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -158,7 +193,7 @@ export function DragScrollRow({
       onPointerCancel={stopDragging}
       onDragStart={handleDragStart}
       className={`cursor-grab active:cursor-grabbing select-none ${className}`}
-      style={{ touchAction: "pan-y" }}
+      style={{ touchAction: "pan-x pan-y" }}
     >
       {children}
     </div>
