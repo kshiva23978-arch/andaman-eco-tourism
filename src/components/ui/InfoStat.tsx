@@ -32,7 +32,7 @@ export function InfoStat({
         {label}
       </span>
       <p
-        className={`font-headline-md text-[clamp(1.05rem,4.5vw,1.5rem)] leading-snug break-words ${colorClasses[color]}`}
+        className={`font-sans font-semibold text-[clamp(1.05rem,4.5vw,1.5rem)] leading-snug break-words ${colorClasses[color]}`}
       >
         {expanded ? value : preview}
       </p>
