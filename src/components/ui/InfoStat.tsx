@@ -31,7 +31,9 @@ export function InfoStat({
       <span className="font-label-md text-on-surface-variant uppercase text-[11px] tracking-widest block mb-1">
         {label}
       </span>
-      <p className={`font-headline-md text-headline-md ${colorClasses[color]}`}>
+      <p
+        className={`font-headline-md text-[clamp(1.05rem,4.5vw,1.5rem)] leading-snug break-words ${colorClasses[color]}`}
+      >
         {expanded ? value : preview}
       </p>
       {isTruncated ? (
