@@ -89,7 +89,7 @@ function AndamanMapPanel({ heightClass }: { heightClass: string }) {
   return (
     <div className="relative w-full">
       <div className="absolute -inset-4 rounded-[28px] bg-white/10 blur-2xl" />
-      <div className="relative overflow-hidden rounded-[28px] border border-white/20 bg-white/10 backdrop-blur-sm shadow-2xl">
+      <div className="relative overflow-hidden backdrop-blur-sm shadow-2xl-md ">
         <div className={`relative w-full ${heightClass}`}>
           <img
             src="/images/map/andaman-map-2.png"
@@ -308,7 +308,7 @@ export default function Home() {
       </section>
 
       {/* Map — mobile only, shown after hero */}
-      <section className="relative bg-white px-margin-mobile py-10 md:hidden">
+      <section className="relative bg-cyan-300 px-margin-mobile py-10 md:hidden ">
         <AndamanMapPanel heightClass="h-[420px]" />
       </section>
 
