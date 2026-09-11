@@ -207,7 +207,7 @@ export default function DestinationCarousel({
         onPointerLeave={stopDragging}
         onPointerCancel={stopDragging}
         onDragStart={handleDragStart}
-        className="flex flex-row items-center overflow-x-auto gap-6 px-[10%] py-10 no-scrollbar snap-x snap-mandatory cursor-grab active:cursor-grabbing select-none"
+        className="flex flex-row items-center overflow-x-auto gap-6 px-[10%] py-5 no-scrollbar snap-x snap-mandatory cursor-grab active:cursor-grabbing select-none"
         style={{ touchAction: "pan-x pan-y" }}
       >
         {extendedDestinations.map((destination, index) => (

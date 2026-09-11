@@ -94,8 +94,8 @@ export default async function ActivityDetailPage({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
           <div className="lg:col-span-8 space-y-12">
             <div className="bg-white border border-outline-variant p-8 rounded-xl shadow-sm">
-              <h2 className="font-headline-lg text-headline-lg mb-6 border-b border-outline-variant pb-4">
-                Activity Overview
+              <h2 className="font-headline-lg text-headline-lg text-black tracking-tight mb-6 border-b border-outline-variant pb-4">
+                Activity <span className="text-green-500">Overview</span>
               </h2>
               <div className="space-y-4 text-on-surface font-body-md text-body-md">
                 {activity.overview.map((paragraph) => (
@@ -201,8 +201,8 @@ export default async function ActivityDetailPage({
         <section className="bg-surface-container-low py-16">
           <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
             <div className="mb-10 text-center">
-              <h2 className="font-headline-lg text-headline-lg text-primary">
-                Available at these Destinations
+              <h2 className="font-headline-lg text-headline-lg text-black tracking-tight">
+                Available at these <span className="text-green-500">Destinations</span>
               </h2>
               <p className="text-on-surface-variant font-body-md text-body-md">
                 Documented sites where this activity is practiced under
@@ -221,8 +221,8 @@ export default async function ActivityDetailPage({
       {/* Related Activities */}
       {related.length > 0 ? (
         <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-20">
-          <h2 className="font-headline-lg text-headline-lg mb-10 text-primary">
-            Explore More Activities
+          <h2 className="font-headline-lg text-headline-lg text-black tracking-tight mb-10">
+            Explore More <span className="text-green-500">Activities</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
             {related.map((item) => (

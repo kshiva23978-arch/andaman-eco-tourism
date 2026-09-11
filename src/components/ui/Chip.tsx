@@ -5,7 +5,7 @@ type ChipVariant = "neutral" | "secondary" | "primary" | "glass";
 const variantClasses: Record<ChipVariant, string> = {
   neutral: "bg-surface-container-highest text-on-surface-variant",
   secondary: "bg-secondary-container text-on-secondary-container",
-  primary: "bg-primary-container text-on-primary-container",
+  primary: "bg-blue-400 text-white",
   glass:
     "bg-surface-container-lowest/20 backdrop-blur-md border border-white/30 text-white",
 };

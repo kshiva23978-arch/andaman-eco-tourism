@@ -76,14 +76,14 @@ const config: Config = {
         "container-max": "1280px",
       },
       fontFamily: {
-        "headline-xl": ["var(--font-public-sans)"],
-        "headline-lg-mobile": ["var(--font-public-sans)"],
+        "headline-xl": ["var(--font-yeseva)", "serif"],
+        "headline-lg-mobile": ["var(--font-yeseva)", "serif"],
         caption: ["var(--font-public-sans)"],
         "body-lg": ["var(--font-public-sans)"],
-        "headline-md": ["var(--font-public-sans)"],
+        "headline-md": ["var(--font-yeseva)", "serif"],
         "body-md": ["var(--font-public-sans)"],
         "label-md": ["var(--font-public-sans)"],
-        "headline-lg": ["var(--font-public-sans)"],
+        "headline-lg": ["var(--font-yeseva)", "serif"],
         sans: ["var(--font-public-sans)"],
       },
       fontSize: {
@@ -97,7 +97,7 @@ const config: Config = {
         ],
         caption: ["12px", { lineHeight: "16px", fontWeight: "400" }],
         "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
-        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "700" }],
         "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
         "label-md": [
           "14px",

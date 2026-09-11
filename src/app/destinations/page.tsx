@@ -19,8 +19,8 @@ export default function DestinationsPage() {
 
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 mb-4">
         <div className="border-l-4 border-primary pl-6 py-2">
-          <h1 className="font-headline-xl text-3xl md:text-headline-xl text-primary mb-2">
-            Destinations Directory
+          <h1 className="font-headline-xl text-3xl md:text-headline-xl text-black tracking-tight mb-2">
+            Destinations <span className="text-green-500">Directory</span>
           </h1>
         </div>
       </section>

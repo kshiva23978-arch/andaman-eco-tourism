@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Public_Sans } from "next/font/google";
+import { Public_Sans, Yeseva_One } from "next/font/google";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { PageLoader } from "@/components/ui/PageLoader";
@@ -10,6 +10,12 @@ const publicSans = Public_Sans({
   variable: "--font-public-sans",
   subsets: ["latin"],
   weight: ["400", "600", "700", "800"],
+});
+
+const yesevaOne = Yeseva_One({
+  variable: "--font-yeseva",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -23,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={publicSans.variable}>
+    <html lang="en" className={`${publicSans.variable} ${yesevaOne.variable}`}>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"

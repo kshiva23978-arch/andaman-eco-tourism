@@ -323,8 +323,8 @@ export default function Home() {
               <Chip variant="primary" icon="landscape" className="mb-3">
                 Handpicked Escapes
               </Chip>
-              <h2 className="font-headline-lg text-2xl md:text-headline-lg text-primary tracking-tight">
-                Explore Featured Destinations
+              <h2 className="font-headline-lg text-2xl md:text-headline-xl text-black tracking-tight">
+                Explore Featured <span className="text-green-500">Destinations</span>
               </h2>
             </div>
             <Link
@@ -351,8 +351,8 @@ export default function Home() {
             <Chip variant="secondary" icon="volunteer_activism" className="mb-3">
               Our Commitment
             </Chip>
-            <h2 className="font-headline-lg text-2xl md:text-headline-lg text-primary tracking-tight">
-              Why Travel Sustainably With Us
+            <h2 className="font-headline-lg text-2xl md:text-headline-xl text-black tracking-tight">
+              Why Travel <span className="text-green-500">Sustainably</span> With Us
             </h2>
           </div>
         </div>
@@ -401,8 +401,8 @@ export default function Home() {
               <Chip variant="glass" icon="hiking" className="mb-4">
                 {activities.length} Curated Experiences
               </Chip>
-              <h2 className="font-headline-lg text-2xl md:text-headline-lg text-white mb-4">
-                Featured Eco-Activities
+              <h2 className="font-headline-lg text-2xl md:text-headline-xl text-white tracking-tight mb-4">
+                Featured <span className="text-green-400">Eco-Activities</span>
               </h2>
             </div>
             <Link

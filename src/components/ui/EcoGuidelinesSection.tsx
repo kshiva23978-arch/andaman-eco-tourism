@@ -87,8 +87,8 @@ export function EcoGuidelinesSection({ guidelines }: { guidelines: Guideline[] }
           <Chip variant="secondary" icon="shield" className="mb-3">
             Responsible Travel
           </Chip>
-          <h2 className="font-headline-lg text-2xl md:text-headline-lg text-primary mb-4">
-            Eco-Guidelines
+          <h2 className="font-headline-lg text-2xl md:text-headline-xl text-black tracking-tight mb-4">
+            <span className="text-green-500">Eco</span>-Guidelines
           </h2>
           <p className="text-on-surface-variant font-body-md text-body-md">
             Traveling to a sensitive ecological zone requires a commitment to responsibility.

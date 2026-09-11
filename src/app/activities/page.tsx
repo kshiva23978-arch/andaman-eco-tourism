@@ -140,9 +140,8 @@ export default function ActivitiesGuidePage() {
             </span>
           </div>
 
-          <h1 className="font-headline-xl text-3xl md:text-headline-xl text-white mb-4">
-           Activities Guide
-
+          <h1 className="font-headline-xl text-3xl md:text-headline-xl text-white tracking-tight mb-4">
+            Activities <span className="text-green-400">Guide</span>
           </h1>
 
           <div className="h-1 w-16 bg-secondary rounded-full mb-6" />
@@ -184,8 +183,8 @@ export default function ActivitiesGuidePage() {
             <span className="text-secondary font-label-md uppercase mb-2 block">
               Core Mandate
             </span>
-            <h2 className="font-headline-lg text-headline-lg text-primary mb-4">
-              Conservation First
+            <h2 className="font-headline-lg text-headline-lg text-black tracking-tight mb-4">
+              <span className="text-green-500">Conservation</span> First
             </h2>
             <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
               As a protected ecological zone, the Andaman & Nicobar
@@ -237,8 +236,8 @@ export default function ActivitiesGuidePage() {
       {/* Coastal Management */}
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-24">
         <div className="text-center mb-12">
-          <h2 className="font-headline-lg text-headline-lg text-primary">
-            Coastal Management
+          <h2 className="font-headline-lg text-headline-lg text-black tracking-tight">
+            Coastal <span className="text-green-500">Management</span>
           </h2>
           <p className="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto mt-4">
             Beaches like Radhanagar and Elephant Beach are fragile

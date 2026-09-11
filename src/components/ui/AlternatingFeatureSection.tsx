@@ -96,7 +96,7 @@ export function AlternatingFeatureSection({
   const linkColor = isDark ? "text-on-primary" : "text-primary";
 
   return (
-    <section className={`relative py-16 ${bgClassName} ${isDark ? "text-on-primary" : ""}`}>
+    <section className={`relative py-10 ${bgClassName} ${isDark ? "text-on-primary" : ""}`}>
       {watermarks.map((wm, index) => (
         <Image
           key={`${wm.src}-${index}`}
@@ -113,11 +113,13 @@ export function AlternatingFeatureSection({
         <div className={`order-2 ${reverse ? "md:order-2" : "md:order-1"}`}>
           <div className="flex items-center gap-3 mb-4">
             {icon ? (
-              <span className={`material-symbols-outlined text-3xl ${iconColor}`}>
+              <span className={`material-symbols-outlined text-3xl shrink-0 ${iconColor}`}>
                 {icon}
               </span>
             ) : null}
-            <h2 className={`font-headline-lg text-headline-lg ${titleColor}`}>
+            <h2
+              className={`font-headline-lg min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[clamp(1.125rem,5vw,2rem)] font-bold leading-tight tracking-tight ${titleColor}`}
+            >
               {href ? (
                 <Link href={href} className="hover:underline">
                   {title}
