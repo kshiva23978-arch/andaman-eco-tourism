@@ -22,6 +22,7 @@ import DestinationCarousel from "@/components/destinations/DestinationCarousel";
 import { DecorativeLeaf } from "@/components/ui/DecorativeLeaf";
 import { DragScrollRow } from "@/components/ui/DragScrollRow";
 import { ParallaxBackground } from "@/components/ui/ParallaxBackground";
+import { RevealText, ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const ECO_GUIDELINES = [
   {
@@ -318,14 +319,14 @@ export default function Home() {
       <section className="relative overflow-hidden py-12 md:py-20 bg-surface-container-low">
         <DecorativeLeaf className="top-8 right-6 md:top-12 md:right-16" rotate={65} size={130} opacity={0.16} />
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+          <ScrollReveal className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
             <div>
               <Chip variant="primary" icon="landscape" className="mb-3">
                 Handpicked Escapes
               </Chip>
-              <h2 className="font-headline-lg text-2xl md:text-headline-xl text-black tracking-tight">
-                Explore Featured <span className="text-green-500">Destinations</span>
-              </h2>
+              <RevealText className="font-headline-lg text-2xl md:text-headline-xl text-black tracking-tight">
+                Explore Featured <span className="text-emerald-700">Destinations</span>
+              </RevealText>
             </div>
             <Link
               href="/destinations"
@@ -336,7 +337,7 @@ export default function Home() {
                 arrow_forward
               </span>
             </Link>
-          </div>
+          </ScrollReveal>
           <div className="w-full">
             <DestinationCarousel featuredDestinations={featuredDestinations} />
           </div>
@@ -347,14 +348,14 @@ export default function Home() {
       {/* Why sustainable travel */}
       <section className="relative overflow-hidden bg-surface py-4 md:py-8">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <div className="mx-auto mb-2 max-w-2xl text-center">
+          <ScrollReveal className="mx-auto mb-2 max-w-2xl text-center">
             <Chip variant="secondary" icon="volunteer_activism" className="mb-3">
               Our Commitment
             </Chip>
-            <h2 className="font-headline-lg text-2xl md:text-headline-xl text-black tracking-tight">
-              Why Travel <span className="text-green-500">Sustainably</span> With Us
-            </h2>
-          </div>
+            <RevealText className="font-headline-lg text-2xl md:text-headline-xl text-black tracking-tight">
+              Why Travel <span className="text-emerald-700">Sustainably</span> With Us
+            </RevealText>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -396,14 +397,14 @@ export default function Home() {
         <div className="absolute inset-0 bg-primary/50" />
 
         <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-4">
+          <ScrollReveal className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-4">
             <div className="max-w-2xl text-center md:text-left w-full">
               <Chip variant="glass" icon="hiking" className="mb-4">
                 {activities.length} Curated Experiences
               </Chip>
-              <h2 className="font-headline-lg text-2xl md:text-headline-xl text-white tracking-tight mb-4">
-                Featured <span className="text-green-400">Eco-Activities</span>
-              </h2>
+              <RevealText className="font-headline-lg text-2xl md:text-headline-xl text-white tracking-tight mb-4">
+                Featured <span className="text-emerald-100">Eco-Activities</span>
+              </RevealText>
             </div>
             <Link
               href="/activities"
@@ -414,7 +415,7 @@ export default function Home() {
                 arrow_forward
               </span>
             </Link>
-          </div>
+          </ScrollReveal>
           <DragScrollRow
             className="flex flex-row overflow-x-auto gap-gutter pb-6 no-scrollbar snap-x snap-mandatory"
             loopCount={featuredActivities.length}

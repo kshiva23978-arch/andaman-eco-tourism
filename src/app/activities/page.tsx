@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { Fragment } from "react";
 import { AlternatingFeatureSection, type WatermarkInput } from "@/components/ui/AlternatingFeatureSection";
 import { getActivityBySlug } from "@/lib/data/activities";
 import { DecorativeLeaf } from "@/components/ui/DecorativeLeaf";
+import { RevealText, ScrollReveal } from "@/components/ui/ScrollReveal";
+import { ActivitiesHero, type HeroSlide } from "@/components/activities/ActivitiesHero";
 
 export const metadata: Metadata = {
   title: "Activities Guide",
@@ -12,8 +11,58 @@ export const metadata: Metadata = {
     "Discover the natural wonders of the Andaman & Nicobar archipelago through responsible exploration and scientific conservation practices.",
 };
 
-const HERO_IMAGE =
-  "/images/bg/activity-bg.png";
+const HERO_SLIDES: HeroSlide[] = [
+  {
+    image: "/images/activitiy-slider/scuba.png",
+    eyebrow: "Marine · Scientific Diving",
+    title: "Dive Beneath the",
+    accent: "Coral Gardens",
+    description:
+      "Descend with certified marine naturalists into reefs monitored for health — a strict no-touch policy keeps every dive a conservation act.",
+    href: "/activities/scuba-snorkeling",
+    cta: "Scuba & Snorkeling",
+  },
+  {
+    image: "/images/activitiy-slider/trekking.png",
+    eyebrow: "Terrestrial · Rainforest",
+    title: "Walk the Ancient",
+    accent: "Rainforest Trails",
+    description:
+      "Follow marked trails through primary evergreen forest with local guides who read the canopy, the tracks and the silence.",
+    href: "/activities/rainforest-trekking",
+    cta: "Rainforest Trekking",
+  },
+  {
+    image: "/images/activitiy-slider/wildlife.png",
+    eyebrow: "Terrestrial · Wildlife",
+    title: "Meet the Islands'",
+    accent: "Endemic Wildlife",
+    description:
+      "Dawn and dusk windows, no playback calls, respectful distances — observe birds and forest life the way researchers do.",
+    href: "/activities/avian-observation",
+    cta: "Avian Observation",
+  },
+  {
+    image: "/images/activitiy-slider/omount-manipur.png",
+    eyebrow: "Terrestrial · Summit Trek",
+    title: "Climb Toward",
+    accent: "Mount Manipur",
+    description:
+      "A guided ascent through cloud forest to the archipelago's high ridgelines, with panoramic views over the Andaman Sea.",
+    href: "/destinations/mount-manipur-national-park",
+    cta: "Explore the Park",
+  },
+  {
+    image: "/images/activitiy-slider/light-house.png",
+    eyebrow: "Marine · Coastal Voyages",
+    title: "Sail the Quiet",
+    accent: "Island Coastlines",
+    description:
+      "Low-wake, low-noise boat transits past lighthouses and mangrove channels — powered by local operators who know these waters.",
+    href: "/activities/sustainable-boating",
+    cta: "Sustainable Boating",
+  },
+];
 
 interface GuideEntry {
   slug: string;
@@ -87,8 +136,8 @@ function GuideSections({ entries }: { entries: GuideEntry[] }) {
         const activity = getActivityBySlug(slug);
         if (!activity) return null;
         return (
-          <Fragment key={slug}>
-      <DecorativeLeaf className="top-6 left-4 md:top-64 md:left-9" rotate={-25} size={110} opacity={0.22} />
+          <div key={slug} className="relative overflow-hidden">
+            <DecorativeLeaf className="top-6 left-4 md:top-64 md:left-9" rotate={-25} size={110} opacity={0.22} />
           <AlternatingFeatureSection
             href={`/activities/${activity.slug}`}
             image={activity.heroImage}
@@ -106,9 +155,8 @@ function GuideSections({ entries }: { entries: GuideEntry[] }) {
             tone={tone}
             watermark={watermark}
           />
-                <DecorativeLeaf className="bottom-6 right-4 md:bottom-86 md:right-9" rotate={-25} size={110} opacity={0.22} />
-
-          </Fragment>
+            <DecorativeLeaf className="bottom-6 right-4 md:bottom-86 md:right-9" rotate={-25} size={110} opacity={0.22} />
+          </div>
         );
       })}
     </>
@@ -119,73 +167,18 @@ export default function ActivitiesGuidePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative h-[450px] md:h-[520px] w-full overflow-hidden">
-        <Image
-          src={HERO_IMAGE}
-          alt="Andaman Islands"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-blue/50 to-transparent" />
-
-        <div className="relative z-10 h-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop flex flex-col justify-center">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="material-symbols-outlined text-white text-[20px]">
-              eco
-            </span>
-            <span className="font-label-md text-label-md text-white uppercase tracking-widest">
-              Experiences That Connect You With Nature
-            </span>
-          </div>
-
-          <h1 className="font-headline-xl text-3xl md:text-headline-xl text-white tracking-tight mb-4">
-            Activities <span className="text-green-400">Guide</span>
-          </h1>
-
-          <div className="h-1 w-16 bg-secondary rounded-full mb-6" />
-
-          <p className="font-body-lg text-white/90 max-w-xl text-lg md:text-xl mb-8">
-           Discover the natural wonders of the archipelago through responsible exploration and scientific conservation practices.
-          </p>
-
-          <Link
-            href="#marine-activities"
-            className="inline-flex w-fit items-center gap-2 rounded-full bg-primary px-8 py-4 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary/90"
-          >
-            Explore Activities
-            <span className="material-symbols-outlined text-[20px]">
-              arrow_forward
-            </span>
-          </Link>
-        </div>
-
-        {/* Wave divider */}
-        <div className="absolute inset-x-0 bottom-0 z-10 leading-none">
-          <svg
-            viewBox="0 0 1440 100"
-            preserveAspectRatio="none"
-            className="h-[50px] w-full md:h-[90px]"
-          >
-            <path
-              className="fill-surface"
-              d="M0,64 C240,120 480,0 720,32 C960,64 1200,112 1440,48 L1440,100 L0,100 Z"
-            />
-          </svg>
-        </div>
-      </section>
+      <ActivitiesHero slides={HERO_SLIDES} />
 
       {/* Conservation Principles */}
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mb-24">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-          <div className="md:col-span-2 bg-surface-container p-8 border border-outline-variant flex flex-col justify-center">
+          <ScrollReveal className="md:col-span-2 bg-surface-container p-8 border border-outline-variant flex flex-col justify-center">
             <span className="text-secondary font-label-md uppercase mb-2 block">
               Core Mandate
             </span>
-            <h2 className="font-headline-lg text-headline-lg text-black tracking-tight mb-4">
-              <span className="text-green-500">Conservation</span> First
-            </h2>
+            <RevealText className="font-headline-lg text-headline-lg text-black tracking-tight mb-4">
+              <span className="text-emerald-700">Conservation</span> First
+            </RevealText>
             <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
               As a protected ecological zone, the Andaman & Nicobar
               Administration prioritizes environmental integrity. Every
@@ -195,8 +188,8 @@ export default function ActivitiesGuidePage() {
               No Trace&rsquo; protocol in all terrestrial and marine
               environments.
             </p>
-          </div>
-          <div className="bg-secondary text-on-secondary p-8 border border-secondary flex flex-col items-start gap-4">
+          </ScrollReveal>
+          <ScrollReveal className="bg-secondary text-on-secondary p-8 border border-secondary flex flex-col items-start gap-4" delay={0.2}>
             <span className="material-symbols-outlined text-4xl">
               nature_people
             </span>
@@ -223,7 +216,7 @@ export default function ActivitiesGuidePage() {
                 Respect wildlife distances
               </li>
             </ul>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -235,17 +228,17 @@ export default function ActivitiesGuidePage() {
 
       {/* Coastal Management */}
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-24">
-        <div className="text-center mb-12">
-          <h2 className="font-headline-lg text-headline-lg text-black tracking-tight">
-            Coastal <span className="text-green-500">Management</span>
-          </h2>
+        <ScrollReveal className="text-center mb-12">
+          <RevealText className="font-headline-lg text-headline-lg text-black tracking-tight">
+            Coastal <span className="text-emerald-700">Management</span>
+          </RevealText>
           <p className="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto mt-4">
             Beaches like Radhanagar and Elephant Beach are fragile
             ecosystems. Proper coastal conduct ensures these shores remain
             pristine for generations.
           </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+        </ScrollReveal>
+        <ScrollReveal className="grid grid-cols-1 md:grid-cols-3 gap-gutter" stagger={0.15}>
           <CoastalPanel
             title="Zone Regulations"
             color="bg-primary"
@@ -273,7 +266,7 @@ export default function ActivitiesGuidePage() {
               "Adhere to lifeguard flags",
             ]}
           />
-        </div>
+        </ScrollReveal>
       </section>
     </>
   );
@@ -286,9 +279,13 @@ function SectionDivider({ label, id }: { label: string; id?: string }) {
       className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mb-12 scroll-mt-24"
     >
       <div className="border-b border-outline-variant pb-6">
-        <span className="font-label-md text-label-md text-secondary uppercase tracking-widest">
+        <RevealText
+          as="span"
+          className="block font-label-md text-label-md text-secondary uppercase tracking-widest"
+          stagger={0.08}
+        >
           {label}
-        </span>
+        </RevealText>
       </div>
     </section>
   );

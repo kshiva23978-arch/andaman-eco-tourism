@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FeatureWatermark } from "./FeatureWatermark";
+import { ScrollReveal } from "./ScrollReveal";
 
 export interface FeatureBullet {
   icon?: string;
@@ -96,21 +98,19 @@ export function AlternatingFeatureSection({
   const linkColor = isDark ? "text-on-primary" : "text-primary";
 
   return (
-    <section className={`relative py-10 ${bgClassName} ${isDark ? "text-on-primary" : ""}`}>
+    <section className={`relative overflow-hidden py-10 ${bgClassName} ${isDark ? "text-on-primary" : ""}`}>
       {watermarks.map((wm, index) => (
-        <Image
+        <FeatureWatermark
           key={`${wm.src}-${index}`}
           src={wm.src}
-          alt=""
-          aria-hidden="true"
-          width={wm.size}
-          height={wm.size}
-          className={`absolute hidden w-auto object-contain pointer-events-none md:block ${POSITION_CLASSES[wm.position]}`}
-          style={{ height: wm.size, opacity: wm.opacity / 100 }}
+          size={wm.size}
+          opacity={wm.opacity / 100}
+          positionClass={POSITION_CLASSES[wm.position]}
+          index={index}
         />
       ))}
       <div className="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 gap-gutter items-center">
-        <div className={`order-2 ${reverse ? "md:order-2" : "md:order-1"}`}>
+        <ScrollReveal className={`order-2 ${reverse ? "md:order-2" : "md:order-1"}`}>
           <div className="flex items-center gap-3 mb-4">
             {icon ? (
               <span className={`material-symbols-outlined text-3xl shrink-0 ${iconColor}`}>
@@ -177,7 +177,7 @@ export function AlternatingFeatureSection({
               </span>
             </Link>
           ) : null}
-        </div>
+        </ScrollReveal>
         <div className={`order-1 ${reverse ? "md:order-1" : "md:order-2"}`}>
           {href ? (
             <Link
