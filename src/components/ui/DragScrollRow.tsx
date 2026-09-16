@@ -14,6 +14,9 @@ export function DragScrollRow({
   className = "",
   loopCount,
   revealOnScroll = false,
+  coverflow = false,
+  settleToCenter = false,
+  autoplayInterval = 0,
 }: {
   children: ReactNode;
   className?: string;
@@ -22,13 +25,54 @@ export function DragScrollRow({
   loopCount?: number;
   /** Fade each card in (opacity only, no position shift) as the row scrolls into view. */
   revealOnScroll?: boolean;
+  /** Cinematic 3D arc: cards turn to face the centre and recede toward the edges as you scroll. */
+  coverflow?: boolean;
+  /** After scrolling stops, ease the nearest card into the centre (use instead of CSS scroll-snap). */
+  settleToCenter?: boolean;
+  /** Milliseconds between smooth auto-advances (0 = off). Pauses on hover, drag, hidden tab, off-screen. */
+  autoplayInterval?: number;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef({ isDown: false, startX: 0, scrollLeft: 0, hasDragged: false });
   const settleTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const DRAG_THRESHOLD = 6;
 
+  const settleTween = useRef<gsap.core.Tween | null>(null);
+  const hoverRef = useRef(false);
+  const inViewRef = useRef(true);
+
   const getCards = () => containerRef.current?.children ?? null;
+
+  const scrollLeftToCenter = (el: HTMLElement) => {
+    const container = containerRef.current!;
+    return el.offsetLeft + el.offsetWidth / 2 - container.clientWidth / 2;
+  };
+
+  /** Smoothly scroll so `index` sits in the centre, then re-seat the infinite loop. */
+  const glideToIndex = (index: number, duration = 0.9) => {
+    const container = containerRef.current;
+    const cards = getCards();
+    if (!container || !cards || !cards[index]) return;
+
+    const target = scrollLeftToCenter(cards[index] as HTMLElement);
+    if (Math.abs(target - container.scrollLeft) < 1) {
+      realignLoop(index);
+      return;
+    }
+
+    settleTween.current?.kill();
+    container.style.scrollBehavior = "auto";
+    settleTween.current = gsap.to(container, {
+      scrollLeft: target,
+      duration,
+      ease: "power3.out",
+      overwrite: true,
+      onComplete: () => {
+        settleTween.current = null;
+        realignLoop(index);
+      },
+    });
+  };
 
   const findClosestIndex = () => {
     const container = containerRef.current;
@@ -87,32 +131,55 @@ export function DragScrollRow({
     }
 
     const scheduleRealign = () => {
+      // Ignore scroll events produced by our own glide or by an in-progress drag.
+      if (settleTween.current || dragState.current.isDown) return;
       const closest = findClosestIndex();
-      if (closest !== null) realignLoop(closest);
+      if (closest === null) return;
+      if (settleToCenter) glideToIndex(closest, 0.8);
+      else realignLoop(closest);
     };
 
-    const supportsScrollEnd = "onscrollend" in window;
-
+    // Debounce ourselves rather than relying on `scrollend`, which is unreliable mid-tween.
     const handleScroll = () => {
       if (settleTimeout.current) clearTimeout(settleTimeout.current);
-      if (!supportsScrollEnd) {
-        settleTimeout.current = setTimeout(scheduleRealign, 150);
-      }
+      settleTimeout.current = setTimeout(scheduleRealign, settleToCenter ? 120 : 150);
     };
 
     container.addEventListener("scroll", handleScroll, { passive: true });
-    if (supportsScrollEnd) {
-      container.addEventListener("scrollend", scheduleRealign, { passive: true });
-    }
     return () => {
       container.removeEventListener("scroll", handleScroll);
-      if (supportsScrollEnd) {
-        container.removeEventListener("scrollend", scheduleRealign);
-      }
       if (settleTimeout.current) clearTimeout(settleTimeout.current);
+      settleTween.current?.kill();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loopCount]);
+  }, [loopCount, settleToCenter]);
+
+  // Smooth autoplay: glide one card at a time.
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container || autoplayInterval <= 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const observer =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(([entry]) => (inViewRef.current = entry.isIntersecting), { threshold: 0.3 })
+        : null;
+    observer?.observe(container);
+
+    const tick = () => {
+      if (hoverRef.current || !inViewRef.current || document.hidden) return;
+      if (dragState.current.isDown || settleTween.current) return;
+      const closest = findClosestIndex();
+      if (closest !== null) glideToIndex(closest + 1, 1.1);
+    };
+    const interval = setInterval(tick, autoplayInterval);
+
+    return () => {
+      clearInterval(interval);
+      observer?.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplayInterval]);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -136,12 +203,59 @@ export function DragScrollRow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealOnScroll]);
 
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container || !coverflow) return;
+
+    const MAX_ROTATE = 38; // deg at the row edge (outer edge turns toward the viewer)
+    const MAX_LIFT = 36; // px the row curves upward toward the edges
+    const MAX_DEPTH = 180; // px pushed back at the row edge
+    const MAX_DIM = 0.45; // brightness reduction at the row edge
+
+    let frame = 0;
+    const apply = () => {
+      frame = 0;
+      const center = container.scrollLeft + container.clientWidth / 2;
+      const half = container.clientWidth / 2;
+      Array.from(container.children).forEach((child) => {
+        const el = child as HTMLElement;
+        // -1 (left edge) .. 0 (centre) .. 1 (right edge)
+        const offset = gsap.utils.clamp(-1, 1, (el.offsetLeft + el.offsetWidth / 2 - center) / half);
+        const mag = Math.abs(offset);
+        gsap.set(el, {
+          rotateY: -offset * MAX_ROTATE,
+          y: -mag * MAX_LIFT,
+          z: -mag * MAX_DEPTH,
+          scale: 1 - mag * 0.08,
+          filter: `brightness(${1 - mag * MAX_DIM})`,
+          transformPerspective: 1200,
+          zIndex: Math.round((1 - mag) * 100),
+        });
+      });
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+
+    apply();
+    container.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      container.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [coverflow]);
+
   // Only hijack pointer events for mouse (click-drag). Touch keeps native momentum scrolling.
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "mouse") return;
     const container = containerRef.current;
     if (!container) return;
 
+    settleTween.current?.kill();
+    settleTween.current = null;
+    if (settleTimeout.current) clearTimeout(settleTimeout.current);
     container.style.scrollBehavior = "auto";
     dragState.current = {
       isDown: true,
@@ -174,9 +288,16 @@ export function DragScrollRow({
     const container = containerRef.current;
     if (!container) return;
 
+    const wasDown = dragState.current.isDown;
     dragState.current.isDown = false;
-    container.style.scrollBehavior = "smooth";
-    container.releasePointerCapture(event.pointerId);
+    container.style.scrollBehavior = settleToCenter ? "auto" : "smooth";
+    if (container.hasPointerCapture(event.pointerId)) container.releasePointerCapture(event.pointerId);
+
+    // Release: ease into the nearest card instead of stopping dead / snapping.
+    if (wasDown && settleToCenter) {
+      const closest = findClosestIndex();
+      if (closest !== null) glideToIndex(closest, 0.7);
+    }
   };
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
@@ -192,8 +313,13 @@ export function DragScrollRow({
       onPointerLeave={stopDragging}
       onPointerCancel={stopDragging}
       onDragStart={handleDragStart}
+      onMouseEnter={() => (hoverRef.current = true)}
+      onMouseLeave={() => (hoverRef.current = false)}
       className={`cursor-grab active:cursor-grabbing select-none ${className}`}
-      style={{ touchAction: "pan-x pan-y" }}
+      style={{
+        touchAction: "pan-x pan-y",
+        ...(coverflow ? { perspective: "1200px", transformStyle: "preserve-3d" } : {}),
+      }}
     >
       {children}
     </div>

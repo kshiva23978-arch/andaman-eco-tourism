@@ -1,14 +1,19 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DestinationCard } from "./DestinationCard";
 
 interface Props {
   featuredDestinations: any[];
+  /** Milliseconds between auto-advances. 0 disables autoplay. */
+  autoplayInterval?: number;
 }
+
+const RESUME_DELAY = 6000;
 
 export default function DestinationCarousel({
   featuredDestinations,
+  autoplayInterval = 4000,
 }: Props) {
   const n = featuredDestinations.length;
   const extendedDestinations =
@@ -20,6 +25,24 @@ export default function DestinationCarousel({
   const dragState = useRef({ isDown: false, startX: 0, scrollLeft: 0, hasDragged: false });
   const settleTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [activeIndex, setActiveIndex] = useState(n); // index into extendedDestinations
+  const activeIndexRef = useRef(n);
+  useEffect(() => {
+    activeIndexRef.current = activeIndex;
+  }, [activeIndex]);
+
+  // Autoplay pauses while hovered / dragging / off-screen, and for a while after any user interaction.
+  const [isHovered, setIsHovered] = useState(false);
+  const [isInView, setIsInView] = useState(true);
+  const [isUserPaused, setIsUserPaused] = useState(false);
+  const resumeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pauseAutoplay = () => {
+    setIsUserPaused(true);
+    if (resumeTimeout.current) clearTimeout(resumeTimeout.current);
+    resumeTimeout.current = setTimeout(() => setIsUserPaused(false), RESUME_DELAY);
+  };
+  useEffect(() => () => {
+    if (resumeTimeout.current) clearTimeout(resumeTimeout.current);
+  }, []);
 
   const getCards = () => carouselRef.current?.children ?? null;
 
@@ -38,6 +61,7 @@ export default function DestinationCarousel({
   // Public-facing dot click: jump to the copy of `realIndex` nearest the current view.
   const scrollToIndex = (realIndex: number) => {
     if (n === 0) return;
+    pauseAutoplay();
     const candidates = [realIndex, realIndex + n, realIndex + 2 * n];
     const closest = candidates.reduce((best, candidate) =>
       Math.abs(candidate - activeIndex) < Math.abs(best - activeIndex) ? candidate : best
@@ -143,12 +167,39 @@ export default function DestinationCarousel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [n]);
 
+  // Pause autoplay while the carousel is scrolled out of view.
+  useEffect(() => {
+    const container = carouselRef.current;
+    if (!container || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { threshold: 0.25 }
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  // Autoplay: advance one card at a time; the loop realign keeps it endless.
+  useEffect(() => {
+    if (n === 0 || autoplayInterval <= 0 || isHovered || isUserPaused || !isInView) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const interval = setInterval(() => {
+      if (dragState.current.isDown || document.hidden) return;
+      scrollToExtendedIndex(activeIndexRef.current + 1, "smooth");
+    }, autoplayInterval);
+
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [n, autoplayInterval, isHovered, isUserPaused, isInView]);
+
   // Only hijack pointer events for mouse (click-drag). Touch keeps native momentum scrolling.
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "mouse") return;
     const container = carouselRef.current;
     if (!container) return;
 
+    pauseAutoplay();
     container.style.scrollBehavior = "auto";
     dragState.current = {
       isDown: true,
@@ -206,6 +257,11 @@ export default function DestinationCarousel({
         onPointerUp={stopDragging}
         onPointerLeave={stopDragging}
         onPointerCancel={stopDragging}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onTouchStart={pauseAutoplay}
+        onFocusCapture={() => setIsHovered(true)}
+        onBlurCapture={() => setIsHovered(false)}
         onDragStart={handleDragStart}
         className="flex flex-row items-center overflow-x-auto gap-6 px-[10%] py-5 no-scrollbar snap-x snap-mandatory cursor-grab active:cursor-grabbing select-none"
         style={{ touchAction: "pan-x pan-y" }}

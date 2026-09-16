@@ -2,7 +2,56 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Activity } from "@/lib/types";
 
-export function ActivityCard({ activity }: { activity: Activity }) {
+export function ActivityCard({
+  activity,
+  variant = "default",
+}: {
+  activity: Activity;
+  /** `cinematic`: tall poster-style card with the copy laid over the image (for the coverflow row). */
+  variant?: "default" | "cinematic";
+}) {
+  if (variant === "cinematic") {
+    return (
+      <div className="w-[230px] shrink-0 sm:w-[260px] md:w-[300px] [transform-style:preserve-3d] will-change-transform">
+        <Link
+          href={`/activities/${activity.slug}`}
+          className="group relative block aspect-[3/4] overflow-hidden rounded-[28px] border border-white/15 bg-black shadow-[0_30px_60px_-20px_rgba(0,0,0,0.65)]"
+        >
+          <Image
+            src={activity.heroImage}
+            alt={activity.title}
+            fill
+            className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-110"
+            sizes="(min-width: 768px) 300px, 260px"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/10" />
+
+          {activity.icon && (
+            <span className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white shadow-lg backdrop-blur-md">
+              <span className="material-symbols-outlined text-[20px]">{activity.icon}</span>
+            </span>
+          )}
+          <div className="absolute inset-x-0 bottom-0 p-5 text-white md:p-6">
+            {activity.duration && (
+              <span className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-white/70">
+                <span className="material-symbols-outlined text-[14px]">schedule</span>
+                {activity.duration}
+              </span>
+            )}
+            <h4 className="font-headline-md text-lg font-bold leading-tight md:text-xl">
+              {activity.title}
+            </h4>
+            <p className="mt-2 line-clamp-2 text-caption text-white/75">{activity.tagline}</p>
+            <span className="mt-4 flex items-center gap-2 font-label-md text-[12px] text-white/90 transition-transform duration-300 group-hover:translate-x-1">
+              View Details
+              <span className="material-symbols-outlined text-sm">arrow_outward</span>
+            </span>
+          </div>
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="min-w-[280px] snap-start" style={{ perspective: "1200px" }}>
       <Link
