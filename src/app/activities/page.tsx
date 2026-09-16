@@ -155,7 +155,7 @@ function GuideSections({ entries }: { entries: GuideEntry[] }) {
             tone={tone}
             watermark={watermark}
           />
-            <DecorativeLeaf className="bottom-6 right-4 md:bottom-86 md:right-9" rotate={-25} size={110} opacity={0.22} />
+            <DecorativeLeaf className="bottom-6 right-4 md:bottom-86 md:right-9" rotate={-25} size={110} opacity={0.22} delay={5} />
           </div>
         );
       })}

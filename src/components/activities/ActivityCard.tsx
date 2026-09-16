@@ -12,17 +12,17 @@ export function ActivityCard({
 }) {
   if (variant === "cinematic") {
     return (
-      <div className="w-[230px] shrink-0 sm:w-[260px] md:w-[300px] [transform-style:preserve-3d] will-change-transform">
+      <div className="w-[min(74vw,320px)] shrink-0 md:w-[300px] lg:w-[320px] [transform-style:preserve-3d] will-change-transform">
         <Link
           href={`/activities/${activity.slug}`}
-          className="group relative block aspect-[3/4] overflow-hidden rounded-[28px] border border-white/15 bg-black shadow-[0_30px_60px_-20px_rgba(0,0,0,0.65)]"
+          className="group relative block aspect-[3/4] overflow-hidden bg-black shadow-[0_30px_60px_-20px_rgba(0,0,0,0.65)]"
         >
           <Image
             src={activity.heroImage}
             alt={activity.title}
             fill
             className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-110"
-            sizes="(min-width: 768px) 300px, 260px"
+            sizes="(min-width: 1024px) 320px, (min-width: 768px) 300px, 74vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/10" />
 

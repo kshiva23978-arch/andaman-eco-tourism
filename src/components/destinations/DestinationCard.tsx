@@ -51,7 +51,7 @@ export function DestinationCard({
               {destination.title}
             </h3>
             <p
-              className={`font-body-md text-body-sm text-white/85 overflow-hidden transition-all duration-500 ease-out ${
+              className={`font-body-md text-body-sm text-justify text-white/85 overflow-hidden transition-all duration-500 ease-out ${
                 isActive ? "mt-2 max-h-24 opacity-100" : "max-h-0 opacity-0"
               }`}
             >

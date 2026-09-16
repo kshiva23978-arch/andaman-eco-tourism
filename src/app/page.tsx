@@ -349,7 +349,7 @@ export default function Home() {
               <h2 className="hero-title text-3xl leading-tight text-primary md:text-4xl lg:text-5xl">
                 Discover the Islands
               </h2>
-              <p className="mt-4 max-w-sm text-sm leading-relaxed text-on-surface-variant md:text-base">
+              <p className="mt-4 max-w-sm text-sm leading-relaxed text-justify text-on-surface-variant md:text-base">
                 Over 570 islands stretch across the Bay of Bengal — only a handful are open to
                 visitors. Pick a marker to explore its beaches, reefs, forests and the communities
                 that care for them.
@@ -409,7 +409,7 @@ export default function Home() {
             <DestinationCarousel featuredDestinations={featuredDestinations} />
           </div>
         </div>
-        <DecorativeLeaf className="bottom-6 left-4 md:bottom-10 md:left-8" rotate={-25} size={110} opacity={0.22} />
+        <DecorativeLeaf className="bottom-6 left-4 md:bottom-10 md:left-8" rotate={-25} size={110} opacity={0.22} delay={5} />
       </section>
 
       {/* Why sustainable travel */}
@@ -460,8 +460,8 @@ export default function Home() {
       {/* Featured Activities */}
       <section className="relative overflow-hidden py-20 md:py-24">
         <ParallaxBackground src="/images/bg/forest-bg.jpg" />
-        <DecorativeLeaf className="bottom-8 right-4 md:bottom-14 md:right-14" rotate={195} flip size={150} opacity={0.2} />
-        <div className="absolute inset-0 bg-primary/50" />
+        <DecorativeLeaf className="bottom-8 right-4 md:bottom-14 md:right-14" rotate={195} flip size={150} opacity={0.2} delay={3} />
+        <div className="absolute inset-0 " />
 
         <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <ScrollReveal className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-4">
@@ -487,7 +487,7 @@ export default function Home() {
 
         {/* Full-bleed cinematic coverflow — cards arc toward the viewer and drift off both edges */}
         <DragScrollRow
-          className="relative flex flex-row items-center gap-4 overflow-x-auto px-[8vw] py-10 no-scrollbar md:gap-6 md:py-14"
+          className="relative flex flex-row items-center gap-3 overflow-x-auto px-[13vw] no-scrollbar md:gap-6 md:px-[8vw] md:py-14"
           loopCount={featuredActivities.length}
           revealOnScroll
           coverflow

@@ -207,16 +207,18 @@ export function DragScrollRow({
     const container = containerRef.current;
     if (!container || !coverflow) return;
 
-    const MAX_ROTATE = 38; // deg at the row edge (outer edge turns toward the viewer)
-    const MAX_LIFT = 36; // px the row curves upward toward the edges
-    const MAX_DEPTH = 180; // px pushed back at the row edge
-    const MAX_DIM = 0.45; // brightness reduction at the row edge
-
     let frame = 0;
     const apply = () => {
       frame = 0;
       const center = container.scrollLeft + container.clientWidth / 2;
       const half = container.clientWidth / 2;
+      // Gentler curve on phones: a card there spans most of the row, so heavy depth makes it look tiny.
+      const narrow = container.clientWidth < 768;
+      const MAX_ROTATE = narrow ? 24 : 38; // deg at the row edge (outer edge turns toward the viewer)
+      const MAX_LIFT = narrow ? 16 : 36; // px the row curves upward toward the edges
+      const MAX_DEPTH = narrow ? 60 : 180; // px pushed back at the row edge
+      const MAX_DIM = narrow ? 0.35 : 0.45; // brightness reduction at the row edge
+      const MAX_SHRINK = narrow ? 0.04 : 0.08;
       Array.from(container.children).forEach((child) => {
         const el = child as HTMLElement;
         // -1 (left edge) .. 0 (centre) .. 1 (right edge)
@@ -226,7 +228,7 @@ export function DragScrollRow({
           rotateY: -offset * MAX_ROTATE,
           y: -mag * MAX_LIFT,
           z: -mag * MAX_DEPTH,
-          scale: 1 - mag * 0.08,
+          scale: 1 - mag * MAX_SHRINK,
           filter: `brightness(${1 - mag * MAX_DIM})`,
           transformPerspective: 1200,
           zIndex: Math.round((1 - mag) * 100),

@@ -80,7 +80,7 @@ export function EcoGuidelinesSection({ guidelines }: { guidelines: Guideline[] }
       className="relative overflow-hidden bg-surface-container-low py-20 md:py-24"
     >
       <DecorativeLeaf className="top-6 left-4 md:top-10 md:left-10" rotate={-60} size={120} opacity={0.15} />
-      <DecorativeLeaf className="bottom-6 right-4 md:bottom-12 md:right-20" rotate={110} flip size={160} opacity={0.15} />
+      <DecorativeLeaf className="bottom-6 right-4 md:bottom-12 md:right-20" rotate={110} flip size={160} opacity={0.15} delay={4} />
 
       <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <div ref={headerRef} className="mx-auto mb-12 max-w-2xl text-center">
@@ -101,7 +101,7 @@ export function EcoGuidelinesSection({ guidelines }: { guidelines: Guideline[] }
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4020881.2782082744!2d90.59024351827024!3d10.209710012395053!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3064a00f2b650ff3%3A0xce80055648fccb2c!2sAndaman%20and%20Nicobar%20Islands!5e0!3m2!1sen!2sin!4v1788341773220!5m2!1sen!2sin"
               width="100%"
-              height="340"
+                className="h-[300px] md:h-[550px] w-full"
               style={{ border: 0, display: "block" }}
               allowFullScreen
               loading="lazy"

@@ -12,10 +12,19 @@ const RESOURCE_LINKS = [
 
 export function SiteFooter() {
   return (
-    <footer className="relative overflow-hidden border-t border-outline-variant">
-      <div className="absolute inset-0 bg-[url('/images/bg/footer-bg.png')] bg-cover bg-center" />
-      <div className="absolute inset-0 bg-black/60" />
+    <footer className="relative overflow-hidden">
+      {/* Jungle skyline floats over the page (transparent sky) and fades into the footer colour below. */}
+      <div className="relative -mb-px h-[142px] sm:h-[320px] md:h-[301px] lg:h-[374px] bg-[rgb(246,243,242)]">
+        <img
+          src="/images/bg/footer-start-bg.png"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none block h-full w-full select-none object-cover object-[50%_60%]"
+        />
+        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-b from-transparent to-[#10382F]" />
+      </div>
 
+      <div className="relative bg-[#10382F]">
       <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-12 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 text-center md:text-left">
         <div>
           <div className="font-headline-md text-white font-bold mb-4">
@@ -60,6 +69,7 @@ export function SiteFooter() {
       </div>
       <div className="relative border-t border-white/15 py-6 text-center text-caption text-white/60">
         © 2024 Andaman &amp; Nicobar Administration. All Rights Reserved.
+      </div>
       </div>
     </footer>
   );
