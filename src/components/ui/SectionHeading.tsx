@@ -5,15 +5,17 @@ export function SectionHeading({
   iconColor = "text-primary",
   children,
   description,
+  className = "",
 }: {
   icon: string;
   iconColor?: string;
   children: ReactNode;
   description?: string;
+  className?: string;
 }) {
   return (
     <div className="mb-8">
-      <h2 className="font-headline-lg text-headline-lg flex items-center gap-3">
+      <h2 className={`font-headline-lg text-headline-lg flex items-center gap-3 ${className}`}>
         <span className={`material-symbols-outlined ${iconColor}`}>{icon}</span>
         {children}
       </h2>

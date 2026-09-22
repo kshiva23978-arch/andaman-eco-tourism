@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { Chip } from "@/components/ui/Chip";
 import { InfoStat } from "@/components/ui/InfoStat";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { destinations, getDestinationBySlug } from "@/lib/data/destinations";
 import { findNearbyDestination } from "@/lib/format";
 import { DestinationGallery } from "@/components/destinations/DestinationGallery";
+import { DestinationHero } from "@/components/destinations/DestinationHero";
+import { DestinationMapSection } from "@/components/destinations/DestinationMapSection";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { GridReveal } from "@/components/ui/GridReveal";
 
 export function generateStaticParams() {
   return destinations.map((destination) => ({ slug: destination.slug }));
@@ -28,27 +30,6 @@ export async function generateMetadata({
   };
 }
 
-function GoogleMapFrame({ title }: { title: string }) {
-  const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(
-    `${title}, Andaman and Nicobar Islands, India`
-  )}&t=k&output=embed`;
-
-  return (
-    <div className="w-full h-[240px] sm:h-[320px] md:h-[400px] overflow-hidden rounded-2xl">
-      <iframe
-        src={mapUrl}
-        width="100%"
-        height="100%"
-        style={{ border: 0 }}
-        loading="lazy"
-        allowFullScreen
-        referrerPolicy="strict-origin-when-cross-origin"
-        title={title}
-      />
-    </div>
-  );
-}
-
 function BulletGrid({
   items,
   icon,
@@ -59,24 +40,27 @@ function BulletGrid({
   columns?: 1 | 2;
 }) {
   return (
-    <ul
+    <ScrollReveal
+      as="ul"
       className={`grid grid-cols-1 ${columns === 2 ? "md:grid-cols-2" : ""
         } gap-4`}
+      y={20}
+      stagger={0.08}
     >
       {items.map((item) => (
         <li
           key={item}
-          className="flex gap-3 bg-white p-4 border border-outline-variant rounded-lg"
+          className="flex gap-3 bg-white cursor-pointer p-4 border border-outline-variant rounded-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-md"
         >
           <span className="material-symbols-outlined text-secondary bg-secondary-container/30 p-1.5 rounded-full h-fit text-[20px]">
             {icon}
           </span>
-          <p className="font-body-md text-body-md text-on-surface-variant">
+          <p className="font-body-md text-body-md text-on-surface-variant text-justify">
             {item}
           </p>
         </li>
       ))}
-    </ul>
+    </ScrollReveal>
   );
 }
 
@@ -100,52 +84,12 @@ export default async function DestinationDetailPage({
   return (
     <>
       {/* Hero */}
-      <section className="relative h-[520px] md:h-[600px] w-full overflow-hidden">
-        <Image
-          src={destination.image}
-          alt={destination.title}
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end pb-16 px-margin-mobile md:px-margin-desktop">
-
-          <div className="max-w-container-max mx-auto w-full">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
-
-              {/* Left - 8 columns */}
-              <div className="md:col-span-8">
-                <Chip variant="glass" className="mb-4">
-                  {destination.region}
-                </Chip>
-
-                <h1 className="font-headline-xl text-white mb-4 text-4xl md:text-[56px] md:leading-[1.05]">
-                  {destination.title}
-                </h1>
-
-                <p className="font-body-lg text-white/90 max-w-2xl text-lg md:text-[22px]">
-                  {destination.overview}
-                </p>
-              </div>
-
-              {/* Right - 4 columns (map, desktop only — see mobile card below) */}
-              <div className="hidden md:block md:col-span-4 bg-white/90 backdrop-blur-md p-2 rounded-lg border border-outline-variant">
-                <GoogleMapFrame title={destination.title} />
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* Map card, mobile only — kept out of the hero overlay so it doesn't overflow the fixed hero height */}
-      <div className="md:hidden max-w-container-max mx-auto px-margin-mobile pt-4">
-        <div className="bg-white p-2 rounded-lg border border-outline-variant">
-          <GoogleMapFrame title={destination.title} />
-        </div>
-      </div>
+      <DestinationHero
+        title={destination.title}
+        region={destination.region}
+        overview={destination.overview}
+        image={destination.image}
+      />
 
       <section className="bg-surface-container-high ">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4 ">
@@ -161,16 +105,24 @@ export default async function DestinationDetailPage({
       </section>
 
       {/* Key Info Grid */}
-      <section className="max-w-container-max  mx-auto px-margin-mobile md:px-margin-desktop py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
+      <section id="destination-overview" className="relative overflow-hidden py-8">
+        <div
+          className="pointer-events-none absolute inset-0 z-0  bg-fixed bg-cover bg-center opacity-[0.06]"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+        <GridReveal className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter" columns={{ base: 1, sm: 2, lg: 3 }}>
           <InfoStat label="Best Time to Visit" value={destination.bestTime} color="secondary" />
           <InfoStat label="Timing" value={destination.timing} />
           <InfoStat label="Entry Fee" value={destination.fees} />
           <InfoStat label="Permits" value={destination.permits} />
           <InfoStat label="Range & Division" value={destination.rangeDivision || "—"} />
           <InfoStat label="Nearest Hospital" value={destination.hospital} color="error" />
+        </GridReveal>
         </div>
       </section>
+  {/* Location */}
+      <DestinationMapSection title={destination.title} overview={destination.overview} />
 
       <section className="bg-white ">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8">
@@ -188,14 +140,14 @@ export default async function DestinationDetailPage({
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <SectionHeading icon="directions_boat">How To Get There</SectionHeading>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-            <div className="lg:col-span-8 space-y-8">
+            <ScrollReveal as="div" className="lg:col-span-8 space-y-8" y={24} stagger={0.15}>
               <div className="flex gap-6">
                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold">
                   1
                 </div>
                 <div>
                   <h4 className="font-headline-md mb-2">By Road</h4>
-                  <p className="font-body-md text-on-surface-variant">
+                  <p className="font-body-md text-on-surface-variant text-justify">
                     {destination.accessibility.road}
                   </p>
                 </div>
@@ -206,16 +158,19 @@ export default async function DestinationDetailPage({
                 </div>
                 <div>
                   <h4 className="font-headline-md mb-2">By Ship / Boat</h4>
-                  <p className="font-body-md text-on-surface-variant">
+                  <p className="font-body-md text-on-surface-variant text-justify">
                     {destination.accessibility.ship}
                   </p>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
             <div className="lg:col-span-4">
-              <div className="bg-surface-container-lowest p-6 border border-outline-variant rounded-lg">
-
-
+              <ScrollReveal
+                as="div"
+                className="bg-surface-container-lowest p-6 border border-outline-variant rounded-lg"
+                y={30}
+                start="top 90%"
+              >
                 <span className="material-symbols-outlined text-primary text-[32px] block mb-4">
                   location_on
                 </span>
@@ -226,49 +181,54 @@ export default async function DestinationDetailPage({
                 <p className="text-on-surface-variant font-caption text-caption mt-1">
                   {destination.rangeDivision}
                 </p>
-              </div>
+              </ScrollReveal>
             </div>
           </div>
         </div>
       </section>
 
+    
       {/* Entry Fees & Permits */}
       <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-20">
         <SectionHeading icon="payments">Entry Fees &amp; Permits</SectionHeading>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-          <div className="p-6 border border-outline-variant rounded-lg bg-surface-container-lowest">
+        <ScrollReveal as="div" className="grid grid-cols-1 md:grid-cols-2 gap-gutter" y={24} stagger={0.12}>
+          <div className="p-6 border border-outline-variant rounded-lg bg-surface-container-lowest transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
             <h4 className="font-label-md text-primary uppercase mb-3 tracking-widest">
               Fees
             </h4>
-            <p className="font-body-md text-body-md text-on-surface-variant whitespace-pre-line">
+            <p className="font-body-md text-body-md text-on-surface-variant whitespace-pre-line text-justify">
               {destination.fees}
             </p>
           </div>
-          <div className="p-6 border border-outline-variant rounded-lg bg-surface-container-lowest">
+          <div className="p-6 border border-outline-variant rounded-lg bg-surface-container-lowest transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
             <h4 className="font-label-md text-primary uppercase mb-3 tracking-widest">
               Permits
             </h4>
-            <p className="font-body-md text-body-md text-on-surface-variant whitespace-pre-line">
+            <p className="font-body-md text-body-md text-on-surface-variant whitespace-pre-line text-justify">
               {destination.permits}
             </p>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* What To See */}
-      <section className="bg-surface-container py-16">
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <SectionHeading icon="visibility">What To See</SectionHeading>
-          <div className="flex flex-wrap gap-4">
+      <section className="relative overflow-hidden py-16">
+        <div
+          className="pointer-events-none absolute inset-0 z-0 bg-[url('/images/bg/forest2-bg.jpg')]  bg-cover bg-center opacity-[0.5]"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+          <SectionHeading icon="visibility" >What To See</SectionHeading>
+          <ScrollReveal as="div" className="flex flex-wrap gap-4" y={16} stagger={0.05}>
             {destination.whatToSee.map((item) => (
               <span
                 key={item}
-                className="px-6 py-2.5 rounded-full bg-white border border-outline-variant text-primary font-label-md"
+                className="px-6 py-2.5 rounded-full bg-white border border-outline-variant text-primary font-label-md transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-sm"
               >
                 {item}
               </span>
             ))}
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -279,19 +239,23 @@ export default async function DestinationDetailPage({
       </section>
 
       {/* Amenities & Accommodation */}
-      <section className="bg-surface-container-low py-16">
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+      <section className="relative overflow-hidden py-16">
+        <div
+          className="pointer-events-none absolute inset-0 z-0 bg-[url('/images/bg/canvas-b.jpg')]  bg-cover bg-center opacity-[0.16]"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-2 gap-gutter">
           <div>
             <SectionHeading icon="info">On-Site Amenities</SectionHeading>
             <BulletGrid items={destination.facility} icon="check_circle" columns={1} />
           </div>
           <div>
             <SectionHeading icon="hotel">Accommodation</SectionHeading>
-            <div className="p-6 border border-outline-variant rounded-lg bg-white">
-              <p className="font-body-md text-body-md text-on-surface-variant whitespace-pre-line">
+            <ScrollReveal as="div" className="p-6 border border-outline-variant rounded-lg bg-white" y={20}>
+              <p className="font-body-md text-body-md text-on-surface-variant whitespace-pre-line text-justify">
                 {destination.accommodation}
               </p>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -301,18 +265,24 @@ export default async function DestinationDetailPage({
         <SectionHeading icon="shield_with_heart" iconColor="text-secondary">
           Conservation &amp; Eco-Practices
         </SectionHeading>
-        <p className="font-body-md text-body-md text-on-surface-variant mb-8 max-w-3xl">
-          {destination.conservationNotes}
-        </p>
+        <ScrollReveal as="div" y={16}>
+          <p className="font-body-md text-body-md text-on-surface-variant mb-8 max-w-3xl text-justify">
+            {destination.conservationNotes}
+          </p>
+        </ScrollReveal>
         <BulletGrid items={destination.ecoGuidelines} icon="eco" />
       </section>
 
       {/* Nearby Places */}
       {nearby.length > 0 ? (
-        <section className="bg-surface-container-low py-16">
-          <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+        <section className="relative overflow-hidden bg-surface-container-low py-16">
+          <div
+            className="pointer-events-none absolute inset-0 z-0 bg-[url('/images/bg/green-orizon.png')]  bg-cover bg-center opacity-[0.6]"
+            aria-hidden="true"
+          />
+          <div className="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
             <SectionHeading icon="near_me">Nearby Places</SectionHeading>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+            <ScrollReveal as="div" className="grid grid-cols-1 md:grid-cols-3 gap-gutter" y={24} stagger={0.1}>
               {nearby.map(({ text, match }) => {
                 const content = (
                   <>
@@ -324,27 +294,27 @@ export default async function DestinationDetailPage({
                         </span>
                       ) : null}
                     </h3>
-                    <p className="font-body-md text-on-surface-variant">{text}</p>
+                    <p className="font-body-md text-on-surface-variant text-justify">{text}</p>
                   </>
                 );
                 return match ? (
                   <Link
                     key={text}
                     href={`/destinations/${match.slug}`}
-                    className="group border border-outline-variant bg-white overflow-hidden rounded-lg p-6 hover:border-primary transition-colors"
+                    className="group cursor-pointer border border-outline-variant bg-white overflow-hidden rounded-lg p-6 hover:border-primary transition-colors"
                   >
                     {content}
                   </Link>
                 ) : (
                   <div
                     key={text}
-                    className="border border-outline-variant bg-white overflow-hidden rounded-lg p-6"
+                    className="cursor-pointer border border-outline-variant bg-white overflow-hidden rounded-lg p-6"
                   >
                     {content}
                   </div>
                 );
               })}
-            </div>
+            </ScrollReveal>
           </div>
         </section>
       ) : null}
@@ -354,24 +324,24 @@ export default async function DestinationDetailPage({
         <SectionHeading icon="priority_high" iconColor="text-error">
           Safety &amp; Travel Tips
         </SectionHeading>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ScrollReveal as="div" className="grid grid-cols-1 md:grid-cols-2 gap-4" y={20} stagger={0.08}>
           <div className="p-6 bg-error-container text-on-error-container border border-error/20 rounded-lg flex gap-4">
             <span className="material-symbols-outlined">call</span>
             <div>
               <p className="font-label-md font-bold mb-1">Emergency: 112</p>
-              <p className="font-body-md opacity-90">{destination.hospital}</p>
+              <p className="font-body-md opacity-90 text-justify">{destination.hospital}</p>
             </div>
           </div>
           {destination.safetyTips.map((tip) => (
             <div
               key={tip}
-              className="p-6 bg-surface-container-lowest border border-outline-variant rounded-lg flex gap-4"
+              className="p-6 bg-surface-container-lowest border border-outline-variant rounded-lg flex gap-4 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md"
             >
               <span className="material-symbols-outlined text-primary">verified_user</span>
-              <p className="font-body-md text-on-surface-variant">{tip}</p>
+              <p className="font-body-md text-on-surface-variant text-justify">{tip}</p>
             </div>
           ))}
-        </div>
+        </ScrollReveal>
       </section>
     </>
   );
