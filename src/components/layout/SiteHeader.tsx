@@ -84,7 +84,7 @@ export function SiteHeader() {
   }, [menuOpen]);
 
   return (
-    <header className="bg-[#206625] border-b border-white/10 sticky top-0 z-50">
+    <header className="bg-[rgb(16,56,47)] border-b border-white/10 sticky top-0 z-50">
       <div className="flex justify-between items-center w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4">
         <Link
           href="/"

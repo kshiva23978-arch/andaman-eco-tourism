@@ -13,7 +13,7 @@ const CONTACT = {
   designation: "Department of Environment & Forests",
   org: "Andaman & Nicobar Administration",
   phone: "03192-244664",
-  email: "dcfpm313@gmail.com",
+  email: "dcfwl313@gmail.com",
 };
 
 export function SiteFooter() {

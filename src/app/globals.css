@@ -63,6 +63,34 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
+/* Homepage island map — labels connect to their pin with a thin leader line
+   (like a map-annotation callout) instead of Leaflet's default tooltip tail. */
+.andaman-map-tooltip {
+  background: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #1b3a2f;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.22);
+}
+.andaman-map-tooltip.leaflet-tooltip-right::before,
+.andaman-map-tooltip.leaflet-tooltip-left::before {
+  border: none;
+  width: 14px;
+  height: 0;
+  margin-top: 0;
+  border-top: 1.5px solid rgba(27, 58, 47, 0.55);
+}
+.andaman-map-tooltip.leaflet-tooltip-right::before {
+  left: -14px;
+}
+.andaman-map-tooltip.leaflet-tooltip-left::before {
+  right: -14px;
+}
+
 /* ---------- Destination "editorial" theme (forest/lagoon/sand palette) ---------- */
 .editorial {
   --forest-deep: #0f2b1e;

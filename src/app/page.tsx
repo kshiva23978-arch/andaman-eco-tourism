@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
@@ -50,36 +51,6 @@ const ECO_GUIDELINES = [
 
 const HERO_VIDEO = "/videos/bg-banner.mp4";
 
-const MAP_HOTSPOTS: Array<{
-  slug: string;
-  label: string;
-  x: number;
-  y: number;
-  dir: "tl" | "tr" | "bl" | "br" | "l" | "r" | "t" | "b";
-}> = [
-  { slug: "saddle-peak-national-park", label: "Saddle Peak", x: 49, y: 67, dir: "l" },
-  { slug: "ross-and-smith-islands", label: "Ross & Smith", x: 64, y: 17, dir: "tr" },
-  { slug: "limestone-caves-baratang", label: "Limestone Caves", x: 53, y: 53, dir: "l" },
-  { slug: "cuthbert-bay-beach-wildlife-sanctuary", label: "Cuthbert Bay", x: 59, y: 36, dir: "tr" },
-  { slug: "mud-volcanoes-of-shyamnagar", label: "Mud Volcanoes", x: 55, y: 53, dir: "tr" },
-  { slug: "elephanta-beach", label: "Elephanta Beach", x: 61, y: 58, dir: "tr" },
-  { slug: "radhanagar-beach", label: "Radhanagar Beach", x: 62, y: 61, dir: "r" },
-  { slug: "mount-manipur-national-park", label: "Mount Manipur", x: 50, y: 68, dir: "r" },
-  { slug: "jolly-buoy-island", label: "Jolly Buoy", x: 41, y: 76, dir: "bl" },
-  { slug: "kalapathar-beach-little-andaman", label: "Kalapathar Beach Little Andaman", x: 40, y: 86, dir: "br" },
-];
-
-const LEADER_DIRS = {
-  tl: { x: -1, y: -1 },
-  tr: { x: 1, y: -1 },
-  bl: { x: -1, y: 1 },
-  br: { x: 1, y: 1 },
-  l: { x: -1, y: 0 },
-  r: { x: 1, y: 0 },
-  t: { x: 0, y: -1 },
-  b: { x: 0, y: 1 },
-} as const;
-
 const heroSlides = [
   { name: "Coral Gardens", video: "/videos/fish.mp4" },
   { name: "Sea Turtles", video: "/videos/bg-banner.mp4" },
@@ -87,57 +58,18 @@ const heroSlides = [
   { name: "Golden Hour", video: "/videos/sun-set.mp4" },
 ];
 
-function AndamanMapPanel({ heightClass }: { heightClass: string }) {
-  return (
-    <div className={`relative w-full ${heightClass}`}>
-      <img
-        src="/images/map/andaman-map-2.png"
-        alt="Andaman and Nicobar Islands map"
-        className="h-full w-full object-contain drop-shadow-[0_24px_40px_rgba(0,51,88,0.12)]"
-      />
-
-      {MAP_HOTSPOTS.map(({ slug, label, x, y, dir }) => {
-        const { x: dx, y: dy } = LEADER_DIRS[dir];
-        const leaderLength = 26;
-        const mag = Math.sqrt(dx * dx + dy * dy) || 1;
-        const endX = (dx / mag) * leaderLength;
-        const endY = (dy / mag) * leaderLength;
-
-        return (
-          <Link
-            key={slug}
-            href={`/destinations/${slug}`}
-            aria-label={`Open ${label} destination`}
-            className="group absolute -translate-x-1/2 -translate-y-1/2"
-            style={{ left: `${x}%`, top: `${y}%` }}
-          >
-            <span className="absolute left-0 top-0 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary shadow-md transition-transform group-hover:scale-125" />
-            <svg className="absolute left-0 top-0 overflow-visible" width="1" height="1">
-              <line
-                x1={endX}
-                y1={endY}
-                x2="0"
-                y2="0"
-                className="stroke-on-surface-variant/50"
-                strokeWidth="1"
-              />
-            </svg>
-            <span
-              className="absolute whitespace-nowrap rounded-md bg-white/85 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-on-surface-variant shadow-sm backdrop-blur-sm transition-colors group-hover:bg-primary group-hover:text-white md:text-[11px]"
-              style={{
-                left: `${endX}px`,
-                top: `${endY}px`,
-                transform: `translate(${dx < 0 ? "-100%" : dx > 0 ? "0%" : "-50%"}, ${dy < 0 ? "-100%" : dy > 0 ? "0%" : "-50%"})`,
-              }}
-            >
-              {label}
-            </span>
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
+// Leaflet touches `window` on import, so it can only render on the client.
+const AndamanLeafletMap = dynamic(
+  () => import("@/components/ui/AndamanLeafletMap").then((mod) => mod.AndamanLeafletMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full min-h-[320px] w-full items-center justify-center rounded-[24px] bg-surface-container-low text-on-surface-variant">
+        Loading map…
+      </div>
+    ),
+  }
+);
 
 export default function Home() {
   const featuredDestinations = getDestinationsBySlugs(featuredDestinationSlugs);
@@ -366,7 +298,7 @@ export default function Home() {
             </ScrollReveal>
 
             <RevealSide as="div" className="md:col-span-8 lg:col-span-7 lg:col-start-6" x={-80}>
-              <AndamanMapPanel heightClass="h-[440px] sm:h-[520px] md:h-[600px] lg:h-[680px]" />
+              <AndamanLeafletMap heightClass="h-[440px] sm:h-[520px] md:h-[600px] lg:h-[680px]" />
             </RevealSide>
           </div>
         </div>
