@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Image from "next/image";
 import gsap from "gsap";
+
+// sessionStorage has no change events worth subscribing to here.
+const subscribeNoop = () => () => {};
 
 /**
  * Full-screen cinematic opener shown before the home hero.
@@ -43,6 +47,12 @@ interface CinematicIntroProps {
 
 export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
   const [mounted, setMounted] = useState(true);
+  // Read on the client only; the server (and hydration) always renders the overlay.
+  const introSeen = useSyncExternalStore(
+    subscribeNoop,
+    () => sessionStorage.getItem(INTRO_SEEN_KEY) === "1",
+    () => false
+  );
   const rootRef = useRef<HTMLDivElement | null>(null);
   const finishedRef = useRef(false);
 
@@ -50,10 +60,10 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
     const root = rootRef.current;
     if (!root) return;
 
+    // Already seen this session: `introSeen` hides the overlay on render; just notify the parent.
     if (sessionStorage.getItem(INTRO_SEEN_KEY) === "1") {
       onReveal?.();
       onComplete?.();
-      setMounted(false);
       return;
     }
 
@@ -251,7 +261,7 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted || introSeen) return null;
 
   return (
     <div
@@ -280,10 +290,12 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
       {/* Birds — layered at different depths */}
       <div data-bird-layer className="pointer-events-none absolute inset-0 will-change-transform">
         {BIRDS.map((bird, i) => (
-          <img
+          <Image
             key={i}
             data-bird
             src="/images/illustrations/bird-fly.png"
+            width={bird.size}
+            height={bird.size}
             alt=""
             className="absolute will-change-transform"
             style={{

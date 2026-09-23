@@ -1,5 +1,6 @@
 "use client";
 
+import { config as fontAwesomeConfig } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowUpRightFromSquare,
@@ -9,6 +10,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { GoogleMap } from "@/components/destinations/GoogleMap";
 import { RevealSide } from "@/components/ui/RevealSide";
+
+// Its CSS is imported in app/layout.tsx. Without this, Font Awesome injects an
+// un-nonced <style> tag in the browser, which the CSP blocks. Must be set in a client
+// module — setting it in the (server) layout never reaches the browser bundle.
+fontAwesomeConfig.autoAddCss = false;
 
 /**
  * Full-bleed "discover" map section: an interactive map on one side and a

@@ -1,0 +1,7 @@
+# Security contact for the Andaman & Nicobar Ecotourism portal (RFC 9116).
+# TODO before go-live: replace the placeholder Contact with the department's
+# official security/IT email, and renew Expires at least once a year.
+
+Contact: mailto:REPLACE-WITH-DEPARTMENT-SECURITY-EMAIL@example.gov.in
+Expires: 2027-09-23T00:00:00.000Z
+Preferred-Languages: en, hi

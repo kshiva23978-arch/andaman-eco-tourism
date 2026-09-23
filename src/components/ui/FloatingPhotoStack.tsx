@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 const DEFAULT_PHOTOS = [
@@ -73,15 +74,19 @@ function Card({
 
   return (
     <div className="relative opacity-50" style={{ width, height: width * 0.8 }}>
-      <img
+      <Image
         src={images[index]}
+        fill
+        sizes={`${width}px`}
         alt=""
         aria-hidden="true"
         className="animate-float absolute inset-0 rounded-2xl border-2 border-white object-cover shadow-lg"
         style={baseStyle}
       />
-      <img
+      <Image
         src={images[nextIndex]}
+        fill
+        sizes={`${width}px`}
         alt=""
         aria-hidden="true"
         className="animate-float absolute inset-0 rounded-2xl border-2 border-white object-cover shadow-lg"

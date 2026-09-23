@@ -1,8 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+
+const subscribeNoop = () => () => {};
+
+/** Moves the lightbox index by `delta`, wrapping around; stays closed if closed. */
+function stepImage(current: number | null, delta: 1 | -1, count: number): number | null {
+  if (current === null) return null;
+  return (current + delta + count) % count;
+}
 
 function GalleryTile({
   src,
@@ -61,32 +69,29 @@ export function DestinationGallery({
   title?: string;
 }) {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // The lightbox portals into document.body, which only exists on the client.
+  const mounted = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false
+  );
 
   const closeLightbox = () => setSelectedImage(null);
   const openAll = () => setSelectedImage(0);
 
-  const nextImage = () =>
-    setSelectedImage((prev) =>
-      prev === null ? null : prev === images.length - 1 ? 0 : prev + 1
-    );
+  const nextImage = () => setSelectedImage((prev) => stepImage(prev, 1, images.length));
+  const prevImage = () => setSelectedImage((prev) => stepImage(prev, -1, images.length));
 
-  const prevImage = () =>
-    setSelectedImage((prev) =>
-      prev === null ? null : prev === 0 ? images.length - 1 : prev - 1
-    );
+  const isOpen = selectedImage !== null;
+  const imageCount = images.length;
 
   useEffect(() => {
-    if (selectedImage === null) return;
+    if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") nextImage();
-      if (e.key === "ArrowLeft") prevImage();
+      if (e.key === "Escape") setSelectedImage(null);
+      if (e.key === "ArrowRight") setSelectedImage((prev) => stepImage(prev, 1, imageCount));
+      if (e.key === "ArrowLeft") setSelectedImage((prev) => stepImage(prev, -1, imageCount));
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -96,7 +101,7 @@ export function DestinationGallery({
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [selectedImage]);
+  }, [isOpen, imageCount]);
 
   if (images.length === 0) return null;
 
@@ -117,9 +122,11 @@ export function DestinationGallery({
                   src={src}
                   alt={title}
                   fill
-                  priority={i === 0}
+                  // Eager rather than `priority`: this list is hidden from sm up, and a
+                  // <link rel="preload"> would warn as unused there.
+                  loading={i === 0 ? "eager" : "lazy"}
                   className="object-cover"
-                  sizes="100vw"
+                  sizes="(min-width: 640px) 1px, calc(100vw - 2rem)"
                 />
               </button>
             ))}
@@ -281,7 +288,7 @@ export function DestinationGallery({
                     alt={title}
                     fill
                     className="object-cover"
-                    sizes="100vw"
+                    sizes="(min-width: 1152px) 1024px, 100vw"
                     priority
                   />
                 </div>

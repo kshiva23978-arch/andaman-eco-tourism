@@ -84,7 +84,7 @@ export function SiteHeader() {
   }, [menuOpen]);
 
   return (
-    <header className="bg-[rgb(16,56,47)] border-b border-white/10 sticky top-0 z-50">
+    <header className="bg-gradient-to-r from-[#0f2b1e] via-[rgb(16,56,47)] to-[#1c4a3c] border-b border-white/10 sticky top-0 z-50">
       <div className="flex justify-between items-center w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4">
         <Link
           href="/"

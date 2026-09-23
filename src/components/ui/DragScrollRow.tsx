@@ -208,7 +208,6 @@ export function DragScrollRow({
     });
 
     return () => ctx.revert();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealOnScroll]);
 
   useLayoutEffect(() => {

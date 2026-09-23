@@ -64,8 +64,8 @@ export function AndamanLeafletMap({ heightClass }: { heightClass: string }) {
     <div
       className={`relative z-0 isolate w-full overflow-hidden ${heightClass}`}
       style={{
-        maskImage: "radial-gradient(ellipse 75% 75% at center, black 30%, transparent 100%)",
-        WebkitMaskImage: "radial-gradient(ellipse 75% 75% at center, black 30%, transparent 100%)",
+        maskImage: "radial-gradient(ellipse 90% 90% at center, black 70%, transparent 100%)",
+        WebkitMaskImage: "radial-gradient(ellipse 90% 90% at center, black 70%, transparent 100%)",
       }}
     >
       <MapContainer
@@ -100,6 +100,20 @@ export function AndamanLeafletMap({ heightClass }: { heightClass: string }) {
           </Marker>
         ))}
       </MapContainer>
+      {/* OSM's tile licence requires visible attribution. Leaflet's own control sits in a
+          corner, which the radial mask fades out, so credit sits bottom-centre instead. */}
+      <p className="pointer-events-none absolute inset-x-0 bottom-1 z-[1000] text-center text-[10px] text-on-surface/70">
+        ©{" "}
+        <a
+          href="https://www.openstreetmap.org/copyright"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pointer-events-auto underline"
+        >
+          OpenStreetMap
+        </a>{" "}
+        contributors
+      </p>
     </div>
   );
 }

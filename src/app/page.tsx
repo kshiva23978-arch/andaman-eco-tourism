@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
@@ -262,11 +263,13 @@ export default function Home() {
       {/* Island map — watercolour paper, copy left / map right */}
       <section className="relative overflow-hidden bg-surface-container-low py-14 md:py-20">
         {/* Illustrated sea background, kept faint so the map and copy stay legible */}
-        <img
-          src="https://img.magnific.com/free-vector/artistic-watercolor-texture-blue-color_1035-6675.jpg?t=st=1789540474~exp=1789544074~hmac=5b4492d67819359ee83155e33c2cef605e0892c3d0f8cb27071c9a8a65c21028&w=1480"
+        <Image
+          src="/images/bg/water-bg-texture.jpg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-20"
+          fill
+          sizes="100vw"
+          className="pointer-events-none object-cover opacity-20"
         />
         {/* Blend the top edge into the hero's wave divider */}
         <div
@@ -275,29 +278,30 @@ export default function Home() {
         />
 
         <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-12 md:gap-8">
-            <ScrollReveal className="md:col-span-4">
-              <span className="mb-4 block h-[3px] w-8 rounded-full bg-primary" />
-              <h2 className="hero-title text-3xl leading-tight text-primary md:text-4xl lg:text-5xl">
+          {/* Stacked until lg — a 4/12 column at md is too narrow for the larger heading. */}
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-10">
+            <ScrollReveal className="lg:col-span-5">
+              <span className="mb-5 block h-1 w-10 rounded-full bg-primary" />
+              <h2 className="hero-title text-4xl leading-[1.1] text-primary sm:text-5xl lg:text-6xl">
                 Discover the Islands
               </h2>
-              <p className="mt-4 max-w-sm text-sm leading-relaxed text-justify text-on-surface-variant md:text-base">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-on-surface-variant sm:text-lg lg:max-w-md xl:text-xl">
                 Over 570 islands stretch across the Bay of Bengal — only a handful are open to
                 visitors. Pick a marker to explore its beaches, reefs, forests and the communities
                 that care for them.
               </p>
               <Link
                 href="/destinations"
-                className="group mt-6 inline-flex items-center gap-2 font-label-md text-label-md text-primary hover:underline"
+                className="group mt-7 inline-flex items-center gap-2 font-label-md text-base font-semibold tracking-wide text-primary hover:underline sm:text-lg"
               >
                 Browse all {destinations.length} destinations
-                <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">
+                <span className="material-symbols-outlined text-[22px] transition-transform group-hover:translate-x-1">
                   arrow_forward
                 </span>
               </Link>
             </ScrollReveal>
 
-            <RevealSide as="div" className="md:col-span-8 lg:col-span-7 lg:col-start-6" x={-80}>
+            <RevealSide as="div" className="lg:col-span-7" x={-80}>
               <AndamanLeafletMap heightClass="h-[440px] sm:h-[520px] md:h-[600px] lg:h-[680px]" />
             </RevealSide>
           </div>

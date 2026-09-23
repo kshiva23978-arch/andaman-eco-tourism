@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -73,8 +74,8 @@ export function DestinationsBanner({
         .fromTo("[data-fade]", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, stagger: 0.1 }, 0.5)
         .fromTo(
           cards,
-          { y: 80, opacity: 0, rotateX: 18, scale: 0.9 },
-          { y: 0, opacity: 1, rotateX: 0, scale: 1, duration: 1.3, stagger: 0.12, ease: "expo.out" },
+          { y: 80, opacity: 0, rotationX: 18, scale: 0.9 },
+          { y: 0, opacity: 1, rotationX: 0, scale: 1, duration: 1.3, stagger: 0.12, ease: "expo.out" },
           0.35
         )
         .fromTo("[data-foliage]", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 1.2 }, 0.4);
@@ -110,8 +111,9 @@ export function DestinationsBanner({
         yPercent: gsap.quickTo(layer, "yPercent", { duration: 1, ease: "power3.out" }),
       }));
       const tilts = cards.map((card) => ({
-        rx: gsap.quickTo(card, "rotateX", { duration: 0.9, ease: "power3.out" }),
-        ry: gsap.quickTo(card, "rotateY", { duration: 0.9, ease: "power3.out" }),
+        // quickTo needs GSAP's canonical names — the "rotateX"/"rotateY" aliases can't be reset.
+        rx: gsap.quickTo(card, "rotationX", { duration: 0.9, ease: "power3.out" }),
+        ry: gsap.quickTo(card, "rotationY", { duration: 0.9, ease: "power3.out" }),
       }));
       const bgX = gsap.quickTo(bg, "x", { duration: 1.4, ease: "power3.out" });
       const bgY = gsap.quickTo(bg, "y", { duration: 1.4, ease: "power3.out" });
@@ -192,8 +194,8 @@ export function DestinationsBanner({
               data-card
               className="overflow-hidden rounded-2xl border border-white/25 bg-white/10 shadow-[0_30px_60px_-18px_rgba(0,0,0,0.6)] backdrop-blur-sm will-change-transform [transform-style:preserve-3d]"
             >
-              <div className="aspect-[4/3] w-full overflow-hidden">
-                <img src={card.src} alt="" className="h-full w-full object-cover" />
+              <div className="relative aspect-[4/3] w-full overflow-hidden">
+                <Image src={card.src} alt="" fill sizes="(min-width: 1024px) 280px, (min-width: 768px) 240px, 34vw" className="object-cover" />
               </div>
               <figcaption className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-semibold tracking-wide text-white/90">
                 <span className="material-symbols-outlined text-[14px]">location_on</span>
@@ -252,21 +254,27 @@ export function DestinationsBanner({
       </div>
 
       {/* Foreground foliage — fastest layers */}
-      <img
+      <Image
         data-foliage
         data-depth={2.6}
         src="/images/bg/branch.png"
+        width={499}
+        height={499}
+        sizes="(min-width: 768px) 340px, 220px"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-10 -left-10 w-[220px] rotate-[12deg] opacity-90 drop-shadow-[0_20px_30px_rgba(0,0,0,0.45)] will-change-transform md:-bottom-16 md:-left-8 md:w-[340px]"
+        className="pointer-events-none absolute -bottom-10 -left-10 h-auto w-[220px] rotate-[12deg] opacity-90 drop-shadow-[0_20px_30px_rgba(0,0,0,0.45)] will-change-transform md:-bottom-16 md:-left-8 md:w-[340px]"
       />
-      <img
+      <Image
         data-foliage
         data-depth={1.9}
         src="/images/bg/leaf.png"
+        width={640}
+        height={640}
+        sizes="(min-width: 768px) 200px, 140px"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute -right-6 -top-8 w-[140px] rotate-[150deg] opacity-80 drop-shadow-[0_20px_30px_rgba(0,0,0,0.4)] will-change-transform md:w-[200px]"
+        className="pointer-events-none absolute -right-6 -top-8 h-auto w-[140px] rotate-[150deg] opacity-80 drop-shadow-[0_20px_30px_rgba(0,0,0,0.4)] will-change-transform md:w-[200px]"
       />
     </section>
   );

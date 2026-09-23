@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import type { Destination } from "@/lib/types";
 import { DestinationCard } from "./DestinationCard";
 
 if (typeof window !== "undefined") {
@@ -10,7 +11,7 @@ if (typeof window !== "undefined") {
 }
 
 interface Props {
-  featuredDestinations: any[];
+  featuredDestinations: Destination[];
   /** Milliseconds between auto-advances. 0 disables autoplay. */
   autoplayInterval?: number;
 }

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const QUICK_LINKS = [
   { label: "Home", href: "/" },
@@ -12,11 +13,31 @@ const QUICK_LINKS = [
 const CONTACT = {
   designation: "Department of Environment & Forests",
   org: "Andaman & Nicobar Administration",
-  phone: "03192-244664",
+  phone: "03192-232816",
   email: "dcfwl313@gmail.com",
 };
 
+const CIRCLE_RADIUS = 19;
+const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
+
 export function SiteFooter() {
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const updateProgress = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0);
+    };
+    updateProgress();
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("resize", updateProgress);
+    return () => {
+      window.removeEventListener("scroll", updateProgress);
+      window.removeEventListener("resize", updateProgress);
+    };
+  }, []);
+
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
@@ -111,7 +132,33 @@ export function SiteFooter() {
         aria-label="Back to top"
         className="fixed bottom-6 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--lagoon,#2e8b82)] text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl"
       >
-        <span className="material-symbols-outlined text-[20px]">arrow_upward</span>
+        <svg
+          className="absolute inset-0 h-full w-full -rotate-90"
+          viewBox="0 0 44 44"
+          aria-hidden="true"
+        >
+          <circle
+            cx="22"
+            cy="22"
+            r={CIRCLE_RADIUS}
+            fill="none"
+            stroke="rgba(255,255,255,0.25)"
+            strokeWidth="2"
+          />
+          <circle
+            cx="22"
+            cy="22"
+            r={CIRCLE_RADIUS}
+            fill="none"
+            stroke="#fff"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray={CIRCLE_CIRCUMFERENCE}
+            strokeDashoffset={CIRCLE_CIRCUMFERENCE * (1 - scrollProgress)}
+            className="transition-[stroke-dashoffset] duration-150 ease-out"
+          />
+        </svg>
+        <span className="material-symbols-outlined relative text-[20px]">arrow_upward</span>
       </button>
     </footer>
   );

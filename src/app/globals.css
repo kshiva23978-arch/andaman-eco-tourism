@@ -82,13 +82,15 @@ a {
   width: 14px;
   height: 0;
   margin-top: 0;
-  border-top: 1.5px solid rgba(27, 58, 47, 0.55);
+  border-top: 3px solid rgba(255, 255, 255, 0.9);
 }
 .andaman-map-tooltip.leaflet-tooltip-right::before {
   left: -14px;
+  margin-left: 0;
 }
 .andaman-map-tooltip.leaflet-tooltip-left::before {
   right: -14px;
+  margin-right: 0;
 }
 
 /* ---------- Destination "editorial" theme (forest/lagoon/sand palette) ---------- */

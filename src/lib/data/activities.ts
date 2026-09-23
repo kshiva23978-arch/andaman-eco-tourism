@@ -1,7 +1,5 @@
 import type { Activity } from "@/lib/types";
 
-const GOOGLE = (id: string) => `https://lh3.googleusercontent.com/aida-public/${id}`;
-
 export const activities: Activity[] = [
   {
     slug: "scuba-snorkeling",
@@ -9,9 +7,7 @@ export const activities: Activity[] = [
     tagline:
       "Explore the depths through the lens of marine biology. Our scientific diving programs prioritize coral health monitoring and biodiversity documentation while providing an immersive educational experience in the Bay of Bengal.",
     icon: "scuba_diving",
-    heroImage: GOOGLE(
-      "AB6AXuCPUUwEFjRsnvALUo8nwIAXU6lTu8vllpTxSioNNaY8Sa4JLzPRN7MXrRbLSQYwIySBBbidMGbit3iv1YVRxyA3ehbhtuNCzMbgn3JeGMYKqsc22X72UMNXE7x-7LCp6ipelkcTrgE_I_eqjjMuECFKGbdgB107CHzXZiFSOgdP_1VWpvrxj4yPoC4c8Oa9OFptQP2rEJJ6FqFbHtxVBHhTiE87IwwjH1r6bfzUgXcngxUfTi2kpKPmsEJdkYyKLNziOVOa2eQQbIVm"
-    ),
+    heroImage: "/images/google-hosted/activities/scuba-snorkeling.png",
     overview: [
       "Scientific Scuba Diving and Snorkeling in the Andaman and Nicobar Islands is regulated by the Department of Environment & Forests. This activity is designed for those seeking a deeper understanding of marine ecosystems beyond recreational observation. Participants are guided by certified eco-divers who facilitate data collection on reef health and species identification.",
       "All dive sites are strictly monitored to ensure that human presence does not interfere with the natural regeneration of coral colonies. We maintain a strict policy of transparency regarding the environmental impact of tourism on these fragile habitats.",
@@ -48,10 +44,10 @@ export const activities: Activity[] = [
       "Reef-safe sunscreens only",
     ],
     galleryImages: [
-      "https://images.unsplash.com/photo-1682687982167-d7fb3ed8541d?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1549074862-6173e20d02a8?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1570367364062-4ab01ebf0954?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      "/images/alternate/alternate-image-destinations.jpg",
+      "/images/alternate/alternate-image-destinations.jpg",
+      "/images/alternate/alternate-image-destinations.jpg",
+      "/images/alternate/alternate-image-destinations.jpg"
     ]
   },
   {
@@ -60,9 +56,7 @@ export const activities: Activity[] = [
     tagline:
       "Regulated vessel operations across the islands' jetties, creeks and marine parks — engineered to minimize wake impact and protect the marine environment from pollution and noise.",
     icon: "sailing",
-    heroImage: GOOGLE(
-      "AB6AXuC4xJoZdqSdeKCYkijWT44kwpMFd_Wdg2YR_g9FNLt3klDVC9ygp91bCdX1RtBjS0yV9u3uxuMTH-c49D43fIaUCRlZbYbYSSS8DFc9YxReyeZq9rD_ta9w1dh1Ihe5BLsmQXi21tNaenUaQf-HOdCliT1VGqknmg6vxqv4RrG7M5lmgXeIXV6zMTgcerpq-DRhgl3BNYhdQZ1un0bNojM7h13MBNhStWfA_ATXEVG973hagFDezN_Mv0aSI4_CkJqAER03iUZg_PrZ"
-    ),
+    heroImage: "/images/google-hosted/activities/sustainable-boating.png",
     overview: [
       "Regulated vessel operations minimize wake impact on coastal erosion and ensure passenger safety during transit between jetties, creeks and outlying islands. Our fleet adheres to strict environmental standards to protect the delicate marine environment from pollution and excessive noise.",
       "Boat operators servicing forest-department jetties are licensed and required to run fixed departure windows, keeping vessel traffic predictable for both wildlife and other water users.",
@@ -99,9 +93,7 @@ export const activities: Activity[] = [
     tagline:
       "Experience the swells of Little Andaman in harmony with the tides, within strictly designated surfing zones.",
     icon: "surfing",
-    heroImage: GOOGLE(
-      "AB6AXuAmVR9jeJZ7-Q0JZCrs7yGkKW7rNB4Xd6azSo3iDUplG4UCmSQJYK-0JIK-FN4vmtqLDDT361CrAZxMGe_sJA6AxN0nxNjnMEnva2cEzxVzz_gijx5ylGh6LSlpdiN8Dm0aJCimN14h2g5CYRs8CW_-G5TtjJP5t8ry4qnSPAGLxt-MfJOrECTw_QYVVk1kz8QYAMF6Z85Im2t29vrv93GZw1ShEQTmaRP7oroL1mh6cvdGag1nvkhI1YAZMuAuS9-yRfdKeWp0RtOw"
-    ),
+    heroImage: "/images/google-hosted/activities/ocean-surfing.png",
     overview: [
       "Experience the swells of Little Andaman in harmony with the tides, following strictly designated surfing zones. We ensure that surfing activities do not interfere with coastal nesting sites or sensitive marine habitats.",
       "Butler Bay is the island's best-known break, with consistent swells outside the June–September monsoon window.",
@@ -135,9 +127,7 @@ export const activities: Activity[] = [
     tagline:
       "A non-invasive alternative to diving, allowing for the visual study of sub-aquatic ecosystems through transparent hulls.",
     icon: "visibility",
-    heroImage: GOOGLE(
-      "AB6AXuCypz4Ke8boOA4DBOxCtZNpdOpRPhQmEG0IKDwsRKM1PLtE2Ar870BUnvMk7Vp_Dxl5HAhIUYp8UsJI_cmpxbIw4szrdm1Ow4iKziHNPzgEUP3nNAQPeXMBLQZlM15pKqCyay_NtPFnoylyurIU4yuA76gVGTGd5f3VzLzaqdM4PKxQde6OmTCN3rIVselATw64nYwJlW0q_tCNMu8NU1AKVmphmFY2nqAxbugdmteFkeKVryb6S0uTqR_iUalTDzb2F0kG65uNVbOl"
-    ),
+    heroImage: "/images/google-hosted/activities/glass-bottom-boating.png",
     overview: [
       "A non-invasive alternative to diving, allowing for the visual study of sub-aquatic ecosystems through transparent hulls. This is an ideal educational activity for all ages, providing a window into the vibrant coral reefs without direct physical interaction.",
       '"Observation without interference is the pinnacle of ecotourism." — rides run in short, fixed-duration slots to limit boat traffic over sensitive reef.',
@@ -171,9 +161,7 @@ export const activities: Activity[] = [
     tagline:
       "Explore the dense tropical evergreen forests of the archipelago's national parks and peaks.",
     icon: "park",
-    heroImage: GOOGLE(
-      "AB6AXuAmZmQ69Mfxy1HiAlvK6RT-eYak2XN_EIy24yfIRDqJygUYzeiF3Fn3TLVQ86RAcid03fvPRW9ARDgmfeUpv6o0ehP6Lk42szeZKz9EyYRWX-QTCJc-Z2hIkNH7k7K-1p0tEWmEEteCTm5vUcv8ES0aNQlOSCB7WkFDnIQouT8eAv7MBZprri1-dcsLPqmZtHce6P2W_FTRLvOQoMfs78KX5ysPHmB9HO2mr8wEoHJaCHOS2NkOyX0qLZO8shy7mkBVqBNLvmfSA4ol"
-    ),
+    heroImage: "/images/google-hosted/activities/rainforest-trekking.png",
     overview: [
       "Explore the dense tropical evergreen forests of Mount Manipur and Saddle Peak National Parks. These ecosystems are highly sensitive to soil compaction and habitat fragmentation. Every step must be taken with care for the ground-level species that form the forest floor.",
       "Trails range from gentle interpretation walks to the full 8–10 km summit trek at Saddle Peak, the archipelago's highest point.",
@@ -208,9 +196,7 @@ export const activities: Activity[] = [
     tagline:
       "Walk through the unique mangrove boardwalks at Wright Myo, Dhaninallah and Yerrata — coastal sentinels that protect the shoreline.",
     icon: "route",
-    heroImage: GOOGLE(
-      "AB6AXuAmZmQ69Mfxy1HiAlvK6RT-eYak2XN_EIy24yfIRDqJygUYzeiF3Fn3TLVQ86RAcid03fvPRW9ARDgmfeUpv6o0ehP6Lk42szeZKz9EyYRWX-QTCJc-Z2hIkNH7k7K-1p0tEWmEEteCTm5vUcv8ES0aNQlOSCB7WkFDnIQouT8eAv7MBZprri1-dcsLPqmZtHce6P2W_FTRLvOQoMfs78KX5ysPHmB9HO2mr8wEoHJaCHOS2NkOyX0qLZO8shy7mkBVqBNLvmfSA4ol"
-    ),
+    heroImage: "/images/google-hosted/activities/mangrove-walks.png",
     overview: [
       "Walk through the unique mangrove boardwalks at Wright Myo Creek, Dhaninallah and Yerrata. These coastal sentinels protect the shoreline and provide nursery grounds for countless species. Staying on the designated paths is crucial to prevent accidental trampling of rare species.",
       "Elevated viewing towers along several boardwalks allow safe sighting of resident saltwater crocodiles and wading birds without disturbing the creek.",
@@ -249,9 +235,7 @@ export const activities: Activity[] = [
     tagline:
       "Paddle through serene mangrove creeks — the most intimate way to experience the islands' coastal biodiversity.",
     icon: "rowing",
-    heroImage: GOOGLE(
-      "AB6AXuAmVR9jeJZ7-Q0JZCrs7yGkKW7rNB4Xd6azSo3iDUplG4UCmSQJYK-0JIK-FN4vmtqLDDT361CrAZxMGe_sJA6AxN0nxNjnMEnva2cEzxVzz_gijx5ylGh6LSlpdiN8Dm0aJCimN14h2g5CYRs8CW_-G5TtjJP5t8ry4qnSPAGLxt-MfJOrECTw_QYVVk1kz8QYAMF6Z85Im2t29vrv93GZw1ShEQTmaRP7oroL1mh6cvdGag1nvkhI1YAZMuAuS9-yRfdKeWp0RtOw"
-    ),
+    heroImage: "/images/google-hosted/activities/quiet-water-kayaking.png",
     overview: [
       "Paddle through the serene mangrove creeks. This low-impact activity provides a silent perspective on the interface between land and sea without disturbing nesting wildlife. It is the most intimate way to experience the islands' coastal biodiversity.",
       "Sunset departures at Austin Creek are particularly prized, with calm water and low glare for wildlife spotting.",
@@ -288,9 +272,7 @@ export const activities: Activity[] = [
     tagline:
       "The islands are home to more than 270 species of birds, including 30 endemic species.",
     icon: "flutter_dash",
-    heroImage: GOOGLE(
-      "AB6AXuC4xJoZdqSdeKCYkijWT44kwpMFd_Wdg2YR_g9FNLt3klDVC9ygp91bCdX1RtBjS0yV9u3uxuMTH-c49D43fIaUCRlZbYbYSSS8DFc9YxReyeZq9rD_ta9w1dh1Ihe5BLsmQXi21tNaenUaQf-HOdCliT1VGqknmg6vxqv4RrG7M5lmgXeIXV6zMTgcerpq-DRhgl3BNYhdQZ1un0bNojM7h13MBNhStWfA_ATXEVG973hagFDezN_Mv0aSI4_CkJqAER03iUZg_PrZ"
-    ),
+    heroImage: "/images/google-hosted/activities/avian-observation.png",
     overview: [
       "The islands are home to more than 270 species of birds, including 30 endemic species. Observation requires patience and non-intrusive behavior. We advocate for responsible bird watching that puts the well-being of the birds first.",
       "Cuthbert Bay and Saddle Peak are noted hotspots, alongside the captive-breeding aviaries at Chidiyatapu's Biological Park.",
@@ -329,9 +311,7 @@ export const activities: Activity[] = [
     tagline:
       "Minimal light pollution in remote areas offers exceptional astronomical clarity.",
     icon: "bedtime",
-    heroImage: GOOGLE(
-      "AB6AXuA_HC49PveLb3FAk7v_Si0NlK9rEoU7L76rB7GtakvKBqzw_5Q7jLWKBt33y1-TV2_kjU8LeMsxVUMvTOeAX85v1aOhW5tpU5KU-PN3tuJ2CPAlQIYdcmczPmbWNMB0QlucDKYMSrM4e6DHW-0FW7LCHl0etkIUJVhX1dvLlcfZL8lWZQ8LnrAQK7bquwFQfouImGnzs4QzGrM2B_t0kcSluwbjw6Qsnd36WlV6pT3GgWzeD2qTHLg8B6QJRtn1_5oSQ4sFTKz7xsmp"
-    ),
+    heroImage: "/images/google-hosted/activities/dark-sky-stargazing.png",
     overview: [
       "Minimal light pollution in remote areas offers exceptional astronomical clarity. Observe the southern constellations in a pristine celestial environment. Stargazing sites are selected for their darkness and lack of ground-level interference.",
       "Little Andaman's outlying beaches and North Andaman's remote bays are the least light-polluted, weather-permitting outside monsoon.",

@@ -8,22 +8,28 @@ const EYEBROW = "ANDAMAN & NICOBAR";
 
 export function PageLoader() {
   const pathname = usePathname();
+  // Every navigation — not just the first load — replays the loader, so it's
+  // shown on every page rather than only once per session. Keying by pathname
+  // remounts it with fresh state instead of resetting state inside an effect.
+  return <PageLoaderOverlay key={pathname} />;
+}
+
+function PageLoaderOverlay() {
   const [isVisible, setIsVisible] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
 
-  // Every navigation — not just the first load — replays the loader, so it's
-  // shown on every page rather than only once per session.
   useEffect(() => {
-    setIsVisible(true);
-    setIsExiting(false);
-
+    let hideTimer: number | undefined;
     const exitTimer = window.setTimeout(() => {
       setIsExiting(true);
-      window.setTimeout(() => setIsVisible(false), 500);
+      hideTimer = window.setTimeout(() => setIsVisible(false), 500);
     }, 2500);
 
-    return () => window.clearTimeout(exitTimer);
-  }, [pathname]);
+    return () => {
+      window.clearTimeout(exitTimer);
+      window.clearTimeout(hideTimer);
+    };
+  }, []);
 
   const rootRef = useRef<HTMLDivElement | null>(null);
 
