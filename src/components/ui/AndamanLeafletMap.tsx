@@ -1,35 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MapContainer, Marker, Tooltip, TileLayer } from "react-leaflet";
+import { MapContainer, Marker, Tooltip, TileLayer, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { DESTINATION_PINS } from "@/lib/data/destination-pins";
 
-type LeaderDirection = "left" | "right";
+const INITIAL_ZOOM = 8;
+// From this zoom every label stays visible; below it only featured pins are labelled
+// (the rest show theirs on hover) so clustered sites like Rangat don't pile up.
+const ALL_LABELS_ZOOM = 11;
 
-export interface MapHotspot {
-  slug: string;
-  label: string;
-  lat: number;
-  lng: number;
-  /** Which side the label leader-lines out to — alternated so labels for
-   * nearby markers (e.g. Saddle Peak / Ross & Smith) don't overlap. */
-  dir: LeaderDirection;
+function ZoomTracker({ onZoom }: { onZoom: (zoom: number) => void }) {
+  useMapEvents({ zoomend: (e) => onZoom(e.target.getZoom()) });
+  return null;
 }
-
-// Approximate coordinates for each featured destination.
-export const ANDAMAN_HOTSPOTS: MapHotspot[] = [
-  { slug: "saddle-peak-national-park", label: "Saddle Peak", lat: 13.2003, lng: 93.0397, dir: "left" },
-  { slug: "ross-and-smith-islands", label: "Ross & Smith", lat: 13.2694, lng: 93.05, dir: "right" },
-  { slug: "limestone-caves-baratang", label: "Limestone Caves", lat: 12.1167, lng: 92.7667, dir: "left" },
-  { slug: "cuthbert-bay-beach-wildlife-sanctuary", label: "Cuthbert Bay", lat: 12.7039, lng: 92.9589, dir: "right" },
-  { slug: "mud-volcanoes-of-shyamnagar", label: "Mud Volcanoes", lat: 13.15, lng: 93.02, dir: "right" },
-  { slug: "elephanta-beach", label: "Elephanta Beach", lat: 12.0167, lng: 92.9833, dir: "right" },
-  { slug: "radhanagar-beach", label: "Radhanagar Beach", lat: 11.9721, lng: 92.9515, dir: "left" },
-  { slug: "mount-manipur-national-park", label: "Mount Manipur", lat: 11.6725, lng: 92.6928, dir: "left" },
-  { slug: "jolly-buoy-island", label: "Jolly Buoy", lat: 11.5333, lng: 92.6167, dir: "right" },
-  { slug: "kalapathar-beach-little-andaman", label: "Kalapathar Beach Little Andaman", lat: 10.6167, lng: 92.5333, dir: "right" },
-];
 
 // Andaman & Nicobar archipelago roughly spans 6°N–14°N; center on the main islands.
 const CENTER: [number, number] = [12.2, 92.85];
@@ -42,23 +28,30 @@ const MAX_BOUNDS: [[number, number], [number, number]] = [
 ];
 const MIN_ZOOM = 7;
 
-const pinIcon = L.divIcon({
-  className: "",
-  html: `<span style="
-    display:block;
-    width:16px;height:16px;
-    border-radius:50%;
-    background:#e8734a;
-    border:2px solid #fff;
-    box-shadow:0 2px 6px rgba(0,0,0,0.35);
-  "></span>`,
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-  popupAnchor: [0, -8],
-});
+const makePinIcon = (size: number) =>
+  L.divIcon({
+    className: "",
+    html: `<span style="
+      display:block;
+      width:${size}px;height:${size}px;
+      border-radius:50%;
+      background:#e8734a;
+      border:2px solid #fff;
+      box-shadow:0 2px 6px rgba(0,0,0,0.35);
+    "></span>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2],
+  });
+
+// Featured destinations get the larger pin.
+const featuredPinIcon = makePinIcon(16);
+const pinIcon = makePinIcon(12);
 
 export function AndamanLeafletMap({ heightClass }: { heightClass: string }) {
   const router = useRouter();
+  const [zoom, setZoom] = useState(INITIAL_ZOOM);
+  const showAllLabels = zoom >= ALL_LABELS_ZOOM;
 
   return (
     <div
@@ -70,7 +63,7 @@ export function AndamanLeafletMap({ heightClass }: { heightClass: string }) {
     >
       <MapContainer
         center={CENTER}
-        zoom={8}
+        zoom={INITIAL_ZOOM}
         minZoom={MIN_ZOOM}
         maxBounds={MAX_BOUNDS}
         maxBoundsViscosity={1.0}
@@ -79,26 +72,37 @@ export function AndamanLeafletMap({ heightClass }: { heightClass: string }) {
         className="h-full w-full"
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        {ANDAMAN_HOTSPOTS.map((spot) => (
-          <Marker
-            key={spot.slug}
-            position={[spot.lat, spot.lng]}
-            icon={pinIcon}
-            eventHandlers={{
-              click: () => router.push(`/destinations/${spot.slug}`),
-            }}
-          >
-            <Tooltip
-              direction={spot.dir}
-              offset={spot.dir === "right" ? [14, 0] : [-14, 0]}
-              permanent
-              opacity={0.95}
-              className="andaman-map-tooltip"
+        <ZoomTracker onZoom={setZoom} />
+        {DESTINATION_PINS.map((spot) => {
+          const open = () => router.push(`/destinations/${spot.slug}`);
+          const permanent = Boolean(spot.featured) || showAllLabels;
+          const dir = spot.dir ?? "right";
+          return (
+            <Marker
+              key={spot.slug}
+              position={[spot.lat, spot.lng]}
+              icon={spot.featured ? featuredPinIcon : pinIcon}
+              title={`View ${spot.label}`}
+              eventHandlers={{ click: open }}
+              zIndexOffset={spot.featured ? 1000 : 0}
             >
-              {spot.label}
-            </Tooltip>
-          </Marker>
-        ))}
+              {/* Tooltips ignore the mouse by default; `interactive` makes the label clickable too.
+                  Leaflet reads `permanent` only on creation, so the key remounts it when it flips. */}
+              <Tooltip
+                key={permanent ? "permanent" : "hover"}
+                direction={dir}
+                offset={dir === "right" ? [14, 0] : [-14, 0]}
+                permanent={permanent}
+                interactive
+                opacity={0.95}
+                className="andaman-map-tooltip"
+                eventHandlers={{ click: open }}
+              >
+                {spot.label}
+              </Tooltip>
+            </Marker>
+          );
+        })}
       </MapContainer>
       {/* OSM's tile licence requires visible attribution. Leaflet's own control sits in a
           corner, which the radial mask fades out, so credit sits bottom-centre instead. */}

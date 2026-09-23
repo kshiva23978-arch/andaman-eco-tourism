@@ -75,6 +75,13 @@ a {
   letter-spacing: 0.01em;
   color: #1b3a2f;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+/* Labels link to their destination page, so give them a hover state like a link. */
+.andaman-map-tooltip:hover {
+  background: #1b3a2f;
+  color: #fff;
 }
 .andaman-map-tooltip.leaflet-tooltip-right::before,
 .andaman-map-tooltip.leaflet-tooltip-left::before {

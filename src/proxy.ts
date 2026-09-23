@@ -14,14 +14,17 @@ import { NextResponse, type NextRequest } from "next/server";
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const isDev = process.env.NODE_ENV === "development";
+  // <style>/<link> elements need the nonce in production. In dev, the error overlay and
+  // HMR inject un-nonced <style> tags, and browsers ignore 'unsafe-inline' whenever a
+  // nonce is present — so dev drops the nonce from style sources instead.
+  const styleSources = isDev ? "'self' 'unsafe-inline'" : `'self' 'nonce-${nonce}'`;
 
   const csp = [
     "default-src 'self'",
     // 'strict-dynamic' lets nonce'd Next.js chunks load the chunks they import.
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
-    // <style>/<link> elements need the nonce (dev's HMR injects un-nonced styles).
-    `style-src 'self' 'nonce-${nonce}'`,
-    `style-src-elem 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-inline'" : ""}`,
+    `style-src ${styleSources}`,
+    `style-src-elem ${styleSources}`,
     // style="" attributes (React inline styles, Leaflet markers) can't run script.
     "style-src-attr 'unsafe-inline'",
     "img-src 'self' data: blob: https://*.tile.openstreetmap.org",
