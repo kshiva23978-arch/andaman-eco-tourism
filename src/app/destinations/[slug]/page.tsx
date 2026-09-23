@@ -93,6 +93,7 @@ export default async function DestinationDetailPage({
       <DestinationHero
         title={destination.title}
         image={destination.image}
+        imagePosition={destination.heroImagePosition}
         breadcrumbs={[
           { label: "Home", href: "/" },
           { label: "Destinations", href: "/destinations" },
@@ -102,8 +103,18 @@ export default async function DestinationDetailPage({
       />
 
       {/* Quick Facts */}
-      <section id="destination-overview" className="bg-[var(--paper)] pt-14 pb-6">
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+      <section id="destination-overview" className="relative overflow-hidden bg-[var(--paper)] pt-14 pb-6">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-30"
+          style={{ backgroundImage: "url('/images/bg/destination-head-bg.png')" }}
+        />
+        {/* Fade the textured background in from the hero's wave-divider color so the seam disappears */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[var(--paper)] to-transparent"
+        />
+        <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <GridReveal
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
             columns={{ base: 1, sm: 2, lg: 3 }}
@@ -121,7 +132,7 @@ export default async function DestinationDetailPage({
             ].map((fact) => (
               <div
                 key={fact.label}
-                className="group rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-[var(--lagoon)]/40 hover:shadow-[0_20px_40px_-16px_rgba(15,43,30,0.25)]"
+                className="group rounded-2xl border border-white/50 bg-white/40 p-6 shadow-[0_8px_32px_-12px_rgba(15,43,30,0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 hover:-translate-y-1.5 hover:border-[var(--lagoon)]/40 hover:bg-white/60 hover:shadow-[0_20px_40px_-16px_rgba(15,43,30,0.25)]"
               >
                 <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--sand)] text-[var(--forest-mid)] transition-colors duration-300 group-hover:bg-[var(--forest-mid)] group-hover:text-[var(--sand)]">
                   <span className="material-symbols-outlined text-[20px]">{fact.icon}</span>
@@ -132,7 +143,7 @@ export default async function DestinationDetailPage({
                 <p className="text-[15px] leading-snug whitespace-pre-line text-[var(--ink)]">{fact.value}</p>
               </div>
             ))}
-            <div className="group rounded-2xl border border-[var(--coral)]/25 bg-[var(--sand)] p-6 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-16px_rgba(232,115,74,0.3)]">
+            <div className="group rounded-2xl border border-[var(--coral)]/25 bg-[var(--sand)]/50 p-6 shadow-[0_8px_32px_-12px_rgba(232,115,74,0.15)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 hover:-translate-y-1.5 hover:bg-[var(--sand)]/70 hover:shadow-[0_20px_40px_-16px_rgba(232,115,74,0.3)]">
               <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-white text-[var(--coral)] transition-colors duration-300 group-hover:bg-[var(--coral)] group-hover:text-white">
                 <span className="material-symbols-outlined text-[20px]">emergency</span>
               </span>
@@ -149,19 +160,26 @@ export default async function DestinationDetailPage({
       <DestinationMapSection title={destination.title} overview={destination.overview} />
 
       {/* Gallery */}
-      <section className="bg-[var(--paper)]">
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8">
-          <SectionHead kicker="Gallery">{destination.title} in frame</SectionHead>
+      <section className="bg-[var(--paper)] py-8 ">
+        <ScrollReveal as="div" y={24}>
+          <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+            <SectionHead kicker="Gallery">{destination.title} in frame</SectionHead>
+          </div>
           <DestinationGallery
             images={destination.galleryImages ?? [destination.image]}
             title={destination.title}
           />
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* How To Get There */}
-      <section className="bg-[var(--forest-deep)] text-[var(--sand)] py-20">
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+      <section className="relative overflow-hidden bg-[var(--forest-deep)] text-[var(--sand)] py-20">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40 mix-blend-soft-light"
+          style={{ backgroundImage: "url('/images/bg/bg-texture.jpg')" }}
+        />
+        <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <SectionHead kicker="Getting here" tone="dark">
             How to reach {destination.title}
           </SectionHead>
@@ -241,11 +259,18 @@ export default async function DestinationDetailPage({
       </section>
 
       {/* What To See */}
-      <section
-        className="py-20 text-[var(--sand)]"
-        style={{ background: "linear-gradient(160deg, var(--forest-deep), #163e2b)" }}
-      >
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+      <section className="relative overflow-hidden py-20 text-[var(--sand)]">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/images/bg/12953515_Scene-12.jpg')" }}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(160deg, rgba(15,43,30,0.88), rgba(22,62,43,0.82))" }}
+        />
+        <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <SectionHead kicker="Highlights" tone="dark">
             What to see
           </SectionHead>
@@ -284,8 +309,13 @@ export default async function DestinationDetailPage({
       </section>
 
       {/* Amenities & Accommodation */}
-      <section className="bg-[var(--forest-deep)] text-[var(--sand)] py-20">
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-14">
+      <section className="relative overflow-hidden bg-[var(--forest-deep)] text-[var(--sand)] py-20">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.08] mix-blend-soft-light"
+          style={{ backgroundImage: "url('/images/bg/bg-deer.png')" }}
+        />
+        <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-14">
           <div>
             <SectionHead kicker="On-site amenities" tone="dark">
               What&apos;s there — and what isn&apos;t
@@ -344,10 +374,15 @@ export default async function DestinationDetailPage({
       {/* Nearby Places */}
       {nearby.length > 0 ? (
         <section
-          className="py-20 text-[var(--sand)]"
-          style={{ background: "linear-gradient(160deg, var(--forest-deep), #0a2118)" }}
+          className="relative overflow-hidden bg-cover bg-center py-20 text-[var(--sand)]"
+          style={{ backgroundImage: "url('/images/bg/bg-nearby.jpg')" }}
         >
-          <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(160deg, rgba(15,43,30,0.88), rgba(10,33,24,0.82))" }}
+          />
+          <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
             <SectionHead kicker="While you're here" tone="dark">
               Nearby places
             </SectionHead>
@@ -367,7 +402,9 @@ export default async function DestinationDetailPage({
                   );
                 }
 
-                const label = text.split(/[:(]/)[0].trim();
+                // Split on a colon, an opening paren, or a dash used as a
+                // separator (spaces on both sides, so "eco-tourism" survives).
+                const label = text.split(/[:(]| [–—-] /)[0].trim();
                 const fallbackImage =
                   NEARBY_FALLBACK_IMAGES[index % NEARBY_FALLBACK_IMAGES.length];
 

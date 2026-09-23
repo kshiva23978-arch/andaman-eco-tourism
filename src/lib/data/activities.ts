@@ -265,7 +265,7 @@ export const activities: Activity[] = [
         body: "Paddle quietly and keep a respectful distance from nesting birds and basking crocodiles.",
       },
       {
-        icon: "life_lite",
+        icon: "schedule",
         title: "Tide-Timed Launch",
         body: "Launches are scheduled around tide windows to avoid exposed mudbanks in narrow channels.",
       },

@@ -186,7 +186,7 @@ export function DragScrollRow({
     if (!container || !revealOnScroll) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
+      const tween = gsap.fromTo(
         container.children,
         { opacity: 0 },
         {
@@ -194,9 +194,17 @@ export function DragScrollRow({
           duration: 0.7,
           ease: "power2.out",
           stagger: 0.08,
-          scrollTrigger: { trigger: container, start: "top 90%" },
+          paused: true,
         }
       );
+
+      ScrollTrigger.create({
+        trigger: container,
+        start: "top 90%",
+        onEnter: () => tween.play(),
+        onEnterBack: () => tween.play(),
+        onLeaveBack: () => tween.reverse(),
+      });
     });
 
     return () => ctx.revert();
@@ -258,14 +266,12 @@ export function DragScrollRow({
     settleTween.current?.kill();
     settleTween.current = null;
     if (settleTimeout.current) clearTimeout(settleTimeout.current);
-    container.style.scrollBehavior = "auto";
     dragState.current = {
       isDown: true,
       startX: event.pageX - container.offsetLeft,
       scrollLeft: container.scrollLeft,
       hasDragged: false,
     };
-    container.setPointerCapture(event.pointerId);
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -279,6 +285,10 @@ export function DragScrollRow({
     if (!dragState.current.hasDragged) {
       if (Math.abs(walk) < DRAG_THRESHOLD) return;
       dragState.current.hasDragged = true;
+      // Only hijack the pointer once an actual drag starts — capturing it on
+      // every plain click suppresses the resulting click event on card links.
+      container.style.scrollBehavior = "auto";
+      container.setPointerCapture(event.pointerId);
     }
 
     event.preventDefault();

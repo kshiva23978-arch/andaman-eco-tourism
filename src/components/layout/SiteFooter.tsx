@@ -1,68 +1,118 @@
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
 
 const QUICK_LINKS = [
+  { label: "Home", href: "/" },
   { label: "Destinations", href: "/destinations" },
   { label: "Activities", href: "/activities" },
 ];
 
-const RESOURCE_LINKS = [
-  { label: "Destinations Directory", href: "/destinations" },
-  { label: "Activities Guide", href: "/activities" },
-];
+const CONTACT = {
+  designation: "Department of Environment & Forests",
+  org: "Andaman & Nicobar Administration",
+  phone: "03192-244664",
+  email: "dcfpm313@gmail.com",
+};
 
 export function SiteFooter() {
-  return (
-    <footer className="relative overflow-hidden">
-      {/* Jungle skyline floats over the page (transparent sky) and fades into the footer colour below. */}
-     
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
-      <div className="relative bg-[#10382F]">
-      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-12 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 text-center md:text-left">
+  return (
+    <footer className="relative overflow-hidden bg-[#10382F]">
+      <div className="relative grid grid-cols-1 gap-10 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-14 md:grid-cols-3 md:gap-8 lg:grid-cols-[1.3fr_1fr_1fr]">
+        {/* Brand */}
         <div>
-          <div className="font-headline-md text-white font-bold mb-4">
-            Department of Environment &amp; Forests
-            <div className="text-lg">Andaman &amp; Nicobar Administration</div>
+          <div className="flex items-center justify-start gap-4 mb-4">
+            <Image
+              src="/logo/department-logo.png"
+              alt="Andaman & Nicobar Forests department seal"
+              width={72}
+              height={72}
+              className="h-16 w-16 shrink-0 object-contain"
+            />
+            <div className="font-headline-md text-white font-bold">
+              Department of Environment &amp; Forests
+              <div className="text-lg">Andaman &amp; Nicobar Administration</div>
+            </div>
           </div>
-          <p className="font-body-md text-body-md text-white/70 mb-4 max-w-md mx-auto md:mx-0">
+          <p className="font-body-md text-body-md text-white/70 max-w-md">
             Official Ecotourism Portal. Dedicated to the sustainable
             development and environmental protection of the archipelago.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-          <div className="flex flex-col gap-3">
-            <h5 className="text-white font-bold font-label-md text-label-md">
-              Quick Links
-            </h5>
+
+        {/* Contact */}
+        <div>
+          <h5 className="mb-4 text-[13px] font-bold uppercase tracking-[0.08em] text-white">
+            Contact
+          </h5>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-start gap-3">
+              <span className="material-symbols-outlined mt-0.5 text-[18px] text-[var(--lagoon-light,#7fc4b8)]">
+                badge
+              </span>
+              <div>
+                <p className="font-semibold text-white">{CONTACT.designation}</p>
+                <p className="text-white/70 text-body-sm">{CONTACT.org}</p>
+              </div>
+            </div>
+            <a
+              href={`tel:${CONTACT.phone}`}
+              className="flex items-center gap-3 text-white/80 transition-colors hover:text-white"
+            >
+              <span className="material-symbols-outlined text-[18px] text-[var(--lagoon-light,#7fc4b8)]">
+                call
+              </span>
+              {CONTACT.phone}
+            </a>
+            <a
+              href={`mailto:${CONTACT.email}`}
+              className="flex items-center gap-3 text-white/80 transition-colors hover:text-white"
+            >
+              <span className="material-symbols-outlined text-[18px] text-[var(--lagoon-light,#7fc4b8)]">
+                mail
+              </span>
+              {CONTACT.email}
+            </a>
+          </div>
+        </div>
+
+        {/* Quick Links */}
+        <div>
+          <h5 className="mb-4 text-[13px] font-bold uppercase tracking-[0.08em] text-white">
+            Quick Links
+          </h5>
+          <div className="flex flex-col gap-2.5">
             {QUICK_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-white/70 hover:text-white font-body-md text-body-md transition-all"
+                className="group flex items-center gap-1.5 text-white/70 hover:text-white font-body-md text-body-md transition-all"
               >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-          <div className="flex flex-col gap-3">
-            <h5 className="text-white font-bold font-label-md text-label-md">
-              Resources
-            </h5>
-            {RESOURCE_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-white/70 hover:text-white font-body-md text-body-md transition-all"
-              >
+                <span className="material-symbols-outlined text-[16px] opacity-60 transition-transform group-hover:translate-x-0.5">
+                  chevron_right
+                </span>
                 {link.label}
               </Link>
             ))}
           </div>
         </div>
       </div>
+
       <div className="relative border-t border-white/[0.15] py-6 text-center text-caption text-white/60">
-        © 2024 Andaman &amp; Nicobar Administration. All Rights Reserved.
+        © 2026 Andaman &amp; Nicobar Administration. All Rights Reserved.
       </div>
-      </div>
+
+      <button
+        type="button"
+        onClick={scrollToTop}
+        aria-label="Back to top"
+        className="fixed bottom-6 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--lagoon,#2e8b82)] text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl"
+      >
+        <span className="material-symbols-outlined text-[20px]">arrow_upward</span>
+      </button>
     </footer>
   );
 }

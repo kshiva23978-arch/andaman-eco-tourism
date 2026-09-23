@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ActivityCard } from "@/components/activities/ActivityCard";
 import { DestinationCard } from "@/components/destinations/DestinationCard";
 import { DestinationGallery } from "@/components/destinations/DestinationGallery";
 import { DestinationHero } from "@/components/destinations/DestinationHero";
@@ -96,8 +95,18 @@ export default async function ActivityDetailPage({
       />
 
       {/* Overview */}
-      <section id="activity-overview" className="bg-[var(--paper)] py-16 md:py-20">
-        <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+      <section id="activity-overview" className="relative overflow-hidden bg-[var(--paper)] py-16 md:py-20">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-[0.35] mix-blend-multiply"
+          style={{
+            backgroundImage: "url('/images/bg/bg-patter-act.jpg')",
+            backgroundSize: "480px",
+            maskImage: "radial-gradient(ellipse at center, black 40%, transparent 85%)",
+            WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 85%)",
+          }}
+        />
+        <div className="relative mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-8">
               <ScrollReveal as="div" y={28}>
@@ -217,19 +226,26 @@ export default async function ActivityDetailPage({
 
       {/* Gallery */}
       <section className="bg-[var(--paper)] py-16">
-        <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
-          <SectionHead kicker="Gallery">{activity.title} in frame</SectionHead>
+        <ScrollReveal as="div" y={24}>
+          <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+            <SectionHead kicker="Gallery">{activity.title} in frame</SectionHead>
+          </div>
           <DestinationGallery
             images={activity.galleryImages ?? [activity.heroImage]}
             title={activity.title}
           />
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* Available Destinations */}
       {availableAt.length > 0 ? (
-        <section className="bg-[var(--sand)] py-20">
-          <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+        <section className="relative overflow-hidden bg-[var(--sand)] py-20">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-repeat opacity-25"
+            style={{ backgroundImage: "url('/images/bg/leaf-bg.jpg')", backgroundSize: "420px" }}
+          />
+          <div className="relative mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
             <ScrollReveal as="div" className="mb-10 text-center" y={24}>
               <span className="mx-auto mb-3 inline-flex w-fit items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
                 <span className="material-symbols-outlined text-[14px]">map</span>
@@ -263,34 +279,15 @@ export default async function ActivityDetailPage({
         <section className="bg-[var(--paper)] py-20">
           <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
             <SectionHead kicker="Keep exploring">Explore More Activities</SectionHead>
-            <RevealSide as="div" className="grid grid-cols-1 gap-4 md:grid-cols-3" x={48}>
+            <GridReveal
+              className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+              columns={{ base: 1, sm: 2, lg: 3 }}
+              y={48}
+            >
               {related.map((item) => (
-                <Link
-                  key={item.slug}
-                  href={`/activities/${item.slug}`}
-                  className="group flex items-center gap-4 rounded-2xl border border-[var(--line)] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--lagoon)]/40 hover:shadow-[0_20px_40px_-16px_rgba(15,43,30,0.25)]"
-                >
-                  <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl">
-                    <Image
-                      src={item.heroImage}
-                      alt={item.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      sizes="80px"
-                    />
-                  </div>
-                  <div>
-                    <h5
-                      className="text-[16px] font-semibold text-[var(--ink)] transition-colors group-hover:text-[var(--forest-mid)]"
-                      style={{ fontFamily: "var(--font-fraunces), serif" }}
-                    >
-                      {item.title}
-                    </h5>
-                    <p className="text-[13px] text-[var(--ink-soft)]">{item.difficulty}</p>
-                  </div>
-                </Link>
+                <ActivityCard key={item.slug} activity={item} />
               ))}
-            </RevealSide>
+            </GridReveal>
           </div>
         </section>
       ) : null}

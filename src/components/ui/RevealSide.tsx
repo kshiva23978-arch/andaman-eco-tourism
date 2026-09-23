@@ -49,7 +49,7 @@ export function RevealSide({
       const cards = Array.from(el.children) as HTMLElement[];
 
       cards.forEach((card, i) => {
-        gsap.fromTo(
+        const tween = gsap.fromTo(
           card,
           { opacity: 0, x: i % 2 === 0 ? -x : x },
           {
@@ -58,9 +58,17 @@ export function RevealSide({
             duration,
             delay: (i % 2) * stagger,
             ease: "power3.out",
-            scrollTrigger: { trigger: card, start, once: true },
+            paused: true,
           }
         );
+
+        ScrollTrigger.create({
+          trigger: card,
+          start,
+          onEnter: () => tween.play(),
+          onEnterBack: () => tween.play(),
+          onLeaveBack: () => tween.reverse(),
+        });
       });
     }, el);
 

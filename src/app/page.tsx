@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { EcoGuidelinesSection } from "@/components/ui/EcoGuidelinesSection";
 import { AlternatingFeatureSection } from "@/components/ui/AlternatingFeatureSection";
-import { DestinationCard } from "@/components/destinations/DestinationCard";
 import { ActivityCard } from "@/components/activities/ActivityCard";
+import DestinationCarousel from "@/components/destinations/DestinationCarousel";
 import {
   destinations,
   featuredDestinationSlugs,
@@ -18,11 +18,11 @@ import {
   featuredActivitySlugs,
   getActivitiesBySlugs,
 } from "@/lib/data/activities";
-import DestinationCarousel from "@/components/destinations/DestinationCarousel";
 import { DecorativeLeaf } from "@/components/ui/DecorativeLeaf";
 import { DragScrollRow } from "@/components/ui/DragScrollRow";
 import { ParallaxBackground } from "@/components/ui/ParallaxBackground";
 import { RevealText, ScrollReveal } from "@/components/ui/ScrollReveal";
+import { RevealSide } from "@/components/ui/RevealSide";
 import { CinematicIntro, HERO_TITLE_LINES } from "@/components/ui/CinematicIntro";
 
 const ECO_GUIDELINES = [
@@ -365,9 +365,9 @@ export default function Home() {
               </Link>
             </ScrollReveal>
 
-            <div className="md:col-span-8 lg:col-span-7 lg:col-start-6">
+            <RevealSide as="div" className="md:col-span-8 lg:col-span-7 lg:col-start-6" x={-80}>
               <AndamanMapPanel heightClass="h-[440px] sm:h-[520px] md:h-[600px] lg:h-[680px]" />
-            </div>
+            </RevealSide>
           </div>
         </div>
 
@@ -464,9 +464,9 @@ export default function Home() {
 
       {/* Featured Activities */}
       <section className="relative overflow-hidden py-20 md:py-24">
-        <ParallaxBackground src="/images/bg/forest-bg.jpg" />
+        <ParallaxBackground src="/images/bg/cellular-jail.jpg" />
         <DecorativeLeaf className="bottom-8 right-4 md:bottom-14 md:right-14" rotate={195} flip size={150} opacity={0.2} delay={3} />
-        <div className="absolute inset-0 " />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/70" />
 
         <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <ScrollReveal className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-4">

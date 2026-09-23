@@ -28,6 +28,11 @@ export function DestinationMapSection({
 
   return (
     <section className="relative overflow-hidden bg-[var(--forest-deep)] py-16 lg:py-0">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-repeat opacity-50 mix-blend-soft-light"
+        style={{ backgroundImage: "url('/images/bg/footprint-bg.jpg')", backgroundSize: "600px" }}
+      />
       <RevealSide as="div" className="relative grid grid-cols-1 lg:grid-cols-12" x={64}>
         {/* Map */}
         <div className="group relative mx-margin-mobile my-6 h-[320px] overflow-hidden rounded-[28px] shadow-[0_32px_64px_-24px_rgba(15,43,30,0.35)] sm:h-[420px] md:mx-margin-desktop lg:col-span-8 lg:my-10 lg:ml-margin-desktop lg:mr-0 lg:h-[560px]">
@@ -61,12 +66,7 @@ export function DestinationMapSection({
         </div>
 
         {/* Info panel */}
-        <div className="relative flex flex-col justify-center overflow-hidden bg-[var(--forest-deep)] px-margin-mobile py-12 md:px-margin-desktop lg:col-span-4 lg:px-14 lg:py-0">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(rgba(250,249,244,0.14)_1px,transparent_1px)] [background-size:14px_14px]"
-          />
-
+        <div className="relative flex flex-col justify-center px-margin-mobile py-12 md:px-margin-desktop lg:col-span-4 lg:px-14 lg:py-0">
           <span className="relative mb-5 inline-flex w-fit items-center gap-2 rounded-full bg-white/[0.08] px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--lagoon-light)]">
             <FontAwesomeIcon icon={faLeaf} className="text-[12px]" />
             Discover

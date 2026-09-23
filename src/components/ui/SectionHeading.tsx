@@ -37,7 +37,7 @@ export function SectionHeading({
     if (!el || prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
+      const tween = gsap.fromTo(
         el.children,
         { opacity: 0, y: -28 },
         {
@@ -46,9 +46,17 @@ export function SectionHeading({
           duration: 0.8,
           ease: "power3.out",
           stagger: 0.1,
-          scrollTrigger: { trigger: el, start: "top 88%", once: true },
+          paused: true,
         }
       );
+
+      ScrollTrigger.create({
+        trigger: el,
+        start: "top 88%",
+        onEnter: () => tween.play(),
+        onEnterBack: () => tween.play(),
+        onLeaveBack: () => tween.reverse(),
+      });
     }, el);
 
     return () => ctx.revert();

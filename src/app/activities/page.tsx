@@ -152,29 +152,33 @@ export default function ActivitiesGuidePage() {
       <ActivitiesHero slides={HERO_SLIDES} />
 
       {/* Conservation Principles */}
-      <section className="relative overflow-hidden bg-[var(--forest-deep)] py-20">
+      <section
+        className="relative overflow-hidden bg-[var(--paper)] bg-repeat py-20"
+        style={{ backgroundImage: "url('/images/bg/bg-patter-act.jpg')", backgroundSize: "480px" }}
+      >
+        {/* Fade the pattern in from the hero's wave-divider color so the seam disappears */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(rgba(250,249,244,0.14)_1px,transparent_1px)] [background-size:14px_14px]"
+          className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[var(--paper)] to-transparent"
         />
         <div className="relative mx-auto grid max-w-container-max grid-cols-1 gap-6 px-margin-mobile md:px-margin-desktop md:grid-cols-3">
           <RevealSide
             as="div"
-            className="md:col-span-2 flex flex-col justify-center rounded-[24px] bg-white/[0.06] border border-white/[0.12] p-8 md:p-10"
+            className="md:col-span-2 flex flex-col justify-center rounded-[24px] border border-[var(--line)] bg-white p-8 shadow-[0_20px_50px_-24px_rgba(15,43,30,0.25)] md:p-10"
             x={56}
           >
-            <span className="mb-3 inline-flex w-fit items-center gap-2 rounded-full bg-white/[0.08] px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--lagoon-light)]">
+            <span className="mb-3 inline-flex w-fit items-center gap-2 rounded-full bg-[var(--sand)] px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
               <span className="material-symbols-outlined text-[14px]">eco</span>
               Core Mandate
             </span>
             <RevealText
               as="h2"
-              className="mb-4 text-[clamp(1.75rem,3.4vw,2.5rem)] leading-tight text-[var(--sand)] font-semibold"
+              className="mb-4 text-[clamp(1.75rem,3.4vw,2.5rem)] leading-tight text-[var(--ink)] font-semibold"
               style={{ fontFamily: "var(--font-fraunces), serif" }}
             >
               Conservation First
             </RevealText>
-            <p className="text-[15px] leading-relaxed text-white/90">
+            <p className="text-[15px] leading-relaxed text-[var(--ink-soft)]">
               As a protected ecological zone, the Andaman &amp; Nicobar
               Administration prioritizes environmental integrity. Every
               activity detailed in this guide is governed by strict

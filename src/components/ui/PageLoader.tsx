@@ -1,25 +1,36 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import gsap from "gsap";
 
 const EYEBROW = "ANDAMAN & NICOBAR";
 
 export function PageLoader() {
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
-  const rootRef = useRef<HTMLDivElement | null>(null);
 
+  // Every navigation — not just the first load — replays the loader, so it's
+  // shown on every page rather than only once per session.
   useEffect(() => {
+    setIsVisible(true);
+    setIsExiting(false);
+
     const exitTimer = window.setTimeout(() => {
       setIsExiting(true);
       window.setTimeout(() => setIsVisible(false), 500);
     }, 2500);
 
     return () => window.clearTimeout(exitTimer);
-  }, []);
+  }, [pathname]);
 
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  // Re-run the draw-in animation each time the loader is (re)shown, since its
+  // DOM (and therefore stroke lengths etc.) is freshly mounted per visit.
   useEffect(() => {
+    if (!isVisible) return;
     const root = rootRef.current;
     if (!root) return;
 
@@ -72,7 +83,7 @@ export function PageLoader() {
     }, root);
 
     return () => ctx.revert();
-  }, []);
+  }, [isVisible]);
 
   if (!isVisible) return null;
 

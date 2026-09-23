@@ -23,11 +23,16 @@ const prefersReducedMotion = () =>
 export function DestinationHero({
   title,
   image,
+  imagePosition = "center",
   breadcrumbs,
   scrollTargetId = "destination-overview",
 }: {
   title: string;
   image: string;
+  /** CSS object-position for the hero photo — useful when a source image is
+   * portrait-oriented and the default center crop lands on a busy, illegible
+   * patch (e.g. close-up sand texture) rather than the recognizable scene. */
+  imagePosition?: string;
   breadcrumbs?: Crumb[];
   scrollTargetId?: string;
 }) {
@@ -102,6 +107,7 @@ export function DestinationHero({
             fill
             priority
             className="object-cover"
+            style={{ objectPosition: imagePosition }}
             sizes="100vw"
           />
         </div>

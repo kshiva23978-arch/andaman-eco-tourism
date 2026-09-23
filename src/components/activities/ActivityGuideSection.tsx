@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { RevealSide } from "@/components/ui/RevealSide";
@@ -38,6 +41,15 @@ export function ActivityGuideSection({
   tone = "light",
 }: ActivityGuideSectionProps) {
   const isDark = tone === "dark";
+  const glowRef = useRef<HTMLDivElement | null>(null);
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLElement>) => {
+    const glow = glowRef.current;
+    if (!glow) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    glow.style.setProperty("--glow-x", `${event.clientX - rect.left}px`);
+    glow.style.setProperty("--glow-y", `${event.clientY - rect.top}px`);
+  };
 
   const imagePanel = (
     <div className={`order-1 ${reverse ? "lg:order-2" : "lg:order-1"}`}>
@@ -155,7 +167,20 @@ export function ActivityGuideSection({
   );
 
   return (
-    <section className={`relative overflow-hidden py-16 md:py-20 ${isDark ? "bg-[var(--forest-deep)]" : "bg-[var(--paper)]"}`}>
+    <section
+      onPointerMove={handlePointerMove}
+      className={`group/glow relative overflow-hidden py-16 md:py-20 ${isDark ? "bg-[var(--forest-deep)]" : "bg-[var(--paper)]"}`}
+    >
+      <div
+        ref={glowRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/glow:opacity-100"
+        style={{
+          background: `radial-gradient(500px circle at var(--glow-x, 50%) var(--glow-y, 50%), ${
+            isDark ? "rgba(127,196,184,0.16)" : "rgba(44,97,70,0.08)"
+          }, transparent 70%)`,
+        }}
+      />
       <RevealSide
         as="div"
         className="mx-auto grid max-w-container-max grid-cols-1 items-center gap-10 px-margin-mobile md:px-margin-desktop lg:grid-cols-2 lg:gap-16"

@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
+import { ClickSpark } from "@/components/ui/ClickSpark";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
 
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="font-body-md text-body-md antialiased flex flex-col min-h-screen">
         <PageLoader />
         <SmoothScroll />
+        <ClickSpark />
         <SiteHeader />
         <main className="flex-grow">{children}</main>
         <SiteFooter />

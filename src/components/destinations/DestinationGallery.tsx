@@ -102,91 +102,109 @@ export function DestinationGallery({
 
   return (
     <>
-      <section className="w-full py-12 md:py-0">
-        <div className="mx-auto max-w-7xl px-4">
-          {/* Mobile: horizontal snap-scroll strip, one image per view */}
-          {images.length > 1 ? (
-            <div className="sm:hidden -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 no-scrollbar">
-              {images.map((src, i) => (
-                <button
-                  key={src + i}
-                  type="button"
-                  onClick={() => setSelectedImage(i)}
-                  className="relative h-64 w-[85%] flex-shrink-0 snap-center overflow-hidden rounded-2xl"
-                >
-                  <Image
-                    src={src}
-                    alt={title}
-                    fill
-                    priority={i === 0}
-                    className="object-cover"
-                    sizes="85vw"
-                  />
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          <div className={images.length > 1 ? "hidden sm:block" : ""}>
-            {images.length === 1 ? (
-              <div className="relative h-[280px] sm:h-[400px] overflow-hidden rounded-3xl">
-                <GalleryTile
-                  src={images[0]}
+      <section className="w-full py-12 md:py-0 px-1">
+        {/* Mobile: stacked list, one image per row */}
+        {images.length > 1 ? (
+          <div className="sm:hidden flex flex-col gap-3 px-4">
+            {images.map((src, i) => (
+              <button
+                key={src + i}
+                type="button"
+                onClick={() => setSelectedImage(i)}
+                className="relative h-64 w-full overflow-hidden rounded-2xl"
+              >
+                <Image
+                  src={src}
                   alt={title}
-                  index={0}
-                  onOpen={setSelectedImage}
+                  fill
+                  priority={i === 0}
+                  className="object-cover"
                   sizes="100vw"
-                  priority
                 />
-              </div>
-            ) : (
-              <div className="relative">
-                {images.length === 2 ? (
-                  <div className="grid h-[280px] grid-cols-2 gap-2 overflow-hidden rounded-3xl sm:h-[320px] lg:h-[420px]">
-                    <GalleryTile src={images[0]} alt={title} index={0} onOpen={setSelectedImage} sizes="50vw" priority />
-                    <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="50vw" />
-                  </div>
-                ) : images.length === 3 ? (
-                  <div className="grid h-[320px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-3xl sm:h-[360px] lg:h-[500px]">
-                    <GalleryTile src={images[0]} alt={title} index={0} onOpen={setSelectedImage} sizes="50vw" priority className="col-span-2 row-span-2" />
-                    <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="50vw" className="col-span-2" />
-                    <GalleryTile src={images[2]} alt={title} index={2} onOpen={setSelectedImage} sizes="50vw" className="col-span-2" />
-                  </div>
-                ) : images.length === 4 ? (
-                  <div className="grid h-[320px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-3xl sm:h-[360px] lg:h-[500px]">
-                    <GalleryTile src={images[0]} alt={title} index={0} onOpen={setSelectedImage} sizes="50vw" priority className="col-span-2 row-span-2" />
-                    <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="50vw" className="col-span-2" />
-                    <GalleryTile src={images[2]} alt={title} index={2} onOpen={setSelectedImage} sizes="25vw" />
-                    <GalleryTile src={images[3]} alt={title} index={3} onOpen={setSelectedImage} sizes="25vw" />
-                  </div>
-                ) : (
-                  <div className="grid h-[320px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-3xl sm:h-[360px] lg:h-[500px]">
-                    <GalleryTile
-                      src={images[0]}
-                      alt={title}
-                      index={0}
-                      onOpen={setSelectedImage}
-                      sizes="50vw"
-                      priority
-                      className="col-span-2 row-span-2"
-                    />
-                    {images.slice(1, 5).map((src, i) => (
-                      <GalleryTile
-                        key={src + i}
-                        src={src}
-                        alt={title}
-                        index={i + 1}
-                        onOpen={setSelectedImage}
-                        sizes="25vw"
-                      />
-                    ))}
-                  </div>
-                )}
-
-                <ShowAllButton onClick={openAll} />
-              </div>
-            )}
+              </button>
+            ))}
           </div>
+        ) : null}
+
+        <div className={`w-full ${images.length > 1 ? "hidden sm:block" : ""}`}>
+          {images.length === 1 ? (
+            <div className="relative aspect-[16/9] max-h-[560px] overflow-hidden">
+              <GalleryTile
+                src={images[0]}
+                alt={title}
+                index={0}
+                onOpen={setSelectedImage}
+                sizes="100vw"
+                priority
+              />
+            </div>
+          ) : (
+            <div className="relative">
+              {images.length === 2 ? (
+                <div className="grid h-[320px] grid-cols-2 gap-2 overflow-hidden sm:h-[420px] lg:h-[560px]">
+                  <GalleryTile src={images[0]} alt={title} index={0} onOpen={setSelectedImage} sizes="50vw" priority />
+                  <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="50vw" />
+                </div>
+              ) : images.length === 3 ? (
+                <div className="grid h-[340px] grid-cols-3 gap-2 overflow-hidden sm:h-[440px] lg:h-[600px]">
+                  <GalleryTile src={images[0]} alt={title} index={0} onOpen={setSelectedImage} sizes="34vw" priority className="col-span-1" />
+                  <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="33vw" className="col-span-1" />
+                  <GalleryTile src={images[2]} alt={title} index={2} onOpen={setSelectedImage} sizes="33vw" className="col-span-1" />
+                </div>
+              ) : images.length <= 6 ? (
+                <div className="grid h-[420px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden sm:h-[480px] lg:h-[640px]">
+                  <GalleryTile
+                    src={images[0]}
+                    alt={title}
+                    index={0}
+                    onOpen={setSelectedImage}
+                    sizes="50vw"
+                    priority
+                    className="col-span-2 row-span-2"
+                  />
+                  {images.slice(1, 5).map((src, i) => (
+                    <GalleryTile
+                      key={src + i}
+                      src={src}
+                      alt={title}
+                      index={i + 1}
+                      onOpen={setSelectedImage}
+                      sizes="25vw"
+                    />
+                  ))}
+                </div>
+              ) : (
+                // 7+ images: three-column mosaic — tall images bookend a
+                // stacked middle column, matching a classic photo-grid layout.
+                <div className="grid h-[560px] grid-cols-3 grid-rows-3 gap-2 overflow-hidden sm:h-[620px] lg:h-[760px]">
+                  <GalleryTile
+                    src={images[0]}
+                    alt={title}
+                    index={0}
+                    onOpen={setSelectedImage}
+                    sizes="34vw"
+                    priority
+                    className="col-start-1 row-span-2"
+                  />
+                  <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-1" />
+                  <GalleryTile src={images[2]} alt={title} index={2} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-2" />
+                  <GalleryTile
+                    src={images[3]}
+                    alt={title}
+                    index={3}
+                    onOpen={setSelectedImage}
+                    sizes="33vw"
+                    className="col-start-3 row-span-2"
+                  />
+                  <GalleryTile src={images[4]} alt={title} index={4} onOpen={setSelectedImage} sizes="34vw" className="col-start-1 row-start-3" />
+                  <GalleryTile src={images[5]} alt={title} index={5} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-3" />
+                  <GalleryTile src={images[6]} alt={title} index={6} onOpen={setSelectedImage} sizes="33vw" className="col-start-3 row-start-3" />
+                </div>
+              )}
+
+              <ShowAllButton onClick={openAll} />
+            </div>
+          )}
         </div>
       </section>
 

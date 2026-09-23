@@ -65,7 +65,15 @@ export function GridReveal({
             : columns.base;
           const rows = Math.ceil(cards.length / cols);
 
-          gsap.fromTo(
+          // Built as a paused tween + explicit ScrollTrigger callbacks rather
+          // than the `scrollTrigger` tween shorthand: when the trigger's
+          // start point is already behind the initial scroll position (e.g.
+          // a grid sitting just below a short hero, already on screen at
+          // load), the shorthand snaps the tween to match that scroll
+          // distance instead of actually playing it — cards would appear
+          // already revealed, barely animating. Calling .play()/.reverse()
+          // from onEnter/onLeaveBack always runs the full animation.
+          const tween = gsap.fromTo(
             cards,
             { y, opacity: 0 },
             {
@@ -74,9 +82,17 @@ export function GridReveal({
               duration,
               ease: "power3.out",
               stagger: { each, grid: [rows, cols], from: "start", axis: "y" },
-              scrollTrigger: { trigger: el, start, once: true },
+              paused: true,
             }
           );
+
+          ScrollTrigger.create({
+            trigger: el,
+            start,
+            onEnter: () => tween.play(),
+            onEnterBack: () => tween.play(),
+            onLeaveBack: () => tween.reverse(),
+          });
         }
       );
 
