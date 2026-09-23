@@ -74,7 +74,7 @@ export function InfoStat({
           ? "glass-panel hover:shadow-[0_16px_40px_rgba(0,0,0,0.4)]"
           : "border border-outline-variant bg-surface-container-lowest hover:shadow-xl hover:border-primary/30"
       }`}
-      style={{ transformPerspective: 800 }}
+      style={{ perspective: 800 }}
     >
       <span
         className={`font-label-md uppercase text-[10px] tracking-widest block mb-1 ${
