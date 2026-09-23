@@ -27,7 +27,7 @@ export function ActivityCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/10" />
 
           {activity.icon && (
-            <span className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white shadow-lg backdrop-blur-md">
+            <span className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/[0.15] text-white shadow-lg backdrop-blur-md">
               <span className="material-symbols-outlined text-[20px]">{activity.icon}</span>
             </span>
           )}
@@ -69,7 +69,7 @@ export function ActivityCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
           {activity.icon && (
-            <span className="absolute left-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white shadow-lg backdrop-blur-md transition-transform duration-500 group-hover:[transform:translateZ(24px)_scale(1.1)]">
+            <span className="absolute left-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/[0.15] text-white shadow-lg backdrop-blur-md transition-transform duration-500 group-hover:[transform:translateZ(24px)_scale(1.1)]">
               <span className="material-symbols-outlined text-[22px]">
                 {activity.icon}
               </span>

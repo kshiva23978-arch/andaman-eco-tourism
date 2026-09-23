@@ -265,7 +265,7 @@ export default function Home() {
                 </div>
 
                 {/* Chapter indicator */}
-                <div className="mt-14 flex items-end border-t border-white/15 pt-5">
+                <div className="mt-14 flex items-end border-t border-white/[0.15] pt-5">
                   <div className="flex gap-6 md:gap-10">
                     {heroSlides.map((slide, index) => (
                       <button
@@ -385,8 +385,13 @@ export default function Home() {
       {/* Featured Destinations */}
       <section className="relative overflow-hidden py-12 md:py-20 bg-surface-container-low">
         <DecorativeLeaf className="top-8 right-6 md:top-12 md:right-16" rotate={65} size={130} opacity={0.16} />
-        <div className="max-w-container-8xl mx-auto px-margin-mobile md:px-margin-desktop">
-          <ScrollReveal className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+        <ScrollReveal
+          as="div"
+          className="max-w-container-8xl mx-auto px-margin-mobile md:px-margin-desktop"
+          y={64}
+          start="top 88%"
+        >
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
             <div>
               <Chip variant="primary" icon="landscape" className="mb-3">
                 Handpicked Escapes
@@ -404,11 +409,11 @@ export default function Home() {
                 arrow_forward
               </span>
             </Link>
-          </ScrollReveal>
+          </div>
           <div className="w-full">
             <DestinationCarousel featuredDestinations={featuredDestinations} />
           </div>
-        </div>
+        </ScrollReveal>
         <DecorativeLeaf className="bottom-6 left-4 md:bottom-10 md:left-8" rotate={-25} size={110} opacity={0.22} delay={5} />
       </section>
 

@@ -46,10 +46,16 @@ export function findNearbyDestination(
   currentSlug: string
 ): Destination | undefined {
   const normalized = nearbyText.toLowerCase();
-  return destinations.find(
-    (d) =>
-      d.slug !== currentSlug &&
-      d.title.length > 3 &&
-      normalized.includes(d.title.toLowerCase())
-  );
+  const candidates = destinations.filter((d) => d.slug !== currentSlug && d.title.length > 3);
+
+  // Pass 1: the destination's full title appears verbatim in the mention.
+  const exact = candidates.find((d) => normalized.includes(d.title.toLowerCase()));
+  if (exact) return exact;
+
+  // Pass 2: titles like "Biological Park, Chidiyatapu" are often mentioned
+  // by just their leading segment ("Biological Park (with endemic flora...)").
+  return candidates.find((d) => {
+    const leadSegment = d.title.split(/[,(–-]/)[0].trim().toLowerCase();
+    return leadSegment.length > 3 && normalized.includes(leadSegment);
+  });
 }

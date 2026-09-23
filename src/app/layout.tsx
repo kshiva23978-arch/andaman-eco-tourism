@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import { Public_Sans, Yeseva_One } from "next/font/google";
+import { Fraunces, Public_Sans, Yeseva_One } from "next/font/google";
+import { config as fontAwesomeConfig } from "@fortawesome/fontawesome-svg-core";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
+
+fontAwesomeConfig.autoAddCss = false;
 
 const publicSans = Public_Sans({
   variable: "--font-public-sans",
@@ -18,6 +22,12 @@ const yesevaOne = Yeseva_One({
   weight: ["400"],
 });
 
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Andaman & Nicobar Ecotourism",
@@ -29,7 +39,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${publicSans.variable} ${yesevaOne.variable}`}>
+    <html lang="en" className={`${publicSans.variable} ${yesevaOne.variable} ${fraunces.variable}`}>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"

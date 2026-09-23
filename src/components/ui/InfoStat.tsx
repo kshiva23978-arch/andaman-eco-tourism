@@ -13,16 +13,25 @@ const colorClasses: Record<InfoStatColor, string> = {
   error: "text-error",
 };
 
+const colorClassesGlass: Record<InfoStatColor, string> = {
+  primary: "text-white",
+  secondary: "text-secondary-container",
+  error: "text-red-300",
+};
+
 export function InfoStat({
   label,
   value,
   color = "primary",
   maxLength = 64,
+  tone = "light",
 }: {
   label: string;
   value: string;
   color?: InfoStatColor;
   maxLength?: number;
+  /** "glass" renders a frosted card for use on photographic backgrounds. */
+  tone?: "light" | "glass";
 }) {
   const [expanded, setExpanded] = useState(false);
   const preview = firstClause(value, maxLength);
@@ -52,20 +61,32 @@ export function InfoStat({
     gsap.to(card, { y: 0, scale: 1, rotateX: 0, rotateY: 0, duration: 0.5, ease: "power3.out", overwrite: "auto" });
   };
 
+  const isGlass = tone === "glass";
+
   return (
     <div
       ref={cardRef}
       onPointerEnter={handleEnter}
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
-      className="p-5 border border-outline-variant bg-surface-container-lowest rounded-lg will-change-transform [transform-style:preserve-3d] transition-shadow duration-300 hover:shadow-xl hover:border-primary/30"
+      className={`p-5 rounded-2xl will-change-transform [transform-style:preserve-3d] transition-shadow duration-300 ${
+        isGlass
+          ? "glass-panel hover:shadow-[0_16px_40px_rgba(0,0,0,0.4)]"
+          : "border border-outline-variant bg-surface-container-lowest hover:shadow-xl hover:border-primary/30"
+      }`}
       style={{ transformPerspective: 800 }}
     >
-      <span className="font-label-md text-on-surface-variant uppercase text-[10px] tracking-widest block mb-1">
+      <span
+        className={`font-label-md uppercase text-[10px] tracking-widest block mb-1 ${
+          isGlass ? "text-white/70" : "text-on-surface-variant"
+        }`}
+      >
         {label}
       </span>
       <p
-        className={`font-sans font-semibold text-[clamp(0.9rem,3.2vw,1.1rem)] leading-snug break-words ${colorClasses[color]}`}
+        className={`font-sans font-semibold text-[clamp(0.9rem,3.2vw,1.1rem)] leading-snug break-words ${
+          isGlass ? colorClassesGlass[color] : colorClasses[color]
+        }`}
       >
         {expanded ? value : preview}
       </p>
@@ -73,7 +94,9 @@ export function InfoStat({
         <button
           type="button"
           onClick={() => setExpanded((prev) => !prev)}
-          className="mt-2 inline-flex items-center gap-1 font-label-md text-[12px] text-primary"
+          className={`mt-2 inline-flex items-center gap-1 font-label-md text-[12px] ${
+            isGlass ? "text-white" : "text-primary"
+          }`}
         >
           <span className="group">
             <span className="group-hover:underline underline-offset-2">

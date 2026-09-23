@@ -17,6 +17,10 @@ import gsap from "gsap";
 
 const INTRO_VIDEO = "/videos/bg-banner.mp4";
 
+// Only play the full cinematic opener once per browser session; later visits
+// to the homepage (e.g. navigating back via the header) skip straight to the hero.
+const INTRO_SEEN_KEY = "andaman:intro-seen";
+
 /** Shared headline, one entry per rendered line. */
 export const HERO_TITLE_LINES = ["Discover Andaman", "& Nicobar Islands"];
 
@@ -46,6 +50,13 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
     const root = rootRef.current;
     if (!root) return;
 
+    if (sessionStorage.getItem(INTRO_SEEN_KEY) === "1") {
+      onReveal?.();
+      onComplete?.();
+      setMounted(false);
+      return;
+    }
+
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Lock scrolling while the overlay is up (Lenis ignores the overlay via data-lenis-prevent).
@@ -72,6 +83,7 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
     const finish = () => {
       if (finishedRef.current) return;
       finishedRef.current = true;
+      sessionStorage.setItem(INTRO_SEEN_KEY, "1");
       window.removeEventListener("scroll", pinTop);
       window.removeEventListener("wheel", swallow, { capture: true });
       window.removeEventListener("touchmove", swallow, { capture: true });
@@ -261,8 +273,8 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
             className="h-full w-full object-cover"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-black/45" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-transparent to-black/35" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/[0.15] to-black/[0.45]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/[0.45] via-transparent to-black/[0.35]" />
       </div>
 
       {/* Birds — layered at different depths */}

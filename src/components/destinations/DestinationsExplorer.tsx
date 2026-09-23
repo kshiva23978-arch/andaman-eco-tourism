@@ -5,6 +5,7 @@ import { DestinationCard } from "@/components/destinations/DestinationCard";
 import { regions } from "@/lib/data/destinations";
 import type { Destination } from "@/lib/types";
 import { DecorativeLeaf } from "../ui/DecorativeLeaf";
+import { GridReveal } from "@/components/ui/GridReveal";
 
 const PAGE_SIZE = 6;
 
@@ -116,11 +117,16 @@ export function DestinationsExplorer({
               Showing {rangeStart}–{rangeEnd} of {filtered.length} destinations
             </p>
 
-            <div key={currentPage} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+            <GridReveal
+              key={currentPage}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter"
+              columns={{ base: 1, sm: 2, lg: 3 }}
+              y={40}
+            >
               {pageItems.map((destination) => (
                 <DestinationCard key={destination.slug} destination={destination} />
               ))}
-            </div>
+            </GridReveal>
 
             {totalPages > 1 && (
               <nav

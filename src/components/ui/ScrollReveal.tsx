@@ -1,7 +1,7 @@
 "use client";
 
 import { Children, cloneElement, isValidElement, useEffect, useRef } from "react";
-import type { ElementType, ReactNode } from "react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -114,6 +114,7 @@ function splitWords(node: ReactNode, keyPrefix = "w"): ReactNode {
 export function RevealText({
   as: Tag = "h2",
   className = "",
+  style,
   children,
   stagger = 0.05,
   duration = 0.9,
@@ -122,6 +123,7 @@ export function RevealText({
 }: {
   as?: ElementType;
   className?: string;
+  style?: CSSProperties;
   children: ReactNode;
   stagger?: number;
   duration?: number;
@@ -155,7 +157,7 @@ export function RevealText({
   }, [stagger, duration, start, delay]);
 
   return (
-    <Tag ref={ref} className={className}>
+    <Tag ref={ref} className={className} style={style}>
       {splitWords(children)}
     </Tag>
   );

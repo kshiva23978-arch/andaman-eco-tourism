@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Chip } from "@/components/ui/Chip";
@@ -16,6 +19,7 @@ export function DestinationCard({
   onExpand?: () => void;
 }) {
   const href = `/destinations/${destination.slug}`;
+  const [saved, setSaved] = useState(false);
 
   if (variant === "carousel") {
     return (
@@ -75,41 +79,78 @@ export function DestinationCard({
   return (
     <Link
       href={href}
-      className="bg-surface-container-lowest border border-outline-variant overflow-hidden flex flex-col group hover:border-primary transition-colors"
+      className="group relative flex flex-col overflow-hidden rounded-3xl shadow-lg transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-2xl"
     >
-      <div className="aspect-[16/10] overflow-hidden relative">
+      <div className="relative aspect-[3/4] overflow-hidden">
         <Image
           src={destination.image}
           alt={destination.title}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
         />
-      </div>
-      <div className="p-6 flex flex-col flex-grow">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-headline-md text-headline-md text-primary">
-            {destination.title}
-          </h3>
-        </div>
-        <p className="font-caption text-caption text-on-surface-variant mb-3">
-          {destination.subtitle} · {destination.region}
-        </p>
-        <p className="font-body-md text-body-md text-on-surface-variant mb-6 line-clamp-3">
-          {destination.overview}
-        </p>
-        <div className="mt-auto space-y-4">
-          <div className="flex items-center gap-2 text-on-secondary-container bg-secondary-container px-3 py-2 rounded">
-            <span className="material-symbols-outlined text-[18px]">
-              calendar_month
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/[0.35] to-black/10" />
+
+        <div className="absolute inset-0 flex flex-col justify-between p-4">
+          {/* Top row: region pill + save toggle */}
+          <div className="flex items-center justify-between">
+            <span className="glass-panel-soft rounded-full px-4 py-1.5 font-label-md text-[11px] uppercase tracking-widest text-white">
+              {destination.region}
             </span>
-            <span className="font-label-md text-label-md">
-              Best time: {firstClause(destination.bestTime)}
-            </span>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setSaved((prev) => !prev);
+              }}
+              aria-label={saved ? "Remove from saved destinations" : "Save destination"}
+              aria-pressed={saved}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full glass-panel-soft text-white transition-colors hover:bg-white/25"
+            >
+              <span
+                className="material-symbols-outlined text-[18px]"
+                style={{
+                  fontVariationSettings: `'FILL' ${saved ? 1 : 0}, 'wght' 500, 'GRAD' 0, 'opsz' 24`,
+                }}
+              >
+                favorite
+              </span>
+            </button>
           </div>
-          <span className="block w-full py-3 text-center border border-primary text-primary font-label-md text-label-md rounded group-hover:bg-primary group-hover:text-on-primary transition-all">
-            VIEW DETAILS
-          </span>
+
+          {/* Bottom stack: tags, title, footer bar */}
+          <div>
+            <div className="mb-3 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full glass-panel px-3 py-1 font-label-md text-[10px] text-white">
+                <span className="material-symbols-outlined text-[14px]">calendar_month</span>
+                {firstClause(destination.bestTime, 26)}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full glass-panel px-3 py-1 font-label-md text-[10px] text-white">
+                <span className="material-symbols-outlined text-[14px]">location_on</span>
+                {destination.subtitle}
+              </span>
+            </div>
+
+            <h3 className="mb-3 font-headline-md text-lg leading-snug text-white drop-shadow-sm line-clamp-2 sm:text-xl">
+              {destination.title}
+            </h3>
+
+            <div className="-mx-4 -mb-4 flex items-center justify-between glass-panel px-4 py-3">
+              <div className="min-w-0">
+                <p className="font-label-md text-[10px] uppercase tracking-widest text-white/60">
+                  Entry Fee
+                </p>
+                <p className="truncate font-label-md text-[12px] text-white/90">
+                  {firstClause(destination.fees, 28)}
+                </p>
+              </div>
+              <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-4 py-2 font-label-md text-[12px] text-primary transition-transform duration-300 group-hover:translate-x-0.5">
+                View
+                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </Link>

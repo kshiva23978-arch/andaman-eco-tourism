@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { Button } from "@/components/ui/Button";
 import { DestinationCard } from "@/components/destinations/DestinationCard";
+import { DestinationGallery } from "@/components/destinations/DestinationGallery";
+import { DestinationHero } from "@/components/destinations/DestinationHero";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { RevealSide } from "@/components/ui/RevealSide";
+import { GridReveal } from "@/components/ui/GridReveal";
 import {
   activities,
   getActivitiesBySlugs,
   getActivityBySlug,
 } from "@/lib/data/activities";
 import { getDestinationsBySlugs } from "@/lib/data/destinations";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import ActivityGallery from "@/components/activities/ActivityGallery";
 
 export function generateStaticParams() {
   return activities.map((activity) => ({ slug: activity.slug }));
@@ -32,6 +34,38 @@ export async function generateMetadata({
   };
 }
 
+function SectionHead({
+  kicker,
+  children,
+  tone = "light",
+}: {
+  kicker: string;
+  children: ReactNode;
+  tone?: "light" | "dark";
+}) {
+  const isDark = tone === "dark";
+  return (
+    <div className="mb-8">
+      <div
+        className={`flex items-center gap-2.5 mb-2.5 font-semibold text-[13px] ${
+          isDark ? "text-[var(--lagoon-light)]" : "text-[var(--lagoon)]"
+        }`}
+      >
+        <span className={`h-px w-7 ${isDark ? "bg-[var(--lagoon-light)]" : "bg-[var(--lagoon)]"}`} />
+        {kicker}
+      </div>
+      <h2
+        className={`text-[clamp(1.6rem,3vw,2.25rem)] leading-[1.08] font-semibold ${
+          isDark ? "text-[var(--sand)]" : "text-[var(--ink)]"
+        }`}
+        style={{ fontFamily: "var(--font-fraunces), serif" }}
+      >
+        {children}
+      </h2>
+    </div>
+  );
+}
+
 export default async function ActivityDetailPage({
   params,
 }: {
@@ -48,211 +82,218 @@ export default async function ActivityDetailPage({
   const related = getActivitiesBySlugs(activity.relatedActivitySlugs);
 
   return (
-    <>
+    <div className="editorial">
       {/* Hero */}
-      <header className="relative h-[500px] md:h-[600px] flex items-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src={activity.heroImage}
-            alt={activity.title}
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        </div>
-        <div className="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop w-full text-white">
-          <div className="max-w-2xl">
-            <span className="inline-block bg-secondary text-on-primary px-3 py-1 rounded text-label-md mb-6 uppercase tracking-wider">
-              Official Activity Profile
-            </span>
-            <h1 className="font-headline-xl text-3xl md:text-headline-xl mb-4">
-              {activity.title}
-            </h1>
-            <p className="font-body-lg text-body-lg text-surface-variant">
-              {activity.tagline}
-            </p>
-          </div>
-        </div>
-      </header>
+      <DestinationHero
+        title={activity.title}
+        image={activity.heroImage}
+        scrollTargetId="activity-overview"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Activities", href: "/activities" },
+          { label: activity.title },
+        ]}
+      />
 
-      <section className="bg-surface-container-high ">
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4 ">
-        <Breadcrumbs
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Activities", href: "/activities" },
-            { label: activity.title },
-          ]}
-        />
-        </div>
-      </section>
+      {/* Overview */}
+      <section id="activity-overview" className="bg-[var(--paper)] py-16 md:py-20">
+        <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-8">
+              <ScrollReveal as="div" y={28}>
+                <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-[var(--sand)] px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
+                  Official Activity Profile
+                </span>
+                <p className="mb-6 max-w-2xl text-[16px] leading-relaxed text-[var(--ink-soft)]">
+                  {activity.tagline}
+                </p>
+              </ScrollReveal>
 
-      {/* Overview & Bento Grid */}
-      <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-          <div className="lg:col-span-8 space-y-12">
-            <div className="bg-white border border-outline-variant p-8 rounded-xl shadow-sm">
-              <h2 className="font-headline-lg text-headline-lg text-black tracking-tight mb-6 border-b border-outline-variant pb-4">
-                Activity <span className="text-emerald-700">Overview</span>
-              </h2>
-              <div className="space-y-4 text-on-surface font-body-md text-body-md">
+              <GridReveal
+                className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2"
+                columns={{ base: 1, sm: 2, lg: 2 }}
+                y={32}
+              >
+                <div className="rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5">
+                  <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--sand)] text-[var(--forest-mid)]">
+                    <span className="material-symbols-outlined text-[18px]">schedule</span>
+                  </span>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--lagoon)]">
+                    Duration
+                  </div>
+                  <p className="mt-1 text-[15px] text-[var(--ink)]">{activity.duration}</p>
+                </div>
+                <div className="rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-5">
+                  <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--sand)] text-[var(--forest-mid)]">
+                    <span className="material-symbols-outlined text-[18px]">trending_up</span>
+                  </span>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--lagoon)]">
+                    Difficulty
+                  </div>
+                  <p className="mt-1 text-[15px] text-[var(--ink)]">{activity.difficulty}</p>
+                </div>
+              </GridReveal>
+
+              <ScrollReveal as="div" className="flex flex-col gap-4" y={20}>
                 {activity.overview.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
+                  <p key={paragraph} className="text-[15px] leading-relaxed text-[var(--ink-soft)]">
+                    {paragraph}
+                  </p>
                 ))}
-              </div>
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded bg-secondary-container flex items-center justify-center flex-shrink-0">
-                    <span className="material-symbols-outlined text-on-secondary-container">
-                      timer
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-label-md text-label-md">Duration</h4>
-                    <p className="text-caption">{activity.duration}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded bg-secondary-container flex items-center justify-center flex-shrink-0">
-                    <span className="material-symbols-outlined text-on-secondary-container">
-                      military_tech
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-label-md text-label-md">Difficulty</h4>
-                    <p className="text-caption">{activity.difficulty}</p>
-                  </div>
-                </div>
-              </div>
+              </ScrollReveal>
             </div>
 
-            <div className="bg-primary text-on-primary p-8 rounded-xl">
-              <h3 className="font-headline-md text-headline-md mb-6 flex items-center gap-3">
-                <span className="material-symbols-outlined">eco</span>
-                Mandatory Eco-Guidelines
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {activity.guidelines.map((guideline) => (
-                  <div key={guideline.title} className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-secondary-fixed">
-                        {guideline.icon}
-                      </span>
-                      <span className="font-label-md text-label-md uppercase">
-                        {guideline.title}
-                      </span>
-                    </div>
-                    <p className="text-caption opacity-90">{guideline.body}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white border border-outline-variant p-6 rounded-xl">
-              <h4 className="font-label-md text-label-md text-primary uppercase mb-4 tracking-widest">
-                Equipment Provided
-              </h4>
-              <ul className="space-y-3">
-                {activity.equipmentProvided.map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-center gap-3 text-body-md font-body-md"
+            {/* Sidebar */}
+            <div className="lg:col-span-4">
+              <RevealSide as="div" className="flex flex-col gap-5" x={48}>
+                <div className="rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-6">
+                  <h4 className="mb-4 text-[12.5px] font-bold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
+                    Equipment Provided
+                  </h4>
+                  <ul className="flex flex-col gap-3">
+                    {activity.equipmentProvided.map((item) => (
+                      <li key={item} className="flex items-start gap-2.5 text-[14px] text-[var(--ink)]">
+                        <span
+                          className="material-symbols-outlined mt-0.5 text-[16px] flex-shrink-0"
+                          style={{ color: "var(--lagoon)" }}
+                        >
+                          check_circle
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-2xl bg-[var(--sand)] p-6">
+                  <h4 className="mb-3 text-[12.5px] font-bold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
+                    Permit Requirements
+                  </h4>
+                  <p className="mb-5 text-[14px] leading-relaxed text-[var(--ink-soft)]">
+                    {activity.permitNote}
+                  </p>
+                  <button
+                    type="button"
+                    className="w-full rounded-full bg-[var(--forest-deep)] px-5 py-3 text-[13.5px] font-semibold text-white transition-colors hover:bg-[var(--forest-mid)]"
                   >
-                    <span className="material-symbols-outlined text-primary text-[20px]">
-                      check_circle
-                    </span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="bg-surface-container-high p-6 rounded-xl border border-outline-variant">
-              <h4 className="font-label-md text-label-md text-primary uppercase mb-4 tracking-widest">
-                Permit Requirements
-              </h4>
-              <p className="text-caption mb-4">{activity.permitNote}</p>
-              <Button variant="primary" fullWidth type="button">
-                Apply for Permit
-              </Button>
+                    Apply for Permit
+                  </button>
+                </div>
+              </RevealSide>
             </div>
           </div>
         </div>
       </section>
 
-
-       <section className="bg-white ">
-              <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-8">
-                        <SectionHeading icon="album">{activity.title} Gallery</SectionHeading>
-      
-              <ActivityGallery
-                images={activity.galleryImages ?? [activity.heroImage]}
-                title={activity.title}
-              />
+      {/* Mandatory Eco-Guidelines */}
+      <section className="relative overflow-hidden bg-[var(--forest-deep)] py-16 md:py-20">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(rgba(250,249,244,0.14)_1px,transparent_1px)] [background-size:14px_14px]"
+        />
+        <div className="relative mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+          <SectionHead kicker="Non-negotiable" tone="dark">
+            Mandatory Eco-Guidelines
+          </SectionHead>
+          <RevealSide as="div" className="grid grid-cols-1 gap-4 md:grid-cols-2" x={48}>
+            {activity.guidelines.map((guideline) => (
+              <div
+                key={guideline.title}
+                className="rounded-2xl border border-white/[0.12] bg-white/[0.06] p-6"
+              >
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-[var(--lagoon-light)]">
+                    <span className="material-symbols-outlined text-[18px]">{guideline.icon}</span>
+                  </span>
+                  <span className="text-[13px] font-semibold uppercase tracking-[0.06em] text-[var(--sand)]">
+                    {guideline.title}
+                  </span>
+                </div>
+                <p className="text-[14px] leading-relaxed text-white/85">{guideline.body}</p>
               </div>
-            </section>
+            ))}
+          </RevealSide>
+        </div>
+      </section>
+
+      {/* Gallery */}
+      <section className="bg-[var(--paper)] py-16">
+        <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+          <SectionHead kicker="Gallery">{activity.title} in frame</SectionHead>
+          <DestinationGallery
+            images={activity.galleryImages ?? [activity.heroImage]}
+            title={activity.title}
+          />
+        </div>
+      </section>
 
       {/* Available Destinations */}
       {availableAt.length > 0 ? (
-        <section className="bg-surface-container-low py-16">
-          <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-            <div className="mb-10 text-center">
-              <h2 className="font-headline-lg text-headline-lg text-black tracking-tight">
-                Available at these <span className="text-emerald-700">Destinations</span>
+        <section className="bg-[var(--sand)] py-20">
+          <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+            <ScrollReveal as="div" className="mb-10 text-center" y={24}>
+              <span className="mx-auto mb-3 inline-flex w-fit items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
+                <span className="material-symbols-outlined text-[14px]">map</span>
+                Where to go
+              </span>
+              <h2
+                className="mb-3 text-[clamp(1.6rem,3vw,2.25rem)] leading-tight font-semibold text-[var(--ink)]"
+                style={{ fontFamily: "var(--font-fraunces), serif" }}
+              >
+                Available at these Destinations
               </h2>
-              <p className="text-on-surface-variant font-body-md text-body-md">
-                Documented sites where this activity is practiced under
-                forest-department guidelines.
+              <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-[var(--ink-soft)]">
+                Documented sites where this activity is practiced under forest-department guidelines.
               </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            </ScrollReveal>
+            <GridReveal
+              className="grid grid-cols-1 gap-6 md:grid-cols-3"
+              columns={{ base: 1, sm: 2, lg: 3 }}
+              y={48}
+            >
               {availableAt.map((destination) => (
                 <DestinationCard key={destination.slug} destination={destination} />
               ))}
-            </div>
+            </GridReveal>
           </div>
         </section>
       ) : null}
 
       {/* Related Activities */}
       {related.length > 0 ? (
-        <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-20">
-          <h2 className="font-headline-lg text-headline-lg text-black tracking-tight mb-10">
-            Explore More <span className="text-emerald-700">Activities</span>
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-            {related.map((item) => (
-              <Link
-                key={item.slug}
-                href={`/activities/${item.slug}`}
-                className="flex items-center gap-4 p-4 border border-outline-variant rounded-lg hover:bg-surface transition-colors group"
-              >
-                <div className="relative w-20 h-20 flex-shrink-0 rounded overflow-hidden shadow-sm">
-                  <Image
-                    src={item.heroImage}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                    sizes="80px"
-                  />
-                </div>
-                <div>
-                  <h5 className="font-label-md text-label-md group-hover:text-primary transition-colors">
-                    {item.title}
-                  </h5>
-                  <p className="text-caption text-on-surface-variant">
-                    {item.difficulty}
-                  </p>
-                </div>
-              </Link>
-            ))}
+        <section className="bg-[var(--paper)] py-20">
+          <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+            <SectionHead kicker="Keep exploring">Explore More Activities</SectionHead>
+            <RevealSide as="div" className="grid grid-cols-1 gap-4 md:grid-cols-3" x={48}>
+              {related.map((item) => (
+                <Link
+                  key={item.slug}
+                  href={`/activities/${item.slug}`}
+                  className="group flex items-center gap-4 rounded-2xl border border-[var(--line)] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--lagoon)]/40 hover:shadow-[0_20px_40px_-16px_rgba(15,43,30,0.25)]"
+                >
+                  <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl">
+                    <Image
+                      src={item.heroImage}
+                      alt={item.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      sizes="80px"
+                    />
+                  </div>
+                  <div>
+                    <h5
+                      className="text-[16px] font-semibold text-[var(--ink)] transition-colors group-hover:text-[var(--forest-mid)]"
+                      style={{ fontFamily: "var(--font-fraunces), serif" }}
+                    >
+                      {item.title}
+                    </h5>
+                    <p className="text-[13px] text-[var(--ink-soft)]">{item.difficulty}</p>
+                  </div>
+                </Link>
+              ))}
+            </RevealSide>
           </div>
         </section>
       ) : null}
-    </>
+    </div>
   );
 }
