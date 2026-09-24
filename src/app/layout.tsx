@@ -36,6 +36,9 @@ export const metadata: Metadata = {
   },
   description:
     "Official ecotourism portal for the Andaman & Nicobar Islands — destinations, activities, permits and conservation guidelines from the Department of Environment & Forests.",
+  verification: {
+    google: "8XuMI2ugyPXGQoeclpGx9fDlFWOOGa8ahFXWB890hsY",
+  },
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

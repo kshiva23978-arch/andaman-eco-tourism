@@ -36,15 +36,15 @@ export const DESTINATION_PINS: DestinationPin[] = [
   // The data lists "Long Island", but its range (MGMNP, Haddo) and the well-known
   // Jahaji Beach are on Rutland Island — pinned there.
   { slug: "jahaji-beach", label: "Jahaji Beach", lat: 11.4316, lng: 92.6518, dir: "left", approx: true },
-  { slug: "jolly-buoy-island", label: "Jolly Buoy", lat: 11.51, lng: 92.605, featured: true, dir: "right", approx: true },
+  { slug: "jolly-buoy-island", label: "Jolly Buoy", lat: 11.51, lng: 92.615, featured: true, dir: "right", approx: true },
   { slug: "red-skin-island", label: "Red Skin Island", lat: 11.5554, lng: 92.5924, dir: "left" },
   { slug: "loha-barrack-crocodile-wildlife-sanctuary", label: "Loha Barrack Sanctuary", lat: 11.629, lng: 92.6109, dir: "left" },
 
   // ---- Baratang -----------------------------------------------------------------
-  { slug: "limestone-caves-baratang", label: "Limestone Caves", lat: 12.0931, lng: 92.745, featured: true, dir: "left" },
-  { slug: "mud-volcano-baratang", label: "Mud Volcano (Baratang)", lat: 12.072, lng: 92.756, dir: "left", approx: true },
+  { slug: "limestone-caves-baratang", label: "Limestone Caves", lat: 12.079, lng: 92.745, featured: true, dir: "left" },
+  { slug: "mud-volcano-baratang", label: "Mud Volcano (Baratang)", lat: 12.086, lng: 92.77, dir: "left", approx: true },
   { slug: "parrot-island", label: "Parrot Island", lat: 12.1812, lng: 92.7203, dir: "left" },
-  { slug: "baludera-beach-baratang", label: "Baludera Beach", lat: 12.13, lng: 92.835, dir: "right", approx: true },
+  { slug: "baludera-beach-baratang", label: "Baludera Beach", lat: 12.13, lng: 92.805, dir: "right", approx: true },
   { slug: "uttara-jetty", label: "Uttara Jetty", lat: 12.3126, lng: 92.7874, dir: "left" },
 
   // ---- Middle Andaman (Rangat, Long Island) ---------------------------------------

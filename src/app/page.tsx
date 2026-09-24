@@ -81,7 +81,6 @@ export default function Home() {
   const slideVideoRef = useRef<HTMLVideoElement | null>(null);
   const activeDestination = heroSlides[activeSlide];
   const heroBackgroundVideo = activeDestination?.video ?? HERO_VIDEO;
-  const isDefaultHeroVideo = !activeDestination?.video;
 
   // Fallback: if the intro never signals (e.g. it errors), still show the hero copy.
   useEffect(() => {
@@ -120,29 +119,15 @@ export default function Home() {
       >
         <div className="absolute inset-0 z-0">
           <video
-            key={`${HERO_VIDEO}-default`}
-            src={HERO_VIDEO}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className={`animate-kenburns absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-in-out ${
-              isDefaultHeroVideo ? "opacity-100" : "opacity-0"
-            }`}
-            aria-label="Default Andaman background video"
-          />
-          <video
             ref={slideVideoRef}
             key={heroBackgroundVideo}
             src={heroBackgroundVideo}
             autoPlay={heroReady}
-            preload="auto"
+            preload={heroReady ? "auto" : "metadata"}
             muted
             playsInline
             onEnded={handleVideoEnded}
-            className={`animate-kenburns absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-in-out ${
-              isDefaultHeroVideo ? "opacity-0" : "opacity-100"
-            }`}
+            className="animate-kenburns absolute inset-0 h-full w-full object-cover"
             aria-label={`${activeDestination?.name ?? "Andaman Archipelago"} background video`}
           />
           {/* Cinematic vignette */}

@@ -84,11 +84,11 @@ export function SiteHeader() {
   }, [menuOpen]);
 
   return (
-    <header className="bg-gradient-to-r from-[#0f2b1e] via-[rgb(16,56,47)] to-[#1c4a3c] border-b border-white/10 sticky top-0 z-50">
+    <header className="bg-[#10382F] border-b border-white/10 sticky top-0 z-50">
       <div className="flex justify-between items-center w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4">
         <Link
           href="/"
-          className="flex items-center gap-3 font-headline-md text-headline-sm sm:text-headline-md text-[#f3ecd9] font-bold tracking-tight"
+          className="flex items-center gap-3 font-headline-md text-headline-sm sm:text-headline-md text-[#f3ecd9] !font-thin tracking-tight"
         >
           <Image
             src="/logo/department-logo.png"

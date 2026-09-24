@@ -53,7 +53,7 @@ export function SiteFooter() {
               height={72}
               className="h-16 w-16 shrink-0 object-contain"
             />
-            <div className="font-headline-md text-white font-bold">
+            <div className="font-headline-md text-white !font-thin">
               Department of Environment &amp; Forests
               <div className="text-lg">Andaman &amp; Nicobar Administration</div>
             </div>

@@ -57,15 +57,20 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
   const finishedRef = useRef(false);
 
   useEffect(() => {
+    // Already seen this session: the overlay renders `null` (see the `introSeen` check below),
+    // so `rootRef` never attaches — this path must not depend on it. Still wait for the
+    // PageLoader (which replays on every navigation) to clear before revealing, so the hero's
+    // fade-up and video start aren't wasted behind the opaque loader.
+    if (sessionStorage.getItem(INTRO_SEEN_KEY) === "1") {
+      const timer = window.setTimeout(() => {
+        onReveal?.();
+        onComplete?.();
+      }, LOADER_DELAY * 1000);
+      return () => window.clearTimeout(timer);
+    }
+
     const root = rootRef.current;
     if (!root) return;
-
-    // Already seen this session: `introSeen` hides the overlay on render; just notify the parent.
-    if (sessionStorage.getItem(INTRO_SEEN_KEY) === "1") {
-      onReveal?.();
-      onComplete?.();
-      return;
-    }
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
