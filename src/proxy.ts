@@ -1,4 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { SESSION_COOKIE } from "@/lib/auth-constants";
+
+const PUBLIC_ADMIN_PATHS = ["/admin/login"];
 
 /**
  * Per-request Content-Security-Policy with a fresh nonce.
@@ -12,6 +15,18 @@ import { NextResponse, type NextRequest } from "next/server";
  *   - OpenStreetMap tiles (AndamanLeafletMap)
  */
 export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isProtectedAdminPath =
+    pathname.startsWith("/admin") && !PUBLIC_ADMIN_PATHS.some((p) => pathname.startsWith(p));
+
+  // Fast, cookie-presence-only gate: keeps unauthenticated visitors from ever
+  // reaching admin pages. The authoritative, database-backed session check
+  // still runs in `src/app/admin/(protected)/layout.tsx` on every request —
+  // Server Actions bypass this matcher, so that check is the one that matters.
+  if (isProtectedAdminPath && !request.cookies.has(SESSION_COOKIE)) {
+    return NextResponse.redirect(new URL("/admin/login", request.url));
+  }
+
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const isDev = process.env.NODE_ENV === "development";
   // <style>/<link> elements need the nonce in production. In dev, the error overlay and

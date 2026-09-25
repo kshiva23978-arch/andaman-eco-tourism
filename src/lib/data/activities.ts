@@ -3,13 +3,13 @@ import type { Activity } from "@/lib/types";
 export const activities: Activity[] = [
   {
     slug: "scuba-snorkeling",
-    title: "Scientific Scuba & Snorkeling",
+    title: "Scuba & Snorkeling",
     tagline:
-      "Explore the depths through the lens of marine biology. Our scientific diving programs prioritize coral health monitoring and biodiversity documentation while providing an immersive educational experience in the Bay of Bengal.",
+      "Explore the depths through the lens of marine biology. Our diving programs prioritize coral health monitoring and biodiversity documentation while providing an immersive educational experience in the Bay of Bengal.",
     icon: "scuba_diving",
     heroImage: "/images/google-hosted/activities/scuba-snorkeling.png",
     overview: [
-      "Scientific Scuba Diving and Snorkeling in the Andaman and Nicobar Islands is regulated by the Department of Environment & Forests. This activity is designed for those seeking a deeper understanding of marine ecosystems beyond recreational observation. Participants are guided by certified eco-divers who facilitate data collection on reef health and species identification.",
+      "Scuba Diving and Snorkeling in the Andaman and Nicobar Islands is regulated by the Department of Environment & Forests. This activity is designed for those seeking a deeper understanding of marine ecosystems beyond recreational observation. Participants are guided by certified eco-divers who facilitate data collection on reef health and species identification.",
       "All dive sites are strictly monitored to ensure that human presence does not interfere with the natural regeneration of coral colonies. We maintain a strict policy of transparency regarding the environmental impact of tourism on these fragile habitats.",
     ],
     duration: "3-4 Hours (1 Dive)",

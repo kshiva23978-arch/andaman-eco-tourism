@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { destinations, getDestinationBySlug } from "@/lib/data/destinations";
+import { getDestinationBySlug } from "@/lib/data/destinations";
 import { findNearbyDestination } from "@/lib/format";
 import { DestinationCard } from "@/components/destinations/DestinationCard";
 import { DestinationGallery } from "@/components/destinations/DestinationGallery";
@@ -21,10 +21,6 @@ const NEARBY_FALLBACK_IMAGES = [
   "/images/bg/starfish-sea.jpg",
   "/images/bg/canvas-b.jpg",
 ];
-
-export function generateStaticParams() {
-  return destinations.map((destination) => ({ slug: destination.slug }));
-}
 
 export async function generateMetadata({
   params,

@@ -8,16 +8,8 @@ import { DestinationHero } from "@/components/destinations/DestinationHero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { RevealSide } from "@/components/ui/RevealSide";
 import { GridReveal } from "@/components/ui/GridReveal";
-import {
-  activities,
-  getActivitiesBySlugs,
-  getActivityBySlug,
-} from "@/lib/data/activities";
+import { getActivitiesBySlugs, getActivityBySlug } from "@/lib/data/activities";
 import { getDestinationsBySlugs } from "@/lib/data/destinations";
-
-export function generateStaticParams() {
-  return activities.map((activity) => ({ slug: activity.slug }));
-}
 
 export async function generateMetadata({
   params,

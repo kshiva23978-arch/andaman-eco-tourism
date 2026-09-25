@@ -10,13 +10,13 @@ import { ActivityGuideSection } from "@/components/activities/ActivityGuideSecti
 export const metadata: Metadata = {
   title: "Activities Guide",
   description:
-    "Discover the natural wonders of the Andaman & Nicobar archipelago through responsible exploration and scientific conservation practices.",
+    "Discover the natural wonders of the Andaman & Nicobar archipelago through responsible exploration and conservation practices.",
 };
 
 const HERO_SLIDES: HeroSlide[] = [
   {
     image: "/images/activitiy-slider/scuba.png",
-    eyebrow: "Marine · Scientific Diving",
+    eyebrow: "Marine · Diving",
     title: "Dive Beneath the",
     accent: "Coral Gardens",
     description:

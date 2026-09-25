@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  CONTENT_EDITOR
+  REVIEWER
+  VIEWER
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+enum ContentStatus {
+  PUBLISHED
+  DRAFT
+}
+
+enum LabelSide {
+  LEFT
+  RIGHT
+}
+
+enum BackgroundType {
+  IMAGE
+  COLOR
+}
+
+enum LogCategory {
+  AUTH
+  CONTENT
+  SECURITY
+  SYSTEM
+}
+
+enum LogSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model User {
+  id                  String     @id @default(cuid())
+  name                String
+  email               String     @unique
+  passwordHash        String
+  role                Role       @default(CONTENT_EDITOR)
+  status              UserStatus @default(INVITED)
+  failedLoginAttempts Int        @default(0)
+  lockedUntil         DateTime?
+  lastActiveAt        DateTime?
+  createdAt           DateTime   @default(now())
+  sessions            Session[]
+  auditLogs           AuditLog[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  ip        String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Destination {
+  id                String        @id @default(cuid())
+  slug              String        @unique
+  title             String
+  subtitle          String
+  region            String
+  rangeDivision     String
+  overview          String
+  accessRoad        String
+  accessShip        String
+  bestTime          String
+  timing            String
+  permits           String
+  fees              String
+  activities        String[]
+  facility          String[]
+  accommodation     String
+  hospital          String
+  nearbyPlaces      String[]
+  conservationNotes String
+  ecoGuidelines     String[]
+  safetyTips        String[]
+  whatToSee         String[]
+  image             String
+  heroImagePosition String?
+  galleryImages     String[]
+  status            ContentStatus @default(DRAFT)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model Activity {
+  id                   String              @id @default(cuid())
+  slug                 String              @unique
+  title                String
+  tagline              String
+  icon                 String
+  heroImage            String
+  overview             String[]
+  duration             String
+  difficulty           String
+  equipmentProvided    String[]
+  permitNote           String
+  destinationSlugs     String[]
+  relatedActivitySlugs String[]
+  guideBody            String
+  guideCallout         String?
+  guideBullets         String[]
+  galleryImages        String[]
+  status               ContentStatus       @default(DRAFT)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  guidelines           ActivityGuideline[]
+}
+
+model ActivityGuideline {
+  id         String   @id @default(cuid())
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  icon       String
+  title      String
+  body       String
+  order      Int      @default(0)
+}
+
+model MapPin {
+  id              String    @id @default(cuid())
+  label           String
+  lat             Float
+  lng             Float
+  featured        Boolean   @default(false)
+  dir             LabelSide @default(RIGHT)
+  approx          Boolean   @default(false)
+  destinationSlug String?
+  order           Int       @default(0)
+}
+
+model Section {
+  id              String         @id @default(cuid())
+  name            String
+  description     String
+  pages           String[]
+  targetType      String?
+  targetSlug      String?
+  targetTitle     String?
+  headline        String?
+  body            String?
+  backgroundType  BackgroundType @default(IMAGE)
+  backgroundImage String?
+  backgroundColor String?
+  overlayEnabled  Boolean        @default(true)
+  overlayColor    String         @default("#000000")
+  overlayOpacity  Int            @default(45)
+  gallery         String[]
+  status          ContentStatus  @default(PUBLISHED)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model MediaAsset {
+  id         String   @id @default(cuid())
+  path       String   @unique
+  filename   String
+  usedIn     String?
+  sizeBytes  Int?
+  uploadedAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  actorId    String?
+  actor      User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actorLabel String
+  ip         String?
+  category   LogCategory
+  severity   LogSeverity @default(INFO)
+  message    String
+  createdAt  DateTime    @default(now())
+}
+
+model SiteSetting {
+  key   String @id
+  value String
+}
+
+model RolePermission {
+  role        Role     @id
+  permissions String[]
+  updatedAt   DateTime @updatedAt
+}

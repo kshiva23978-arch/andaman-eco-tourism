@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Public_Sans, Yeseva_One } from "next/font/google";
 import { connection } from "next/server";
-import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { PageLoader } from "@/components/ui/PageLoader";
+import { SiteChrome } from "@/components/layout/SiteChrome";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
 import { ClickSpark } from "@/components/ui/ClickSpark";
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -29,6 +27,12 @@ const fraunces = Fraunces({
   weight: ["400", "500", "600", "700"],
 });
 
+// Force every route in the app to render on-demand, per request — no route is
+// ever prerendered/cached as static HTML. `connection()` below already causes
+// this as a side effect; this declares it explicitly so it can't regress if
+// that call is ever removed or refactored.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: {
     default: "Andaman & Nicobar Ecotourism",
@@ -48,12 +52,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${publicSans.variable} ${yesevaOne.variable} ${fraunces.variable}`}>
       <body className="font-body-md text-body-md antialiased flex flex-col min-h-screen">
-        <PageLoader />
         <SmoothScroll />
         <ClickSpark />
-        <SiteHeader />
-        <main className="flex-grow">{children}</main>
-        <SiteFooter />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );
