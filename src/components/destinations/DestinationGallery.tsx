@@ -1,7 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+
+const subscribeNoop = () => () => {};
+
+/** Moves the lightbox index by `delta`, wrapping around; stays closed if closed. */
+function stepImage(current: number | null, delta: 1 | -1, count: number): number | null {
+  if (current === null) return null;
+  return (current + delta + count) % count;
+}
 
 function GalleryTile({
   src,
@@ -10,7 +19,7 @@ function GalleryTile({
   onOpen,
   sizes,
   priority,
-  className,
+  className = "",
 }: {
   src: string;
   alt: string;
@@ -18,10 +27,14 @@ function GalleryTile({
   onOpen: (index: number) => void;
   sizes: string;
   priority?: boolean;
-  className: string;
+  className?: string;
 }) {
   return (
-    <button type="button" onClick={() => onOpen(index)} className={`group relative overflow-hidden ${className}`}>
+    <button
+      type="button"
+      onClick={() => onOpen(index)}
+      className={`group relative block h-full w-full overflow-hidden ${className}`}
+    >
       <Image
         src={src}
         alt={alt}
@@ -30,10 +43,20 @@ function GalleryTile({
         className="object-cover transition-transform duration-700 group-hover:scale-105"
         sizes={sizes}
       />
-      <div className="absolute inset-0 bg-black/0 transition duration-300 group-hover:bg-black/20" />
-      <div className="absolute left-1/2 top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-2xl text-black opacity-0 shadow-lg transition duration-300 group-hover:opacity-100">
-        +
-      </div>
+      <div className="absolute inset-0 bg-black/0 transition duration-300 group-hover:bg-black/10" />
+    </button>
+  );
+}
+
+function ShowAllButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="absolute bottom-4 right-4 z-10 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 font-label-md text-[13px] text-on-surface shadow-lg transition-transform duration-300 hover:scale-105"
+    >
+      <span className="material-symbols-outlined text-[18px]">grid_view</span>
+      Show all
     </button>
   );
 }
@@ -46,26 +69,29 @@ export function DestinationGallery({
   title?: string;
 }) {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  // The lightbox portals into document.body, which only exists on the client.
+  const mounted = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false
+  );
 
   const closeLightbox = () => setSelectedImage(null);
+  const openAll = () => setSelectedImage(0);
 
-  const nextImage = () =>
-    setSelectedImage((prev) =>
-      prev === null ? null : prev === images.length - 1 ? 0 : prev + 1
-    );
+  const nextImage = () => setSelectedImage((prev) => stepImage(prev, 1, images.length));
+  const prevImage = () => setSelectedImage((prev) => stepImage(prev, -1, images.length));
 
-  const prevImage = () =>
-    setSelectedImage((prev) =>
-      prev === null ? null : prev === 0 ? images.length - 1 : prev - 1
-    );
+  const isOpen = selectedImage !== null;
+  const imageCount = images.length;
 
   useEffect(() => {
-    if (selectedImage === null) return;
+    if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") nextImage();
-      if (e.key === "ArrowLeft") prevImage();
+      if (e.key === "Escape") setSelectedImage(null);
+      if (e.key === "ArrowRight") setSelectedImage((prev) => stepImage(prev, 1, imageCount));
+      if (e.key === "ArrowLeft") setSelectedImage((prev) => stepImage(prev, -1, imageCount));
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -75,234 +101,221 @@ export function DestinationGallery({
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [selectedImage]);
+  }, [isOpen, imageCount]);
 
   if (images.length === 0) return null;
 
   return (
     <>
-      <section className="w-full py-12 md:py-0">
-        <div className="mx-auto max-w-7xl px-4">
-          {/* Mobile: horizontal snap-scroll strip, one image per view */}
-          {images.length > 1 ? (
-            <div className="sm:hidden -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 no-scrollbar">
-              {images.map((src, i) => (
-                <button
-                  key={src + i}
-                  type="button"
-                  onClick={() => setSelectedImage(i)}
-                  className="relative h-64 w-[85%] flex-shrink-0 snap-center overflow-hidden rounded-2xl"
-                >
-                  <Image
-                    src={src}
-                    alt={title}
-                    fill
-                    priority={i === 0}
-                    className="object-cover"
-                    sizes="85vw"
-                  />
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          <div className={images.length > 1 ? "hidden sm:block" : ""}>
-            {images.length === 1 ? (
-              <div className="relative h-[280px] sm:h-[400px] overflow-hidden rounded-2xl">
-                <GalleryTile
-                  src={images[0]}
+      <section className="w-full py-12 md:py-0 px-1">
+        {/* Mobile: stacked list, one image per row */}
+        {images.length > 1 ? (
+          <div className="sm:hidden flex flex-col gap-3 px-4">
+            {images.map((src, i) => (
+              <button
+                key={src + i}
+                type="button"
+                onClick={() => setSelectedImage(i)}
+                className="relative h-64 w-full overflow-hidden rounded-2xl"
+              >
+                <Image
+                  src={src}
                   alt={title}
-                  index={0}
-                  onOpen={setSelectedImage}
-                  sizes="100vw"
-                  priority
-                  className="h-full w-full rounded-2xl"
+                  fill
+                  // Eager rather than `priority`: this list is hidden from sm up, and a
+                  // <link rel="preload"> would warn as unused there.
+                  loading={i === 0 ? "eager" : "lazy"}
+                  className="object-cover"
+                  sizes="(min-width: 640px) 1px, calc(100vw - 2rem)"
                 />
-              </div>
-            ) : images.length === 2 ? (
-              <div className="grid h-[280px] sm:h-[320px] lg:h-[400px] grid-cols-2 gap-2 overflow-hidden rounded-2xl">
-                <GalleryTile
-                  src={images[0]}
-                  alt={title}
-                  index={0}
-                  onOpen={setSelectedImage}
-                  sizes="50vw"
-                  priority
-                  className="h-full w-full rounded-l-2xl"
-                />
-                <GalleryTile
-                  src={images[1]}
-                  alt={title}
-                  index={1}
-                  onOpen={setSelectedImage}
-                  sizes="50vw"
-                  className="h-full w-full rounded-r-2xl"
-                />
-              </div>
-            ) : images.length === 3 ? (
-              <div className="grid h-[320px] sm:h-[360px] lg:h-[500px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
-                <GalleryTile
-                  src={images[0]}
-                  alt={title}
-                  index={0}
-                  onOpen={setSelectedImage}
-                  sizes="50vw"
-                  priority
-                  className="col-span-2 row-span-2 rounded-l-2xl"
-                />
-                <GalleryTile
-                  src={images[1]}
-                  alt={title}
-                  index={1}
-                  onOpen={setSelectedImage}
-                  sizes="50vw"
-                  className="col-span-2 rounded-tr-2xl"
-                />
-                <GalleryTile
-                  src={images[2]}
-                  alt={title}
-                  index={2}
-                  onOpen={setSelectedImage}
-                  sizes="50vw"
-                  className="col-span-2 rounded-br-2xl"
-                />
-              </div>
-            ) : images.length === 4 ? (
-              <div className="grid h-[320px] sm:h-[360px] lg:h-[500px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
-                <GalleryTile
-                  src={images[0]}
-                  alt={title}
-                  index={0}
-                  onOpen={setSelectedImage}
-                  sizes="50vw"
-                  priority
-                  className="col-span-2 row-span-2 rounded-l-2xl"
-                />
-                <GalleryTile
-                  src={images[1]}
-                  alt={title}
-                  index={1}
-                  onOpen={setSelectedImage}
-                  sizes="50vw"
-                  className="col-span-2 rounded-tr-2xl"
-                />
-                <GalleryTile
-                  src={images[2]}
-                  alt={title}
-                  index={2}
-                  onOpen={setSelectedImage}
-                  sizes="25vw"
-                  className=""
-                />
-                <GalleryTile
-                  src={images[3]}
-                  alt={title}
-                  index={3}
-                  onOpen={setSelectedImage}
-                  sizes="25vw"
-                  className="rounded-br-2xl"
-                />
-              </div>
-            ) : (
-              <div className="grid h-[320px] sm:h-[360px] lg:h-[500px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
-                <GalleryTile
-                  src={images[0]}
-                  alt={title}
-                  index={0}
-                  onOpen={setSelectedImage}
-                  sizes="50vw"
-                  priority
-                  className="col-span-2 row-span-2 rounded-l-2xl"
-                />
-                {images.slice(1, 5).map((src, i) => {
-                  const index = i + 1;
-                  const isLastVisible = index === 4;
-                  const remaining = images.length - 5;
-                  const corner =
-                    index === 2 ? "rounded-tr-2xl" : index === 4 ? "rounded-br-2xl" : "";
-
-                  return (
-                    <div key={src + index} className={`relative overflow-hidden ${corner}`}>
-                      <GalleryTile
-                        src={src}
-                        alt={title}
-                        index={index}
-                        onOpen={setSelectedImage}
-                        sizes="25vw"
-                        className="h-full w-full"
-                      />
-                      {isLastVisible && remaining > 0 ? (
-                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 font-headline-md text-white">
-                          +{remaining}
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+              </button>
+            ))}
           </div>
+        ) : null}
+
+        <div className={`w-full ${images.length > 1 ? "hidden sm:block" : ""}`}>
+          {images.length === 1 ? (
+            <div className="relative aspect-[16/9] max-h-[560px] overflow-hidden">
+              <GalleryTile
+                src={images[0]}
+                alt={title}
+                index={0}
+                onOpen={setSelectedImage}
+                sizes="100vw"
+                priority
+              />
+            </div>
+          ) : (
+            <div className="relative">
+              {images.length === 2 ? (
+                <div className="grid h-[320px] grid-cols-2 gap-2 overflow-hidden sm:h-[420px] lg:h-[560px]">
+                  <GalleryTile src={images[0]} alt={title} index={0} onOpen={setSelectedImage} sizes="50vw" priority />
+                  <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="50vw" />
+                </div>
+              ) : images.length === 3 ? (
+                <div className="grid h-[340px] grid-cols-3 gap-2 overflow-hidden sm:h-[440px] lg:h-[600px]">
+                  <GalleryTile src={images[0]} alt={title} index={0} onOpen={setSelectedImage} sizes="34vw" priority className="col-span-1" />
+                  <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="33vw" className="col-span-1" />
+                  <GalleryTile src={images[2]} alt={title} index={2} onOpen={setSelectedImage} sizes="33vw" className="col-span-1" />
+                </div>
+              ) : images.length <= 6 ? (
+                <div className="grid h-[420px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden sm:h-[480px] lg:h-[640px]">
+                  <GalleryTile
+                    src={images[0]}
+                    alt={title}
+                    index={0}
+                    onOpen={setSelectedImage}
+                    sizes="50vw"
+                    priority
+                    className="col-span-2 row-span-2"
+                  />
+                  {images.slice(1, 5).map((src, i) => (
+                    <GalleryTile
+                      key={src + i}
+                      src={src}
+                      alt={title}
+                      index={i + 1}
+                      onOpen={setSelectedImage}
+                      sizes="25vw"
+                    />
+                  ))}
+                </div>
+              ) : (
+                // 7+ images: three-column mosaic — tall images bookend a
+                // stacked middle column, matching a classic photo-grid layout.
+                <div className="grid h-[560px] grid-cols-3 grid-rows-3 gap-2 overflow-hidden sm:h-[620px] lg:h-[760px]">
+                  <GalleryTile
+                    src={images[0]}
+                    alt={title}
+                    index={0}
+                    onOpen={setSelectedImage}
+                    sizes="34vw"
+                    priority
+                    className="col-start-1 row-span-2"
+                  />
+                  <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-1" />
+                  <GalleryTile src={images[2]} alt={title} index={2} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-2" />
+                  <GalleryTile
+                    src={images[3]}
+                    alt={title}
+                    index={3}
+                    onOpen={setSelectedImage}
+                    sizes="33vw"
+                    className="col-start-3 row-span-2"
+                  />
+                  <GalleryTile src={images[4]} alt={title} index={4} onOpen={setSelectedImage} sizes="34vw" className="col-start-1 row-start-3" />
+                  <GalleryTile src={images[5]} alt={title} index={5} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-3" />
+                  <GalleryTile src={images[6]} alt={title} index={6} onOpen={setSelectedImage} sizes="33vw" className="col-start-3 row-start-3" />
+                </div>
+              )}
+
+              <ShowAllButton onClick={openAll} />
+            </div>
+          )}
         </div>
       </section>
 
-      {selectedImage !== null ? (
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-3 sm:p-4"
-          onClick={closeLightbox}
-        >
-          <button
-            type="button"
-            onClick={closeLightbox}
-            className="absolute right-3 top-3 sm:right-5 sm:top-5 z-50 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-white/10 text-2xl sm:text-3xl text-white backdrop-blur transition hover:bg-white/20"
-            aria-label="Close"
-          >
-            ×
-          </button>
-
-          <div className="absolute left-1/2 top-4 sm:top-6 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-white backdrop-blur">
-            {selectedImage + 1} / {images.length}
-          </div>
-
-          {images.length > 1 ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                prevImage();
-              }}
-              className="absolute left-2 sm:left-4 top-1/2 z-50 flex h-10 w-10 sm:h-12 sm:w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-3xl sm:text-4xl text-white backdrop-blur transition hover:bg-white/20 md:left-8"
-              aria-label="Previous image"
+      {mounted && selectedImage !== null
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[9999] flex flex-col"
+              style={{ backgroundColor: "rgba(11, 31, 28, 0.97)" }}
+              onClick={closeLightbox}
             >
-              ‹
-            </button>
-          ) : null}
+              {/* Progress segments */}
+              <div className="flex gap-1.5 px-4 pt-4 sm:px-6">
+                {images.map((_, i) => (
+                  <span key={i} className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/20">
+                    <span
+                      className={`block h-full rounded-full bg-white transition-all duration-300 ${
+                        i <= selectedImage ? "w-full" : "w-0"
+                      }`}
+                    />
+                  </span>
+                ))}
+              </div>
 
-          <div className="relative h-[70vh] sm:h-[80vh] w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
-            <Image
-              src={images[selectedImage]}
-              alt={title}
-              fill
-              className="object-contain"
-              sizes="100vw"
-              priority
-            />
-          </div>
+              {/* Header */}
+              <div className="flex items-start justify-between px-4 pt-3 sm:px-6">
+                <div onClick={(e) => e.stopPropagation()}>
+                  <p className="font-label-md text-[12px] text-white/60">
+                    {String(selectedImage + 1).padStart(2, "0")} / {images.length}
+                  </p>
+                  <p className="font-headline-md text-lg text-white">{title}</p>
+                </div>
 
-          {images.length > 1 ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                nextImage();
-              }}
-              className="absolute right-2 sm:right-4 top-1/2 z-50 flex h-10 w-10 sm:h-12 sm:w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-3xl sm:text-4xl text-white backdrop-blur transition hover:bg-white/20 md:right-8"
-              aria-label="Next image"
-            >
-              ›
-            </button>
-          ) : null}
-        </div>
-      ) : null}
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    aria-label="Save"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">favorite</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeLightbox}
+                    aria-label="Close"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">close</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Image stage */}
+              <div className="relative flex flex-1 items-center justify-center px-4 py-4 sm:px-16">
+                {images.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      prevImage();
+                    }}
+                    className="absolute left-2 top-1/2 z-50 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20 sm:left-4 md:left-8"
+                    aria-label="Previous image"
+                  >
+                    <span className="material-symbols-outlined text-[22px]">chevron_left</span>
+                  </button>
+                ) : null}
+
+                <div
+                  className="relative h-full w-full max-w-5xl overflow-hidden rounded-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Image
+                    src={images[selectedImage]}
+                    alt={title}
+                    fill
+                    className="object-cover"
+                    sizes="(min-width: 1152px) 1024px, 100vw"
+                    priority
+                  />
+                </div>
+
+                {images.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      nextImage();
+                    }}
+                    className="absolute right-2 top-1/2 z-50 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20 sm:right-4 md:right-8"
+                    aria-label="Next image"
+                  >
+                    <span className="material-symbols-outlined text-[22px]">chevron_right</span>
+                  </button>
+                ) : null}
+              </div>
+
+              {/* Caption */}
+              <p className="pb-5 text-center font-body-md text-[13px] text-white/70">
+                {title} - Destination gallery
+              </p>
+            </div>,
+            document.body
+          )
+        : null}
     </>
   );
 }

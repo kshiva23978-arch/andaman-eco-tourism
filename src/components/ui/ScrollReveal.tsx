@@ -1,7 +1,7 @@
 "use client";
 
 import { Children, cloneElement, isValidElement, useEffect, useRef } from "react";
-import type { ElementType, ReactNode } from "react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -45,7 +45,12 @@ export function ScrollReveal({
     if (!el || prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
+      // Paused tween + explicit ScrollTrigger callbacks: the `scrollTrigger`
+      // tween shorthand snaps to match scroll position when the trigger's
+      // start is already behind the initial scroll (common for content just
+      // below a short hero), skipping the actual animation. play()/reverse()
+      // from onEnter/onLeaveBack always run it in full.
+      const tween = gsap.fromTo(
         el.children,
         { opacity: 0, y },
         {
@@ -55,9 +60,17 @@ export function ScrollReveal({
           delay,
           ease: "power3.out",
           stagger,
-          scrollTrigger: { trigger: el, start, once: true },
+          paused: true,
         }
       );
+
+      ScrollTrigger.create({
+        trigger: el,
+        start,
+        onEnter: () => tween.play(),
+        onEnterBack: () => tween.play(),
+        onLeaveBack: () => tween.reverse(),
+      });
     }, el);
 
     return () => ctx.revert();
@@ -114,6 +127,7 @@ function splitWords(node: ReactNode, keyPrefix = "w"): ReactNode {
 export function RevealText({
   as: Tag = "h2",
   className = "",
+  style,
   children,
   stagger = 0.05,
   duration = 0.9,
@@ -122,6 +136,7 @@ export function RevealText({
 }: {
   as?: ElementType;
   className?: string;
+  style?: CSSProperties;
   children: ReactNode;
   stagger?: number;
   duration?: number;
@@ -135,7 +150,7 @@ export function RevealText({
     if (!el || prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
+      const tween = gsap.fromTo(
         el.querySelectorAll("[data-reveal-word]"),
         { yPercent: 110, opacity: 0, rotate: 4 },
         {
@@ -146,16 +161,24 @@ export function RevealText({
           delay,
           ease: "power4.out",
           stagger,
-          scrollTrigger: { trigger: el, start, once: true },
+          paused: true,
         }
       );
+
+      ScrollTrigger.create({
+        trigger: el,
+        start,
+        onEnter: () => tween.play(),
+        onEnterBack: () => tween.play(),
+        onLeaveBack: () => tween.reverse(),
+      });
     }, el);
 
     return () => ctx.revert();
   }, [stagger, duration, start, delay]);
 
   return (
-    <Tag ref={ref} className={className}>
+    <Tag ref={ref} className={className} style={style}>
       {splitWords(children)}
     </Tag>
   );

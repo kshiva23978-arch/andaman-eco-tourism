@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import type { Destination } from "@/lib/types";
 import { DestinationCard } from "./DestinationCard";
 
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
 interface Props {
-  featuredDestinations: any[];
+  featuredDestinations: Destination[];
   /** Milliseconds between auto-advances. 0 disables autoplay. */
   autoplayInterval?: number;
 }
@@ -167,6 +174,41 @@ export default function DestinationCarousel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [n]);
 
+  // Cards slide in left-to-right, in view order, as the carousel scrolls into view.
+  useEffect(() => {
+    const container = carouselRef.current;
+    if (!container || n === 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const ctx = gsap.context(() => {
+      // Only the middle (visible) copy of the infinite-loop triple — the
+      // other two copies sit off-scroll and would just waste stagger time.
+      const visibleCards = Array.from(container.children).slice(n, n * 2);
+      const tween = gsap.fromTo(
+        visibleCards,
+        { opacity: 0, x: -60 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          stagger: 0.12,
+          paused: true,
+        }
+      );
+
+      ScrollTrigger.create({
+        trigger: container,
+        start: "top 85%",
+        onEnter: () => tween.play(),
+        onEnterBack: () => tween.play(),
+        onLeaveBack: () => tween.reverse(),
+      });
+    }, container);
+
+    return () => ctx.revert();
+  }, [n]);
+
   // Pause autoplay while the carousel is scrolled out of view.
   useEffect(() => {
     const container = carouselRef.current;
@@ -200,14 +242,12 @@ export default function DestinationCarousel({
     if (!container) return;
 
     pauseAutoplay();
-    container.style.scrollBehavior = "auto";
     dragState.current = {
       isDown: true,
       startX: event.pageX - container.offsetLeft,
       scrollLeft: container.scrollLeft,
       hasDragged: false,
     };
-    container.setPointerCapture(event.pointerId);
   };
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
@@ -227,6 +267,10 @@ export default function DestinationCarousel({
     if (!dragState.current.hasDragged) {
       if (Math.abs(walk) < DRAG_THRESHOLD) return;
       dragState.current.hasDragged = true;
+      // Only hijack the pointer once an actual drag starts — capturing it on
+      // every plain click suppresses the resulting click event on the card link.
+      container.style.scrollBehavior = "auto";
+      container.setPointerCapture(event.pointerId);
     }
 
     event.preventDefault();
@@ -240,7 +284,9 @@ export default function DestinationCarousel({
 
     dragState.current.isDown = false;
     container.style.scrollBehavior = "smooth";
-    container.releasePointerCapture(event.pointerId);
+    if (container.hasPointerCapture(event.pointerId)) {
+      container.releasePointerCapture(event.pointerId);
+    }
   };
 
   if (n === 0) return null;

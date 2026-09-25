@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { EcoGuidelinesSection } from "@/components/ui/EcoGuidelinesSection";
 import { AlternatingFeatureSection } from "@/components/ui/AlternatingFeatureSection";
-import { DestinationCard } from "@/components/destinations/DestinationCard";
 import { ActivityCard } from "@/components/activities/ActivityCard";
+import DestinationCarousel from "@/components/destinations/DestinationCarousel";
 import {
   destinations,
   featuredDestinationSlugs,
@@ -18,11 +20,11 @@ import {
   featuredActivitySlugs,
   getActivitiesBySlugs,
 } from "@/lib/data/activities";
-import DestinationCarousel from "@/components/destinations/DestinationCarousel";
 import { DecorativeLeaf } from "@/components/ui/DecorativeLeaf";
 import { DragScrollRow } from "@/components/ui/DragScrollRow";
 import { ParallaxBackground } from "@/components/ui/ParallaxBackground";
 import { RevealText, ScrollReveal } from "@/components/ui/ScrollReveal";
+import { RevealSide } from "@/components/ui/RevealSide";
 import { CinematicIntro, HERO_TITLE_LINES } from "@/components/ui/CinematicIntro";
 
 const ECO_GUIDELINES = [
@@ -50,36 +52,6 @@ const ECO_GUIDELINES = [
 
 const HERO_VIDEO = "/videos/bg-banner.mp4";
 
-const MAP_HOTSPOTS: Array<{
-  slug: string;
-  label: string;
-  x: number;
-  y: number;
-  dir: "tl" | "tr" | "bl" | "br" | "l" | "r" | "t" | "b";
-}> = [
-  { slug: "saddle-peak-national-park", label: "Saddle Peak", x: 49, y: 67, dir: "l" },
-  { slug: "ross-and-smith-islands", label: "Ross & Smith", x: 64, y: 17, dir: "tr" },
-  { slug: "limestone-caves-baratang", label: "Limestone Caves", x: 53, y: 53, dir: "l" },
-  { slug: "cuthbert-bay-beach-wildlife-sanctuary", label: "Cuthbert Bay", x: 59, y: 36, dir: "tr" },
-  { slug: "mud-volcanoes-of-shyamnagar", label: "Mud Volcanoes", x: 55, y: 53, dir: "tr" },
-  { slug: "elephanta-beach", label: "Elephanta Beach", x: 61, y: 58, dir: "tr" },
-  { slug: "radhanagar-beach", label: "Radhanagar Beach", x: 62, y: 61, dir: "r" },
-  { slug: "mount-manipur-national-park", label: "Mount Manipur", x: 50, y: 68, dir: "r" },
-  { slug: "jolly-buoy-island", label: "Jolly Buoy", x: 41, y: 76, dir: "bl" },
-  { slug: "kalapathar-beach-little-andaman", label: "Kalapathar Beach Little Andaman", x: 40, y: 86, dir: "br" },
-];
-
-const LEADER_DIRS = {
-  tl: { x: -1, y: -1 },
-  tr: { x: 1, y: -1 },
-  bl: { x: -1, y: 1 },
-  br: { x: 1, y: 1 },
-  l: { x: -1, y: 0 },
-  r: { x: 1, y: 0 },
-  t: { x: 0, y: -1 },
-  b: { x: 0, y: 1 },
-} as const;
-
 const heroSlides = [
   { name: "Coral Gardens", video: "/videos/fish.mp4" },
   { name: "Sea Turtles", video: "/videos/bg-banner.mp4" },
@@ -87,57 +59,18 @@ const heroSlides = [
   { name: "Golden Hour", video: "/videos/sun-set.mp4" },
 ];
 
-function AndamanMapPanel({ heightClass }: { heightClass: string }) {
-  return (
-    <div className={`relative w-full ${heightClass}`}>
-      <img
-        src="/images/map/andaman-map-2.png"
-        alt="Andaman and Nicobar Islands map"
-        className="h-full w-full object-contain drop-shadow-[0_24px_40px_rgba(0,51,88,0.12)]"
-      />
-
-      {MAP_HOTSPOTS.map(({ slug, label, x, y, dir }) => {
-        const { x: dx, y: dy } = LEADER_DIRS[dir];
-        const leaderLength = 26;
-        const mag = Math.sqrt(dx * dx + dy * dy) || 1;
-        const endX = (dx / mag) * leaderLength;
-        const endY = (dy / mag) * leaderLength;
-
-        return (
-          <Link
-            key={slug}
-            href={`/destinations/${slug}`}
-            aria-label={`Open ${label} destination`}
-            className="group absolute -translate-x-1/2 -translate-y-1/2"
-            style={{ left: `${x}%`, top: `${y}%` }}
-          >
-            <span className="absolute left-0 top-0 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary shadow-md transition-transform group-hover:scale-125" />
-            <svg className="absolute left-0 top-0 overflow-visible" width="1" height="1">
-              <line
-                x1={endX}
-                y1={endY}
-                x2="0"
-                y2="0"
-                className="stroke-on-surface-variant/50"
-                strokeWidth="1"
-              />
-            </svg>
-            <span
-              className="absolute whitespace-nowrap rounded-md bg-white/85 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-on-surface-variant shadow-sm backdrop-blur-sm transition-colors group-hover:bg-primary group-hover:text-white md:text-[11px]"
-              style={{
-                left: `${endX}px`,
-                top: `${endY}px`,
-                transform: `translate(${dx < 0 ? "-100%" : dx > 0 ? "0%" : "-50%"}, ${dy < 0 ? "-100%" : dy > 0 ? "0%" : "-50%"})`,
-              }}
-            >
-              {label}
-            </span>
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
+// Leaflet touches `window` on import, so it can only render on the client.
+const AndamanLeafletMap = dynamic(
+  () => import("@/components/ui/AndamanLeafletMap").then((mod) => mod.AndamanLeafletMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full min-h-[320px] w-full items-center justify-center rounded-[24px] bg-surface-container-low text-on-surface-variant">
+        Loading map…
+      </div>
+    ),
+  }
+);
 
 export default function Home() {
   const featuredDestinations = getDestinationsBySlugs(featuredDestinationSlugs);
@@ -148,7 +81,6 @@ export default function Home() {
   const slideVideoRef = useRef<HTMLVideoElement | null>(null);
   const activeDestination = heroSlides[activeSlide];
   const heroBackgroundVideo = activeDestination?.video ?? HERO_VIDEO;
-  const isDefaultHeroVideo = !activeDestination?.video;
 
   // Fallback: if the intro never signals (e.g. it errors), still show the hero copy.
   useEffect(() => {
@@ -187,29 +119,15 @@ export default function Home() {
       >
         <div className="absolute inset-0 z-0">
           <video
-            key={`${HERO_VIDEO}-default`}
-            src={HERO_VIDEO}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className={`animate-kenburns absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-in-out ${
-              isDefaultHeroVideo ? "opacity-100" : "opacity-0"
-            }`}
-            aria-label="Default Andaman background video"
-          />
-          <video
             ref={slideVideoRef}
             key={heroBackgroundVideo}
             src={heroBackgroundVideo}
             autoPlay={heroReady}
-            preload="auto"
+            preload={heroReady ? "auto" : "metadata"}
             muted
             playsInline
             onEnded={handleVideoEnded}
-            className={`animate-kenburns absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-in-out ${
-              isDefaultHeroVideo ? "opacity-0" : "opacity-100"
-            }`}
+            className="animate-kenburns absolute inset-0 h-full w-full object-cover"
             aria-label={`${activeDestination?.name ?? "Andaman Archipelago"} background video`}
           />
           {/* Cinematic vignette */}
@@ -265,7 +183,7 @@ export default function Home() {
                 </div>
 
                 {/* Chapter indicator */}
-                <div className="mt-14 flex items-end border-t border-white/15 pt-5">
+                <div className="mt-14 flex items-end border-t border-white/[0.15] pt-5">
                   <div className="flex gap-6 md:gap-10">
                     {heroSlides.map((slide, index) => (
                       <button
@@ -330,11 +248,13 @@ export default function Home() {
       {/* Island map — watercolour paper, copy left / map right */}
       <section className="relative overflow-hidden bg-surface-container-low py-14 md:py-20">
         {/* Illustrated sea background, kept faint so the map and copy stay legible */}
-        <img
-          src="https://img.magnific.com/free-vector/artistic-watercolor-texture-blue-color_1035-6675.jpg?t=st=1789540474~exp=1789544074~hmac=5b4492d67819359ee83155e33c2cef605e0892c3d0f8cb27071c9a8a65c21028&w=1480"
+        <Image
+          src="/images/bg/water-bg-texture.jpg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-20"
+          fill
+          sizes="100vw"
+          className="pointer-events-none object-cover opacity-20"
         />
         {/* Blend the top edge into the hero's wave divider */}
         <div
@@ -343,31 +263,32 @@ export default function Home() {
         />
 
         <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-12 md:gap-8">
-            <ScrollReveal className="md:col-span-4">
-              <span className="mb-4 block h-[3px] w-8 rounded-full bg-primary" />
-              <h2 className="hero-title text-3xl leading-tight text-primary md:text-4xl lg:text-5xl">
+          {/* Stacked until lg — a 4/12 column at md is too narrow for the larger heading. */}
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-10">
+            <ScrollReveal className="lg:col-span-5">
+              <span className="mb-5 block h-1 w-10 rounded-full bg-primary" />
+              <h2 className="hero-title text-4xl leading-[1.1] text-primary sm:text-5xl lg:text-6xl">
                 Discover the Islands
               </h2>
-              <p className="mt-4 max-w-sm text-sm leading-relaxed text-justify text-on-surface-variant md:text-base">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-on-surface-variant sm:text-lg lg:max-w-md xl:text-xl">
                 Over 570 islands stretch across the Bay of Bengal — only a handful are open to
                 visitors. Pick a marker to explore its beaches, reefs, forests and the communities
                 that care for them.
               </p>
               <Link
                 href="/destinations"
-                className="group mt-6 inline-flex items-center gap-2 font-label-md text-label-md text-primary hover:underline"
+                className="group mt-7 inline-flex items-center gap-2 font-label-md text-base font-semibold tracking-wide text-primary hover:underline sm:text-lg"
               >
                 Browse all {destinations.length} destinations
-                <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">
+                <span className="material-symbols-outlined text-[22px] transition-transform group-hover:translate-x-1">
                   arrow_forward
                 </span>
               </Link>
             </ScrollReveal>
 
-            <div className="md:col-span-8 lg:col-span-7 lg:col-start-6">
-              <AndamanMapPanel heightClass="h-[440px] sm:h-[520px] md:h-[600px] lg:h-[680px]" />
-            </div>
+            <RevealSide as="div" className="lg:col-span-7" x={-80}>
+              <AndamanLeafletMap heightClass="h-[440px] sm:h-[520px] md:h-[600px] lg:h-[680px]" />
+            </RevealSide>
           </div>
         </div>
 
@@ -385,8 +306,13 @@ export default function Home() {
       {/* Featured Destinations */}
       <section className="relative overflow-hidden py-12 md:py-20 bg-surface-container-low">
         <DecorativeLeaf className="top-8 right-6 md:top-12 md:right-16" rotate={65} size={130} opacity={0.16} />
-        <div className="max-w-container-8xl mx-auto px-margin-mobile md:px-margin-desktop">
-          <ScrollReveal className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+        <ScrollReveal
+          as="div"
+          className="max-w-container-8xl mx-auto px-margin-mobile md:px-margin-desktop"
+          y={64}
+          start="top 88%"
+        >
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
             <div>
               <Chip variant="primary" icon="landscape" className="mb-3">
                 Handpicked Escapes
@@ -404,11 +330,11 @@ export default function Home() {
                 arrow_forward
               </span>
             </Link>
-          </ScrollReveal>
+          </div>
           <div className="w-full">
             <DestinationCarousel featuredDestinations={featuredDestinations} />
           </div>
-        </div>
+        </ScrollReveal>
         <DecorativeLeaf className="bottom-6 left-4 md:bottom-10 md:left-8" rotate={-25} size={110} opacity={0.22} delay={5} />
       </section>
 
@@ -459,9 +385,9 @@ export default function Home() {
 
       {/* Featured Activities */}
       <section className="relative overflow-hidden py-20 md:py-24">
-        <ParallaxBackground src="/images/bg/forest-bg.jpg" />
+        <ParallaxBackground src="/images/bg/cellular-jail.jpg" />
         <DecorativeLeaf className="bottom-8 right-4 md:bottom-14 md:right-14" rotate={195} flip size={150} opacity={0.2} delay={3} />
-        <div className="absolute inset-0 " />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/70" />
 
         <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
           <ScrollReveal className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-4">

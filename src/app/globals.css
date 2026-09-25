@@ -48,6 +48,135 @@ a {
   backdrop-filter: blur(8px);
 }
 
+/* Frosted card for use on top of photographic section backgrounds. */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.glass-panel-soft {
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+/* Homepage island map — labels connect to their pin with a thin leader line
+   (like a map-annotation callout) instead of Leaflet's default tooltip tail. */
+.andaman-map-tooltip {
+  background: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #1b3a2f;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+/* Labels link to their destination page, so give them a hover state like a link. */
+.andaman-map-tooltip:hover {
+  background: #1b3a2f;
+  color: #fff;
+}
+.andaman-map-tooltip.leaflet-tooltip-right::before,
+.andaman-map-tooltip.leaflet-tooltip-left::before {
+  border: none;
+  width: 14px;
+  height: 0;
+  margin-top: 0;
+  border-top: 3px solid rgba(255, 255, 255, 0.9);
+}
+.andaman-map-tooltip.leaflet-tooltip-right::before {
+  left: -14px;
+  margin-left: 0;
+}
+.andaman-map-tooltip.leaflet-tooltip-left::before {
+  right: -14px;
+  margin-right: 0;
+}
+
+/* ---------- Destination "editorial" theme (forest/lagoon/sand palette) ---------- */
+.editorial {
+  --forest-deep: #0f2b1e;
+  --forest: #1f4d34;
+  --forest-mid: #2c6146;
+  --lagoon: #2e8b82;
+  --lagoon-light: #7fc4b8;
+  --sand: #f3ecd9;
+  --sand-dim: #e9dfc4;
+  --paper: #faf9f4;
+  --coral: #e8734a;
+  --ink: #132018;
+  --ink-soft: #3c4a41;
+  --line: rgba(19, 32, 24, 0.12);
+  font-family: var(--font-public-sans), system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.editorial h1,
+.editorial h2,
+.editorial h3,
+.editorial h4 {
+  font-family: var(--font-fraunces), serif;
+  letter-spacing: -0.01em;
+}
+
+.editorial .fact,
+.editorial .fee-card,
+.editorial .eco-item {
+  background: var(--paper);
+}
+
+@keyframes tide-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes tide-fill {
+  to {
+    opacity: 1;
+  }
+}
+
+.tide-path {
+  stroke-dasharray: 2600;
+  stroke-dashoffset: 2600;
+  animation: tide-draw 2.2s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+}
+
+.tide-fill {
+  opacity: 0;
+  animation: tide-fill 0.9s ease-out 2s forwards;
+}
+
+@keyframes pin-pulse {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.pin-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 9999px;
+  border: 2px solid var(--coral);
+  opacity: 0;
+  animation: pin-pulse 2.4s ease-out infinite;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

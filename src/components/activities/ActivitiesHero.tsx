@@ -591,7 +591,7 @@ export function ActivitiesHero({ slides }: { slides: HeroSlide[] }) {
           className="h-[50px] w-full md:h-[90px]"
         >
           <path
-            className="fill-surface"
+            fill="var(--paper)"
             d="M0,64 C240,120 480,0 720,32 C960,64 1200,112 1440,48 L1440,100 L0,100 Z"
           />
         </svg>

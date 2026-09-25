@@ -3,6 +3,9 @@ import Link from "next/link";
 import { FeatureWatermark } from "./FeatureWatermark";
 import { ScrollReveal } from "./ScrollReveal";
 
+// Full width on mobile, half of the two-column grid from md, capped by the 1280px container.
+const IMAGE_SIZES = "(min-width: 1280px) 576px, (min-width: 768px) 50vw, 100vw";
+
 export interface FeatureBullet {
   icon?: string;
   text: string;
@@ -188,12 +191,13 @@ export function AlternatingFeatureSection({
                 src={image}
                 alt={imageAlt}
                 fill
+                sizes={IMAGE_SIZES}
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
             </Link>
           ) : (
             <div className="w-full aspect-video relative overflow-hidden rounded shadow-sm">
-              <Image src={image} alt={imageAlt} fill className="object-cover" />
+              <Image src={image} alt={imageAlt} fill sizes={IMAGE_SIZES} className="object-cover" />
             </div>
           )}
         </div>

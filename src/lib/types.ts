@@ -32,6 +32,9 @@ export interface Destination {
   safetyTips: string[];
   whatToSee: string[];
   image: string;
+  /** CSS object-position for the hero photo; only needed when the default
+   * center crop of a portrait source lands on an illegible patch. */
+  heroImagePosition?: string;
   galleryImages?: string[];
 }
 

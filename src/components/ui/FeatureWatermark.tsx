@@ -45,12 +45,14 @@ export function FeatureWatermark({
     const fromTop = positionClass.includes("top-0");
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top 80%",
-          once: true,
-        },
+      const tl = gsap.timeline({ paused: true });
+
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top 80%",
+        onEnter: () => tl.play(),
+        onEnterBack: () => tl.play(),
+        onLeaveBack: () => tl.reverse(),
       });
 
       tl.fromTo(

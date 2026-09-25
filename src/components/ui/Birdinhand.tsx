@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface BirdinhandProps {
   className?: string;
   rotate?: number;
@@ -14,7 +16,7 @@ export function Birdinhand({
     opacity = 0.18,
 }: BirdinhandProps) {
     return (
-        <img
+        <Image
             src="/images/illustrations/bird-in-hand.png"
             alt="bird-in-hand"
             aria-hidden="true"

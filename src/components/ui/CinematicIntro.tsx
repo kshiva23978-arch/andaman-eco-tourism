@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Image from "next/image";
 import gsap from "gsap";
+
+// sessionStorage has no change events worth subscribing to here.
+const subscribeNoop = () => () => {};
 
 /**
  * Full-screen cinematic opener shown before the home hero.
@@ -16,6 +20,10 @@ import gsap from "gsap";
  */
 
 const INTRO_VIDEO = "/videos/bg-banner.mp4";
+
+// Only play the full cinematic opener once per browser session; later visits
+// to the homepage (e.g. navigating back via the header) skip straight to the hero.
+const INTRO_SEEN_KEY = "andaman:intro-seen";
 
 /** Shared headline, one entry per rendered line. */
 export const HERO_TITLE_LINES = ["Discover Andaman", "& Nicobar Islands"];
@@ -39,10 +47,28 @@ interface CinematicIntroProps {
 
 export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
   const [mounted, setMounted] = useState(true);
+  // Read on the client only; the server (and hydration) always renders the overlay.
+  const introSeen = useSyncExternalStore(
+    subscribeNoop,
+    () => sessionStorage.getItem(INTRO_SEEN_KEY) === "1",
+    () => false
+  );
   const rootRef = useRef<HTMLDivElement | null>(null);
   const finishedRef = useRef(false);
 
   useEffect(() => {
+    // Already seen this session: the overlay renders `null` (see the `introSeen` check below),
+    // so `rootRef` never attaches — this path must not depend on it. Still wait for the
+    // PageLoader (which replays on every navigation) to clear before revealing, so the hero's
+    // fade-up and video start aren't wasted behind the opaque loader.
+    if (sessionStorage.getItem(INTRO_SEEN_KEY) === "1") {
+      const timer = window.setTimeout(() => {
+        onReveal?.();
+        onComplete?.();
+      }, LOADER_DELAY * 1000);
+      return () => window.clearTimeout(timer);
+    }
+
     const root = rootRef.current;
     if (!root) return;
 
@@ -72,6 +98,7 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
     const finish = () => {
       if (finishedRef.current) return;
       finishedRef.current = true;
+      sessionStorage.setItem(INTRO_SEEN_KEY, "1");
       window.removeEventListener("scroll", pinTop);
       window.removeEventListener("wheel", swallow, { capture: true });
       window.removeEventListener("touchmove", swallow, { capture: true });
@@ -239,7 +266,7 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted || introSeen) return null;
 
   return (
     <div
@@ -261,17 +288,19 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
             className="h-full w-full object-cover"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-black/45" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-transparent to-black/35" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/[0.15] to-black/[0.45]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/[0.45] via-transparent to-black/[0.35]" />
       </div>
 
       {/* Birds — layered at different depths */}
       <div data-bird-layer className="pointer-events-none absolute inset-0 will-change-transform">
         {BIRDS.map((bird, i) => (
-          <img
+          <Image
             key={i}
             data-bird
             src="/images/illustrations/bird-fly.png"
+            width={bird.size}
+            height={bird.size}
             alt=""
             className="absolute will-change-transform"
             style={{

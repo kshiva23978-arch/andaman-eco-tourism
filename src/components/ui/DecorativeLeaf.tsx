@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 
 interface DecorativeLeafProps {
@@ -82,7 +83,7 @@ export function DecorativeLeaf({
       className={`pointer-events-none absolute select-none will-change-transform ${className}`}
       style={{ width: size, height: size, opacity }}
     >
-      <img
+      <Image
         src="/images/bg/leaf.png"
         alt=""
         width={size}
