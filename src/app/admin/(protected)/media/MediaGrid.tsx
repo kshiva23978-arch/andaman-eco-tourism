@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Card, SecondaryButton, PrimaryButton, Modal } from "@/components/admin/AdminUI";
 import { ACCEPT_ATTR, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES } from "@/lib/upload-limits";
+import { isVideoPath } from "@/lib/uploads";
 import { deleteMediaAction, uploadMediaAction } from "./actions";
 
 export type MediaRow = {
@@ -88,7 +89,7 @@ export function MediaGrid({ items }: { items: MediaRow[] }) {
               onClick={() => setPreview(item)}
               className="relative block aspect-[4/3] w-full overflow-hidden bg-black/5"
             >
-              {item.src.endsWith(".mp4") || item.src.endsWith(".webm") ? (
+              {isVideoPath(item.src) ? (
                 <div className="flex h-full w-full items-center justify-center bg-black/80 text-white">
                   <span className="material-symbols-outlined text-[32px]">movie</span>
                 </div>
@@ -138,7 +139,7 @@ export function MediaGrid({ items }: { items: MediaRow[] }) {
         {preview && (
           <div>
             <div className="relative mb-4 aspect-video w-full overflow-hidden rounded-lg bg-black/5">
-              {preview.src.endsWith(".mp4") || preview.src.endsWith(".webm") ? (
+              {isVideoPath(preview.src) ? (
                 <video src={preview.src} controls className="h-full w-full object-contain" />
               ) : (
                 <Image src={preview.src} alt={preview.name} fill className="object-contain" />

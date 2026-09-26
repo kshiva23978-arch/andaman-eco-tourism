@@ -132,7 +132,7 @@ export function AlternatingFeatureSection({
               )}
             </h2>
           </div>
-          <p className={`font-body-md text-body-md leading-relaxed mb-6 ${bodyColor}`}>
+          <p className={`font-body-md text-body-md leading-relaxed text-justify mb-6 ${bodyColor}`}>
             {body}
           </p>
           {bullets ? (

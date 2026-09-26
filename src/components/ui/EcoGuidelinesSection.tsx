@@ -102,7 +102,7 @@ export function EcoGuidelinesSection({
           <h2 className="font-headline-lg text-2xl md:text-headline-xl text-black tracking-tight mb-4">
             <AccentText text={title} accentClassName="text-emerald-700" />
           </h2>
-          <p className="text-on-surface-variant font-body-md text-body-md">{intro}</p>
+          <p className="text-on-surface-variant font-body-md text-body-md text-justify">{intro}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[0.9fr_1.1fr] items-start">
@@ -156,7 +156,7 @@ export function EcoGuidelinesSection({
                       {guideline.title}
                     </h4>
                     {guideline.body ? (
-                      <p className="relative text-on-surface-variant font-body-md text-body-md">
+                      <p className="relative text-on-surface-variant font-body-md text-body-md text-justify">
                         {guideline.body}
                       </p>
                     ) : null}

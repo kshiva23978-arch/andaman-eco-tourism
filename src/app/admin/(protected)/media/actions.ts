@@ -13,6 +13,7 @@ import {
   MEDIA_TYPES,
   UPLOAD_ROOT,
   UPLOAD_URL_PREFIX,
+  isVideoPath,
   resolveUploadPath,
   slugifyFilename,
   sniffMediaType,
@@ -73,6 +74,20 @@ export async function uploadMediaAction(formData: FormData): Promise<UploadResul
 
   revalidatePath("/admin/media");
   return { ok: true, path: publicPath };
+}
+
+export type MediaOption = { id: string; path: string; name: string; kind: "image" | "video" };
+
+/** Media library options for the in-editor picker; any signed-in admin can browse. */
+export async function listMediaAction(): Promise<MediaOption[]> {
+  await requireUser();
+  const assets = await prisma.mediaAsset.findMany({ orderBy: { uploadedAt: "desc" } });
+  return assets.map((a) => ({
+    id: a.id,
+    path: a.path,
+    name: a.filename,
+    kind: isVideoPath(a.path) ? "video" : "image",
+  }));
 }
 
 export async function deleteMediaAction(id: string) {

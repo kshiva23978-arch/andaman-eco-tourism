@@ -87,7 +87,7 @@ export default function AdminLoginPage() {
                 name="username"
                 autoComplete="username"
                 className="w-full rounded-lg border border-black/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                placeholder="you@doef.gov.in"
+                placeholder="you@user.gmail"
               />
             </label>
 
@@ -119,9 +119,7 @@ export default function AdminLoginPage() {
                 <input type="checkbox" className="h-4 w-4" defaultChecked />
                 Remember me
               </label>
-              <button type="button" className="font-semibold text-secondary hover:underline">
-                Forgot password?
-              </button>
+             
             </div>
 
             <div className="mb-4">

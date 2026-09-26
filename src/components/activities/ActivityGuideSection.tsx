@@ -110,7 +110,7 @@ export function ActivityGuideSection({
       </h3>
 
       <p
-        className={`mb-6 text-[15px] leading-relaxed ${
+        className={`mb-6 text-[15px] leading-relaxed text-justify ${
           isDark ? "text-white/90" : "text-[var(--ink-soft)]"
         }`}
       >
@@ -140,7 +140,7 @@ export function ActivityGuideSection({
 
       {callout ? (
         <div
-          className={`mb-6 rounded-xl border-l-4 px-5 py-4 text-[13.5px] italic leading-relaxed ${
+          className={`mb-6 rounded-xl border-l-4 px-5 py-4 text-[13.5px] italic leading-relaxed text-justify ${
             isDark
               ? "border-[var(--lagoon-light)] bg-white/[0.09] text-white/95"
               : "border-[var(--lagoon)] bg-[var(--sand)] text-[var(--ink-soft)]"

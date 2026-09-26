@@ -144,7 +144,7 @@ export function HomeClient({
                       </span>
                     ))}
                   </h1>
-                  <p className={`mb-8 max-w-lg text-base text-white/85 md:text-lg md:text-body-lg ${heroReveal}`}>
+                  <p className={`mb-8 max-w-lg text-base text-justify text-white/85 md:text-lg md:text-body-lg ${heroReveal}`}>
                     {hero.subtitle}
                   </p>
                   <div className={`flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-6 ${heroReveal}`}>
@@ -253,7 +253,7 @@ export function HomeClient({
               <h2 className="hero-title text-4xl leading-[1.1] text-primary sm:text-5xl lg:text-6xl">
                 {map.title}
               </h2>
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-on-surface-variant sm:text-lg lg:max-w-md xl:text-xl">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-justify text-on-surface-variant sm:text-lg lg:max-w-md xl:text-xl">
                 {map.body}
               </p>
               <Link

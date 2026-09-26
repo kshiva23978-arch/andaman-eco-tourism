@@ -117,7 +117,7 @@ export default async function ActivityDetailPage({
                 <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-[var(--sand)] px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
                   {page.overview.badge}
                 </span>
-                <p className="mb-6 max-w-2xl text-[16px] leading-relaxed text-[var(--ink-soft)]">
+                <p className="mb-6 max-w-2xl text-[16px] leading-relaxed text-[var(--ink-soft)] text-justify">
                   {activity.tagline}
                 </p>
               </ScrollReveal>
@@ -149,7 +149,7 @@ export default async function ActivityDetailPage({
 
               <ScrollReveal as="div" className="flex flex-col gap-4" y={20}>
                 {activity.overview.map((paragraph) => (
-                  <p key={paragraph} className="text-[15px] leading-relaxed text-[var(--ink-soft)]">
+                  <p key={paragraph} className="text-[15px] leading-relaxed text-[var(--ink-soft)] text-justify">
                     {paragraph}
                   </p>
                 ))}
@@ -181,7 +181,7 @@ export default async function ActivityDetailPage({
                   <h4 className="mb-3 text-[12.5px] font-bold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
                     {page.overview.permitTitle}
                   </h4>
-                  <p className="mb-5 text-[14px] leading-relaxed text-[var(--ink-soft)]">
+                  <p className="mb-5 text-[14px] leading-relaxed text-[var(--ink-soft)] text-justify">
                     {activity.permitNote}
                   </p>
                   {page.overview.permitButtonLabel && page.overview.permitButtonHref ? (
@@ -226,7 +226,7 @@ export default async function ActivityDetailPage({
                     {guideline.title}
                   </span>
                 </div>
-                <p className="text-[14px] leading-relaxed text-white/85">{guideline.body}</p>
+                <p className="text-[14px] leading-relaxed text-white/85 text-justify">{guideline.body}</p>
               </div>
             ))}
           </RevealSide>
@@ -271,7 +271,7 @@ export default async function ActivityDetailPage({
               >
                 {withTitle(page.destinations.title, activity.title)}
               </h2>
-              <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-[var(--ink-soft)]">
+              <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-[var(--ink-soft)] text-justify">
                 {page.destinations.body}
               </p>
             </ScrollReveal>

@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import Image from "next/image";
 import { hexToRgba } from "@/lib/color";
+import { isVideoPath } from "@/lib/uploads";
+import { listMediaAction, type MediaOption } from "@/app/admin/(protected)/media/actions";
 
 export function Card({
   children,
@@ -864,17 +866,7 @@ export function BackgroundEditor({
           No background — the page&apos;s default styling is used.
         </p>
       ) : value.type === "image" ? (
-        <div className="flex items-center gap-4">
-          <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-black/5">
-            <Image src={value.image} alt="" fill sizes="128px" className="object-cover" />
-          </div>
-          <input
-            className={inputClass}
-            value={value.image}
-            onChange={(e) => patch({ image: e.target.value })}
-            placeholder="/images/…"
-          />
-        </div>
+        <ImageField value={value.image} onChange={(image) => patch({ image })} />
       ) : (
         <div className="flex items-center gap-3">
           <input
@@ -959,6 +951,7 @@ export function GalleryEditor({
   onChange: (images: string[], titles: string[]) => void;
 }) {
   const [draft, setDraft] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const withTitles = titles !== undefined;
   const currentTitles = images.map((_, i) => titles?.[i] ?? "");
 
@@ -1057,11 +1050,140 @@ export function GalleryEditor({
         <SecondaryButton icon="add_photo_alternate" onClick={add}>
           Add
         </SecondaryButton>
+        <SecondaryButton icon="photo_library" onClick={() => setPickerOpen(true)}>
+          Browse
+        </SecondaryButton>
       </div>
-      <p className="mt-2 text-xs text-on-surface-variant">
-        Tip: browse <span className="font-semibold">Media Library</span> in another tab, copy an
-        image path, and paste it above.
-      </p>
+
+      <MediaPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(path) => {
+          onChange([...images, path], [...currentTitles, ""]);
+          setPickerOpen(false);
+        }}
+      />
+    </div>
+  );
+}
+
+/** Searchable modal for picking an existing image from the Media Library. */
+export function MediaPickerModal({
+  open,
+  onClose,
+  onSelect,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSelect: (path: string) => void;
+}) {
+  const [items, setItems] = useState<MediaOption[] | null>(null);
+  const [query, setQuery] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    listMediaAction()
+      .then((data) => {
+        setItems(data);
+        setError(null);
+      })
+      .catch(() => setError("Couldn't load the media library."));
+  }, [open]);
+
+  const filtered = useMemo(() => {
+    const images = (items ?? []).filter((m) => m.kind === "image");
+    const q = query.trim().toLowerCase();
+    return q ? images.filter((m) => m.name.toLowerCase().includes(q) || m.path.toLowerCase().includes(q)) : images;
+  }, [items, query]);
+
+  return (
+    <Modal open={open} onClose={onClose} title="Choose from Media Library" wide>
+      <div className="relative mb-4">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">
+          search
+        </span>
+        <input
+          autoFocus
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by file name…"
+          className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 pl-9 text-sm text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+        />
+      </div>
+
+      {error && <p className="py-8 text-center text-sm text-error">{error}</p>}
+
+      {!error && items === null && (
+        <p className="py-10 text-center text-sm text-on-surface-variant">Loading…</p>
+      )}
+
+      {!error && items !== null && (
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+          {filtered.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => onSelect(m.path)}
+              title={m.path}
+              className="group relative aspect-square overflow-hidden rounded-lg border border-black/10 bg-black/5 transition-colors hover:border-secondary"
+            >
+              <Image src={m.path} alt={m.name} fill sizes="160px" className="object-cover" />
+              <span className="absolute inset-x-0 bottom-0 truncate bg-black/60 px-1.5 py-1 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                {m.name}
+              </span>
+            </button>
+          ))}
+          {filtered.length === 0 && (
+            <p className="col-span-full py-10 text-center text-sm text-on-surface-variant">
+              No images match your search.
+            </p>
+          )}
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+/** Thumbnail + path input + Media Library picker, for a single image field. */
+export function ImageField({
+  value,
+  onChange,
+  placeholder = "/images/…",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-black/5">
+        {value && !isVideoPath(value) && (
+          <Image src={value} alt="" fill sizes="128px" className="object-cover" />
+        )}
+      </div>
+      <div className="flex flex-1 gap-2">
+        <input
+          className={inputClass}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+        />
+        <SecondaryButton icon="photo_library" onClick={() => setPickerOpen(true)}>
+          Browse
+        </SecondaryButton>
+      </div>
+
+      <MediaPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(path) => {
+          onChange(path);
+          setPickerOpen(false);
+        }}
+      />
     </div>
   );
 }

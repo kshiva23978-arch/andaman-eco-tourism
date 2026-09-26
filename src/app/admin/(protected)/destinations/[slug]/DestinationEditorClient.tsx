@@ -13,6 +13,7 @@ import {
   Tabs,
   TagListEditor,
   GalleryEditor,
+  ImageField,
   FormField,
   StatusSwitch,
   inputClass,
@@ -334,16 +335,7 @@ export function DestinationEditorClient({
           {tab === "Gallery & Media" && (
             <div>
               <FormField label="Hero / background image" hint="Shown as the full-width banner at the top of the destination page.">
-                <div className="flex items-center gap-4">
-                  <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-black/5">
-                    <Image src={form.image} alt="" fill sizes="128px" className="object-cover" />
-                  </div>
-                  <input
-                    className={inputClass}
-                    value={form.image}
-                    onChange={(e) => set("image", e.target.value)}
-                  />
-                </div>
+                <ImageField value={form.image} onChange={(v) => set("image", v)} />
               </FormField>
               <FormField label="Hero image position" hint="CSS object-position — only needed if the default crop looks off.">
                 <input

@@ -247,7 +247,7 @@ export default async function DestinationDetailPage({
               <h4 className="text-[12.5px] uppercase tracking-[0.06em] text-[var(--forest-mid)] font-bold mb-3">
                 {page.fees.feesLabel}
               </h4>
-              <p className="text-[14.5px] text-[var(--ink-soft)] leading-relaxed whitespace-pre-line">
+              <p className="text-[14.5px] text-[var(--ink-soft)] leading-relaxed whitespace-pre-line text-justify">
                 {destination.fees}
               </p>
             </div>
@@ -255,7 +255,7 @@ export default async function DestinationDetailPage({
               <h4 className="text-[12.5px] uppercase tracking-[0.06em] text-[var(--forest-mid)] font-bold mb-3">
                 {page.fees.permitsLabel}
               </h4>
-              <p className="text-[14.5px] text-[var(--ink-soft)] leading-relaxed whitespace-pre-line">
+              <p className="text-[14.5px] text-[var(--ink-soft)] leading-relaxed whitespace-pre-line text-justify">
                 {destination.permits}
               </p>
             </div>
@@ -331,7 +331,7 @@ export default async function DestinationDetailPage({
                   <span className="material-symbols-outlined text-[18px] text-[var(--lagoon-light)] mt-0.5 flex-shrink-0">
                     check_circle
                   </span>
-                  <span className="text-[14.5px] text-white/90 leading-relaxed">{item}</span>
+                  <span className="text-[14.5px] text-white/90 leading-relaxed text-justify">{item}</span>
                 </div>
               ))}
             </RevealSide>
@@ -342,7 +342,7 @@ export default async function DestinationDetailPage({
             </SectionHead>
             <RevealSide as="div" x={48}>
               <div className="bg-white/[0.08] border border-white/[0.18] rounded-[10px] p-7">
-                <p className="text-[14.5px] text-white/85 leading-relaxed whitespace-pre-line">
+                <p className="text-[14.5px] text-white/85 leading-relaxed whitespace-pre-line text-justify">
                   {destination.accommodation}
                 </p>
               </div>
@@ -462,7 +462,7 @@ export default async function DestinationDetailPage({
                 <span className="material-symbols-outlined text-[20px]">emergency</span>
                 {page.safety.emergencyLabel}
               </div>
-              <p className="text-[14px] leading-relaxed" style={{ color: "#6b3822" }}>
+              <p className="text-[14px] leading-relaxed text-justify" style={{ color: "#6b3822" }}>
                 {destination.hospital}
               </p>
             </div>
@@ -475,7 +475,7 @@ export default async function DestinationDetailPage({
                   <span className="material-symbols-outlined text-[18px] text-[var(--lagoon)] mt-0.5 flex-shrink-0">
                     verified_user
                   </span>
-                  <span className="text-[14px] text-[var(--ink-soft)] leading-relaxed">{tip}</span>
+                  <span className="text-[14px] text-[var(--ink-soft)] leading-relaxed text-justify">{tip}</span>
                 </div>
               ))}
             </div>

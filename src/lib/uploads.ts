@@ -43,6 +43,10 @@ export function sniffMediaType(bytes: Uint8Array): keyof typeof MEDIA_TYPES | nu
   return null;
 }
 
+export function isVideoPath(path: string): boolean {
+  return /\.(mp4|webm)$/i.test(path);
+}
+
 /** "My Photo (1).JPG" -> "my-photo-1" — safe for URLs and every filesystem. */
 export function slugifyFilename(name: string): string {
   const base = name.replace(/\.[^.]*$/, "");

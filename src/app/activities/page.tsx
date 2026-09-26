@@ -128,7 +128,7 @@ export default async function ActivitiesGuidePage() {
             >
               {principles.title}
             </RevealText>
-            <p className="text-[15px] leading-relaxed text-[var(--ink-soft)]">{principles.body}</p>
+            <p className="text-[15px] leading-relaxed text-[var(--ink-soft)] text-justify">{principles.body}</p>
           </RevealSide>
           <RevealSide
             as="div"
@@ -196,7 +196,7 @@ export default async function ActivitiesGuidePage() {
             >
               {coastal.title}
             </h2>
-            <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-[var(--ink-soft)]">{coastal.body}</p>
+            <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-[var(--ink-soft)] text-justify">{coastal.body}</p>
           </ScrollReveal>
           <GridReveal
             className="grid grid-cols-1 gap-5 md:grid-cols-3"

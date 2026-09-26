@@ -13,7 +13,12 @@ import {
   FormField,
   inputClass,
 } from "@/components/admin/AdminUI";
-import { toggleSuspendAction, updateUserRoleAction, updateRolePermissionsAction } from "./actions";
+import {
+  toggleSuspendAction,
+  createUserAction,
+  updateUserAction,
+  updateRolePermissionsAction,
+} from "./actions";
 import { PERMISSIONS, type PermissionKey } from "@/lib/permissions";
 
 export type Role = "SUPER_ADMIN" | "CONTENT_EDITOR" | "REVIEWER" | "VIEWER";
@@ -55,9 +60,7 @@ export function UsersManager({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [roleTarget, setRoleTarget] = useState<UserRow | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [roleDraft, setRoleDraft] = useState<Role>("CONTENT_EDITOR");
   const [permissionDrafts, setPermissionDrafts] =
     useState<Record<Role, PermissionKey[]>>(rolePermissions);
   const [savedRole, setSavedRole] = useState<Role | null>(null);
@@ -66,6 +69,22 @@ export function UsersManager({
     setPrevRolePermissions(rolePermissions);
     setPermissionDrafts(rolePermissions);
   }
+
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createDraft, setCreateDraft] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "CONTENT_EDITOR" as Role,
+  });
+
+  const [editTarget, setEditTarget] = useState<UserRow | null>(null);
+  const [editDraft, setEditDraft] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "CONTENT_EDITOR" as Role,
+  });
 
   function toggleSuspend(id: string) {
     setError(null);
@@ -79,22 +98,42 @@ export function UsersManager({
     });
   }
 
-  function openRoleEditor(u: UserRow) {
-    setRoleDraft(u.role);
-    setRoleTarget(u);
+  function openCreate() {
+    setCreateDraft({ name: "", email: "", password: "", role: "CONTENT_EDITOR" });
+    setError(null);
+    setCreateOpen(true);
   }
 
-  function saveRole() {
-    if (!roleTarget) return;
-    const id = roleTarget.id;
-    setRoleTarget(null);
+  function saveCreate() {
     setError(null);
     startTransition(async () => {
       try {
-        await updateUserRoleAction(id, roleDraft);
+        await createUserAction(createDraft);
+        setCreateOpen(false);
         router.refresh();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Couldn't change this user's role.");
+        setError(err instanceof Error ? err.message : "Couldn't create this user.");
+      }
+    });
+  }
+
+  function openEditor(u: UserRow) {
+    setEditDraft({ name: u.name, email: u.email, password: "", role: u.role });
+    setError(null);
+    setEditTarget(u);
+  }
+
+  function saveEdit() {
+    if (!editTarget) return;
+    const id = editTarget.id;
+    setError(null);
+    startTransition(async () => {
+      try {
+        await updateUserAction(id, { ...editDraft, password: editDraft.password || undefined });
+        setEditTarget(null);
+        router.refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Couldn't update this user.");
       }
     });
   }
@@ -126,6 +165,11 @@ export function UsersManager({
       <PageHeader
         title="Users & Roles"
         description="Control who can access the admin panel and what each role is allowed to do."
+        actions={
+          <PrimaryButton icon="person_add" onClick={openCreate}>
+            Add user
+          </PrimaryButton>
+        }
       />
 
       {error && (
@@ -182,8 +226,8 @@ export function UsersManager({
                     <div className="flex justify-end gap-2">
                       <IconButton
                         icon="edit"
-                        title="Edit role"
-                        onClick={() => openRoleEditor(u)}
+                        title="Edit user"
+                        onClick={() => openEditor(u)}
                       />
                       <IconButton
                         icon={u.status === "SUSPENDED" ? "lock_open" : "lock"}
@@ -264,24 +308,98 @@ export function UsersManager({
       </Card>
 
       <Modal
-        open={!!roleTarget}
-        onClose={() => setRoleTarget(null)}
-        title="Change role"
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        title="Add user"
         footer={
           <>
-            <SecondaryButton onClick={() => setRoleTarget(null)}>Cancel</SecondaryButton>
-            <PrimaryButton onClick={saveRole}>Save</PrimaryButton>
+            <SecondaryButton onClick={() => setCreateOpen(false)}>Cancel</SecondaryButton>
+            <PrimaryButton onClick={saveCreate} disabled={isPending}>
+              Create
+            </PrimaryButton>
           </>
         }
       >
-        <p className="mb-3 text-sm text-on-surface-variant">
-          Update the role for <strong className="text-on-surface">{roleTarget?.name}</strong>.
-        </p>
+        <FormField label="Name">
+          <input
+            className={inputClass}
+            value={createDraft.name}
+            onChange={(e) => setCreateDraft((d) => ({ ...d, name: e.target.value }))}
+          />
+        </FormField>
+        <FormField label="Email">
+          <input
+            type="email"
+            className={inputClass}
+            value={createDraft.email}
+            onChange={(e) => setCreateDraft((d) => ({ ...d, email: e.target.value }))}
+          />
+        </FormField>
+        <FormField label="Password" hint="At least 8 characters.">
+          <input
+            type="password"
+            className={inputClass}
+            value={createDraft.password}
+            onChange={(e) => setCreateDraft((d) => ({ ...d, password: e.target.value }))}
+          />
+        </FormField>
         <FormField label="Role">
           <select
             className={inputClass}
-            value={roleDraft}
-            onChange={(e) => setRoleDraft(e.target.value as Role)}
+            value={createDraft.role}
+            onChange={(e) => setCreateDraft((d) => ({ ...d, role: e.target.value as Role }))}
+          >
+            {ROLES.map((r) => (
+              <option key={r} value={r}>
+                {ROLE_LABELS[r]}
+              </option>
+            ))}
+          </select>
+        </FormField>
+      </Modal>
+
+      <Modal
+        open={!!editTarget}
+        onClose={() => setEditTarget(null)}
+        title="Edit user"
+        footer={
+          <>
+            <SecondaryButton onClick={() => setEditTarget(null)}>Cancel</SecondaryButton>
+            <PrimaryButton onClick={saveEdit} disabled={isPending}>
+              Save
+            </PrimaryButton>
+          </>
+        }
+      >
+        <FormField label="Name">
+          <input
+            className={inputClass}
+            value={editDraft.name}
+            onChange={(e) => setEditDraft((d) => ({ ...d, name: e.target.value }))}
+          />
+        </FormField>
+        <FormField label="Email">
+          <input
+            type="email"
+            className={inputClass}
+            value={editDraft.email}
+            onChange={(e) => setEditDraft((d) => ({ ...d, email: e.target.value }))}
+          />
+        </FormField>
+        <FormField label="New password" hint="Leave blank to keep the current password.">
+          <input
+            type="password"
+            className={inputClass}
+            value={editDraft.password}
+            onChange={(e) => setEditDraft((d) => ({ ...d, password: e.target.value }))}
+          />
+        </FormField>
+        <FormField label="Role">
+          <select
+            className={inputClass}
+            value={editDraft.role}
+            disabled={editTarget?.id === currentUserId}
+            onChange={(e) => setEditDraft((d) => ({ ...d, role: e.target.value as Role }))}
           >
             {ROLES.map((r) => (
               <option key={r} value={r}>
