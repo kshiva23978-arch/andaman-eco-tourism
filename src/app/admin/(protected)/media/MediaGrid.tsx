@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Card, SecondaryButton, PrimaryButton, Modal } from "@/components/admin/AdminUI";
-import { deleteMediaAction } from "./actions";
+import { ACCEPT_ATTR, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES } from "@/lib/upload-limits";
+import { deleteMediaAction, uploadMediaAction } from "./actions";
 
 export type MediaRow = {
   id: string;
@@ -161,23 +162,200 @@ export function MediaGrid({ items }: { items: MediaRow[] }) {
         )}
       </Modal>
 
-      <Modal
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
-        title="Upload media"
-        footer={
-          <>
-            <SecondaryButton onClick={() => setUploadOpen(false)}>Cancel</SecondaryButton>
-            <PrimaryButton onClick={() => setUploadOpen(false)}>Upload</PrimaryButton>
-          </>
-        }
-      >
-        <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-black/20 px-4 py-10 text-center text-sm text-on-surface-variant">
-          <span className="material-symbols-outlined text-[32px]">cloud_upload</span>
-          Drag and drop files here, or click to browse.
-          <span className="text-xs">File storage isn&apos;t wired up yet — this records nothing.</span>
-        </div>
-      </Modal>
+      {uploadOpen && (
+        <UploadDialog
+          onClose={() => setUploadOpen(false)}
+          onUploaded={() => router.refresh()}
+        />
+      )}
     </div>
+  );
+}
+
+type QueuedFile = {
+  id: number;
+  file: File;
+  status: "queued" | "uploading" | "done" | "error";
+  error?: string;
+};
+
+const MB = 1024 * 1024;
+
+function formatBytes(bytes: number) {
+  return bytes < MB ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / MB).toFixed(1)} MB`;
+}
+
+/** Client-side pre-check for instant feedback; the server re-validates the actual bytes. */
+function precheck(file: File): string | undefined {
+  const isVideo = file.type.startsWith("video/") || /\.(mp4|webm)$/i.test(file.name);
+  const limit = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+  if (file.size > limit) return `Too large — ${isVideo ? "videos" : "images"} are limited to ${limit / MB} MB.`;
+  if (!/\.(jpe?g|png|webp|gif|avif|mp4|webm)$/i.test(file.name)) {
+    return "Unsupported type. Use JPG, PNG, WebP, GIF, AVIF, MP4 or WebM.";
+  }
+  return undefined;
+}
+
+function UploadDialog({ onClose, onUploaded }: { onClose: () => void; onUploaded: () => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const nextId = useRef(0);
+  const [queue, setQueue] = useState<QueuedFile[]>([]);
+  const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const pending = queue.filter((q) => q.status === "queued");
+  const doneCount = queue.filter((q) => q.status === "done").length;
+  const finished = queue.length > 0 && pending.length === 0 && !uploading;
+
+  function addFiles(files: FileList | null) {
+    if (!files) return;
+    const added: QueuedFile[] = Array.from(files).map((file) => {
+      const error = precheck(file);
+      return { id: nextId.current++, file, status: error ? "error" : "queued", error };
+    });
+    setQueue((q) => [...q, ...added]);
+  }
+
+  function update(id: number, patch: Partial<QueuedFile>) {
+    setQueue((q) => q.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+  }
+
+  async function startUpload() {
+    setUploading(true);
+    let uploadedAny = false;
+    // One request per file keeps each under the server's body-size limit.
+    for (const item of pending) {
+      update(item.id, { status: "uploading" });
+      try {
+        const data = new FormData();
+        data.append("file", item.file);
+        const result = await uploadMediaAction(data);
+        if (result.ok) {
+          uploadedAny = true;
+          update(item.id, { status: "done" });
+        } else {
+          update(item.id, { status: "error", error: result.error });
+        }
+      } catch {
+        update(item.id, { status: "error", error: "Upload failed — check your connection and permissions." });
+      }
+    }
+    setUploading(false);
+    if (uploadedAny) onUploaded();
+  }
+
+  return (
+    <Modal
+      open
+      onClose={uploading ? () => {} : onClose}
+      title="Upload media"
+      footer={
+        <>
+          <SecondaryButton onClick={onClose} disabled={uploading}>
+            {finished ? "Close" : "Cancel"}
+          </SecondaryButton>
+          <PrimaryButton
+            icon="upload"
+            onClick={startUpload}
+            disabled={uploading || pending.length === 0}
+          >
+            {uploading
+              ? "Uploading…"
+              : pending.length > 0
+                ? `Upload ${pending.length} file${pending.length === 1 ? "" : "s"}`
+                : "Upload"}
+          </PrimaryButton>
+        </>
+      }
+    >
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          if (!uploading) addFiles(e.dataTransfer.files);
+        }}
+        disabled={uploading}
+        className={`flex w-full flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-10 text-center text-sm transition-colors ${
+          dragging
+            ? "border-secondary bg-secondary-container/40 text-on-surface"
+            : "border-black/20 text-on-surface-variant hover:bg-black/[0.02]"
+        }`}
+      >
+        <span className="material-symbols-outlined text-[32px]">cloud_upload</span>
+        Drag and drop files here, or click to browse.
+        <span className="text-xs">
+          JPG, PNG, WebP, GIF, AVIF up to {MAX_IMAGE_BYTES / MB} MB · MP4, WebM up to{" "}
+          {MAX_VIDEO_BYTES / MB} MB
+        </span>
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        accept={ACCEPT_ATTR}
+        className="hidden"
+        onChange={(e) => {
+          addFiles(e.target.files);
+          e.target.value = ""; // allow re-picking the same file
+        }}
+      />
+
+      {queue.length > 0 && (
+        <ul className="mt-4 flex max-h-64 flex-col gap-2 overflow-y-auto">
+          {queue.map((item) => (
+            <li key={item.id} className="flex items-center gap-3 rounded-lg border border-black/10 px-3 py-2">
+              <span
+                className={`material-symbols-outlined text-[20px] ${
+                  item.status === "done"
+                    ? "text-secondary"
+                    : item.status === "error"
+                      ? "text-error"
+                      : item.status === "uploading"
+                        ? "animate-spin text-on-surface-variant"
+                        : "text-on-surface-variant"
+                }`}
+              >
+                {item.status === "done"
+                  ? "check_circle"
+                  : item.status === "error"
+                    ? "error"
+                    : item.status === "uploading"
+                      ? "progress_activity"
+                      : "draft"}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-on-surface">{item.file.name}</p>
+                <p className={`text-xs ${item.status === "error" ? "text-error" : "text-on-surface-variant"}`}>
+                  {item.error ?? formatBytes(item.file.size)}
+                </p>
+              </div>
+              {item.status !== "uploading" && item.status !== "done" && !uploading && (
+                <button
+                  type="button"
+                  onClick={() => setQueue((q) => q.filter((x) => x.id !== item.id))}
+                  className="rounded p-1 text-on-surface-variant hover:bg-black/5"
+                  aria-label={`Remove ${item.file.name}`}
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {finished && doneCount > 0 && (
+        <p className="mt-3 text-sm font-medium text-secondary">
+          {doneCount} file{doneCount === 1 ? "" : "s"} added to the library.
+        </p>
+      )}
+    </Modal>
   );
 }

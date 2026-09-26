@@ -2,7 +2,6 @@
 
 import { useMemo, useRef, useState } from "react";
 import { DestinationCard } from "@/components/destinations/DestinationCard";
-import { regions } from "@/lib/data/destinations";
 import type { Destination } from "@/lib/types";
 import { DecorativeLeaf } from "../ui/DecorativeLeaf";
 import { GridReveal } from "@/components/ui/GridReveal";
@@ -26,8 +25,11 @@ function getPageItems(current: number, total: number): Array<number | null> {
 
 export function DestinationsExplorer({
   destinations,
+  regions,
 }: {
   destinations: Destination[];
+  /** Region names for the filter, managed in the admin. */
+  regions: string[];
 }) {
   const [region, setRegion] = useState<string>("All");
   const [query, setQuery] = useState("");

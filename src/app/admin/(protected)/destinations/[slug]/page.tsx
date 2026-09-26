@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getPageContent } from "@/lib/content/page-content-db";
 import { DestinationEditorClient } from "./DestinationEditorClient";
 
 export default async function DestinationEditorPage({
@@ -9,9 +10,12 @@ export default async function DestinationEditorPage({
 }) {
   const { slug } = await params;
   const isNew = slug === "new";
+  const { regions } = await getPageContent("destinations");
 
   if (isNew) {
-    return <DestinationEditorClient initialData={null} originalSlug={null} status={null} />;
+    return (
+      <DestinationEditorClient initialData={null} originalSlug={null} status={null} regions={regions} />
+    );
   }
 
   const destination = await prisma.destination.findUnique({ where: { slug } });
@@ -19,6 +23,7 @@ export default async function DestinationEditorPage({
 
   return (
     <DestinationEditorClient
+      regions={regions}
       initialData={{
         slug: destination.slug,
         title: destination.title,
@@ -44,6 +49,7 @@ export default async function DestinationEditorPage({
         image: destination.image,
         heroImagePosition: destination.heroImagePosition ?? "",
         galleryImages: destination.galleryImages,
+        galleryTitles: destination.galleryTitles,
       }}
       originalSlug={destination.slug}
       status={destination.status}

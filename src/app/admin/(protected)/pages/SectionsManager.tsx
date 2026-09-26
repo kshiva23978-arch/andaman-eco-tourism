@@ -283,6 +283,75 @@ export function SectionsManager({
         }
       />
 
+      {/* Editors that drive the live site. */}
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {[
+          {
+            href: "/admin/pages/home",
+            icon: "home",
+            title: "Home page",
+            body: "Hero, island map text, featured carousels, sustainability blocks and eco-guidelines.",
+          },
+          {
+            href: "/admin/pages/map",
+            icon: "pin_drop",
+            title: "Map pins",
+            body: "Pins and labels on the home page's island map.",
+          },
+          {
+            href: "/admin/pages/destinations",
+            icon: "travel_explore",
+            title: "Destinations page",
+            body: "Directory banner, floating photos and the region list used by the filter.",
+          },
+          {
+            href: "/admin/pages/destination-page",
+            icon: "view_agenda",
+            title: "Destination page layout",
+            body: "Section headings, labels and backgrounds shared by every destination page.",
+          },
+          {
+            href: "/admin/pages/activities",
+            icon: "hiking",
+            title: "Activities guide page",
+            body: "Hero slider, Marine/Terrestrial groups, conservation and coastal sections.",
+          },
+          {
+            href: "/admin/pages/activity-page",
+            icon: "view_agenda",
+            title: "Activity page layout",
+            body: "Headings, labels, the permit button link and backgrounds on every activity page.",
+          },
+        ].map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="group flex items-start gap-3 rounded-xl border border-secondary/30 bg-secondary-container/40 p-4 transition-colors hover:bg-secondary-container/70"
+          >
+            <span className="material-symbols-outlined flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-white">
+              {item.icon}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-2 font-semibold text-on-surface">
+                {item.title}
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase text-white">
+                  Live
+                </span>
+              </span>
+              <span className="mt-0.5 block text-sm text-on-surface-variant">{item.body}</span>
+            </span>
+            <span className="material-symbols-outlined text-secondary transition-transform group-hover:translate-x-1">
+              arrow_forward
+            </span>
+          </Link>
+        ))}
+      </div>
+
+      <p className="mb-3 flex items-center gap-2 text-sm text-on-surface-variant">
+        <span className="material-symbols-outlined text-[18px]">info</span>
+        The sections below are saved but not yet shown on the public site.
+      </p>
+
       <div className="mb-4 flex flex-wrap gap-2">
         {FILTER_TABS.map((p) => (
           <button

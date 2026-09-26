@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# admin media uploads (served by src/app/uploads/[...path]/route.ts)
+/storage/

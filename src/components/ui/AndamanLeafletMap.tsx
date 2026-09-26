@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { MapContainer, Marker, Tooltip, TileLayer, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { DESTINATION_PINS } from "@/lib/data/destination-pins";
+import type { DestinationPin } from "@/lib/data/destination-pins";
 
 const INITIAL_ZOOM = 8;
 // From this zoom every label stays visible; below it only featured pins are labelled
@@ -48,7 +48,13 @@ const makePinIcon = (size: number) =>
 const featuredPinIcon = makePinIcon(16);
 const pinIcon = makePinIcon(12);
 
-export function AndamanLeafletMap({ heightClass }: { heightClass: string }) {
+export function AndamanLeafletMap({
+  heightClass,
+  pins,
+}: {
+  heightClass: string;
+  pins: DestinationPin[];
+}) {
   const router = useRouter();
   const [zoom, setZoom] = useState(INITIAL_ZOOM);
   const showAllLabels = zoom >= ALL_LABELS_ZOOM;
@@ -73,17 +79,18 @@ export function AndamanLeafletMap({ heightClass }: { heightClass: string }) {
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <ZoomTracker onZoom={setZoom} />
-        {DESTINATION_PINS.map((spot) => {
-          const open = () => router.push(`/destinations/${spot.slug}`);
+        {pins.map((spot, index) => {
+          const slug = spot.slug;
+          const open = slug ? () => router.push(`/destinations/${slug}`) : undefined;
           const permanent = Boolean(spot.featured) || showAllLabels;
           const dir = spot.dir ?? "right";
           return (
             <Marker
-              key={spot.slug}
+              key={`${spot.slug ?? spot.label}-${index}`}
               position={[spot.lat, spot.lng]}
               icon={spot.featured ? featuredPinIcon : pinIcon}
-              title={`View ${spot.label}`}
-              eventHandlers={{ click: open }}
+              title={open ? `View ${spot.label}` : spot.label}
+              eventHandlers={open ? { click: open } : {}}
               zIndexOffset={spot.featured ? 1000 : 0}
             >
               {/* Tooltips ignore the mouse by default; `interactive` makes the label clickable too.
@@ -93,10 +100,10 @@ export function AndamanLeafletMap({ heightClass }: { heightClass: string }) {
                 direction={dir}
                 offset={dir === "right" ? [14, 0] : [-14, 0]}
                 permanent={permanent}
-                interactive
+                interactive={Boolean(open)}
                 opacity={0.95}
                 className="andaman-map-tooltip"
-                eventHandlers={{ click: open }}
+                eventHandlers={open ? { click: open } : {}}
               >
                 {spot.label}
               </Tooltip>

@@ -32,6 +32,7 @@ enum LabelSide {
 enum BackgroundType {
   IMAGE
   COLOR
+  PLAIN
 }
 
 enum LogCategory {
@@ -98,6 +99,8 @@ model Destination {
   image             String
   heroImagePosition String?
   galleryImages     String[]
+  /// Caption per gallery image, same order/length as galleryImages.
+  galleryTitles     String[]      @default([])
   status            ContentStatus @default(DRAFT)
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
@@ -110,6 +113,11 @@ model Activity {
   tagline              String
   icon                 String
   heroImage            String
+  heroBackgroundType   BackgroundType      @default(IMAGE)
+  heroBackgroundColor  String?
+  heroOverlayEnabled   Boolean             @default(false)
+  heroOverlayColor     String              @default("#000000")
+  heroOverlayOpacity   Int                 @default(45)
   overview             String[]
   duration             String
   difficulty           String
@@ -121,6 +129,8 @@ model Activity {
   guideCallout         String?
   guideBullets         String[]
   galleryImages        String[]
+  /// Caption per gallery image, same order/length as galleryImages.
+  galleryTitles        String[]            @default([])
   status               ContentStatus       @default(DRAFT)
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
@@ -190,6 +200,14 @@ model AuditLog {
   severity   LogSeverity @default(INFO)
   message    String
   createdAt  DateTime    @default(now())
+}
+
+/// Editable copy/media for a whole public page, stored as one JSON document per page
+/// (key "home", …). Shape and defaults live in src/lib/content/*.ts.
+model PageContent {
+  key       String   @id
+  data      Json
+  updatedAt DateTime @updatedAt
 }
 
 model SiteSetting {

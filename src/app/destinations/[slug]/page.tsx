@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getDestinationBySlug } from "@/lib/data/destinations";
+import { getPublishedDestinations } from "@/lib/data/destinations-db";
+import { getPageContent } from "@/lib/content/page-content-db";
+import { withTitle } from "@/lib/content/normalize";
 import { findNearbyDestination } from "@/lib/format";
 import { DestinationCard } from "@/components/destinations/DestinationCard";
 import { DestinationGallery } from "@/components/destinations/DestinationGallery";
@@ -12,15 +14,11 @@ import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { RevealSide } from "@/components/ui/RevealSide";
 import { GridReveal } from "@/components/ui/GridReveal";
 
-// Used for "nearby place" mentions that aren't in the destinations dataset
-// (so there's no real photo for them) — cycled per card for visual variety.
-const NEARBY_FALLBACK_IMAGES = [
-  "/images/bg/forest-bg.jpg",
-  "/images/bg/view-bg.jpg",
-  "/images/bg/beach.jpg",
-  "/images/bg/starfish-sea.jpg",
-  "/images/bg/canvas-b.jpg",
-];
+/** `backgroundImage` style for an admin-set section background, or nothing when cleared. */
+const bg = (src: string) => (src ? { backgroundImage: `url('${src}')` } : undefined);
+
+// Rendered per request from the database; the query is cached in destinations-db.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -28,7 +26,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const destination = getDestinationBySlug(slug);
+  const destination = (await getPublishedDestinations()).find((d) => d.slug === slug);
   if (!destination) return {};
   return {
     title: destination.title,
@@ -72,7 +70,11 @@ export default async function DestinationDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const destination = getDestinationBySlug(slug);
+  const [allDestinations, page] = await Promise.all([
+    getPublishedDestinations(),
+    getPageContent("destination-page"),
+  ]);
+  const destination = allDestinations.find((d) => d.slug === slug);
 
   if (!destination) {
     notFound();
@@ -80,7 +82,7 @@ export default async function DestinationDetailPage({
 
   const nearby = destination.nearbyPlaces.map((text) => ({
     text,
-    match: findNearbyDestination(text, destination.slug),
+    match: findNearbyDestination(text, destination.slug, allDestinations),
   }));
 
   return (
@@ -103,7 +105,7 @@ export default async function DestinationDetailPage({
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-30"
-          style={{ backgroundImage: "url('/images/bg/destination-head-bg.png')" }}
+          style={bg(page.facts.background)}
         />
         {/* Fade the textured background in from the hero's wave-divider color so the seam disappears */}
         <div
@@ -120,11 +122,11 @@ export default async function DestinationDetailPage({
             start="top 95%"
           >
             {[
-              { label: "Best Time to Visit", value: destination.bestTime, icon: "calendar_month" },
-              { label: "Timing", value: destination.timing, icon: "schedule" },
-              { label: "Entry Fee", value: destination.fees, icon: "payments" },
-              { label: "Permits", value: destination.permits, icon: "badge" },
-              { label: "Range & Division", value: destination.rangeDivision || "—", icon: "forest" },
+              { label: page.facts.bestTimeLabel, value: destination.bestTime, icon: "calendar_month" },
+              { label: page.facts.timingLabel, value: destination.timing, icon: "schedule" },
+              { label: page.facts.feeLabel, value: destination.fees, icon: "payments" },
+              { label: page.facts.permitsLabel, value: destination.permits, icon: "badge" },
+              { label: page.facts.rangeLabel, value: destination.rangeDivision || "—", icon: "forest" },
             ].map((fact) => (
               <div
                 key={fact.label}
@@ -144,7 +146,7 @@ export default async function DestinationDetailPage({
                 <span className="material-symbols-outlined text-[20px]">emergency</span>
               </span>
               <div className="mb-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--coral)]">
-                Nearest Hospital
+                {page.facts.hospitalLabel}
               </div>
               <p className="text-[15px] leading-snug text-[var(--ink)]">{destination.hospital}</p>
             </div>
@@ -153,16 +155,23 @@ export default async function DestinationDetailPage({
       </section>
 
       {/* Location */}
-      <DestinationMapSection title={destination.title} overview={destination.overview} />
+      <DestinationMapSection
+        title={destination.title}
+        overview={destination.overview}
+        content={page.location}
+      />
 
       {/* Gallery */}
       <section className="bg-[var(--paper)] py-8 ">
         <ScrollReveal as="div" y={24}>
           <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-            <SectionHead kicker="Gallery">{destination.title} in frame</SectionHead>
+            <SectionHead kicker={page.gallery.kicker}>
+              {withTitle(page.gallery.title, destination.title)}
+            </SectionHead>
           </div>
           <DestinationGallery
             images={destination.galleryImages ?? [destination.image]}
+            captions={destination.galleryImages ? destination.galleryTitles : undefined}
             title={destination.title}
           />
         </ScrollReveal>
@@ -173,11 +182,11 @@ export default async function DestinationDetailPage({
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40 mix-blend-soft-light"
-          style={{ backgroundImage: "url('/images/bg/bg-texture.jpg')" }}
+          style={bg(page.reach.background)}
         />
         <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <SectionHead kicker="Getting here" tone="dark">
-            How to reach {destination.title}
+          <SectionHead kicker={page.reach.kicker} tone="dark">
+            {withTitle(page.reach.title, destination.title)}
           </SectionHead>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
             <RevealSide as="div" className="lg:col-span-8 flex flex-col" x={56}>
@@ -187,7 +196,7 @@ export default async function DestinationDetailPage({
                 </div>
                 <div>
                   <h4 className="text-[17px] mb-1.5 text-[var(--sand)]" style={{ fontFamily: "var(--font-fraunces), serif" }}>
-                    By Road
+                    {page.reach.roadLabel}
                   </h4>
                   <p className="text-[14.5px] text-white/[0.78] leading-relaxed text-justify">
                     {destination.accessibility.road}
@@ -200,7 +209,7 @@ export default async function DestinationDetailPage({
                 </div>
                 <div>
                   <h4 className="text-[17px] mb-1.5 text-[var(--sand)]" style={{ fontFamily: "var(--font-fraunces), serif" }}>
-                    By Ship / Boat
+                    {page.reach.shipLabel}
                   </h4>
                   <p className="text-[14.5px] text-white/[0.78] leading-relaxed text-justify">
                     {destination.accessibility.ship}
@@ -232,11 +241,11 @@ export default async function DestinationDetailPage({
       {/* Entry Fees & Permits */}
       <section className="bg-[var(--paper)] py-20">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <SectionHead kicker="Practical">Entry fees &amp; permits</SectionHead>
+          <SectionHead kicker={page.fees.kicker}>{withTitle(page.fees.title, destination.title)}</SectionHead>
           <RevealSide as="div" className="grid grid-cols-1 md:grid-cols-2 gap-5" x={56}>
             <div className="bg-[var(--sand)] rounded-[10px] p-7">
               <h4 className="text-[12.5px] uppercase tracking-[0.06em] text-[var(--forest-mid)] font-bold mb-3">
-                Fees
+                {page.fees.feesLabel}
               </h4>
               <p className="text-[14.5px] text-[var(--ink-soft)] leading-relaxed whitespace-pre-line">
                 {destination.fees}
@@ -244,7 +253,7 @@ export default async function DestinationDetailPage({
             </div>
             <div className="bg-[var(--sand)] rounded-[10px] p-7">
               <h4 className="text-[12.5px] uppercase tracking-[0.06em] text-[var(--forest-mid)] font-bold mb-3">
-                Permits
+                {page.fees.permitsLabel}
               </h4>
               <p className="text-[14.5px] text-[var(--ink-soft)] leading-relaxed whitespace-pre-line">
                 {destination.permits}
@@ -259,7 +268,7 @@ export default async function DestinationDetailPage({
         <div
           aria-hidden="true"
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/bg/12953515_Scene-12.jpg')" }}
+          style={bg(page.whatToSee.background)}
         />
         <div
           aria-hidden="true"
@@ -267,8 +276,8 @@ export default async function DestinationDetailPage({
           style={{ background: "linear-gradient(160deg, rgba(15,43,30,0.88), rgba(22,62,43,0.82))" }}
         />
         <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <SectionHead kicker="Highlights" tone="dark">
-            What to see
+          <SectionHead kicker={page.whatToSee.kicker} tone="dark">
+            {withTitle(page.whatToSee.title, destination.title)}
           </SectionHead>
           <RevealSide as="div" className="flex flex-wrap gap-3" x={36}>
             {destination.whatToSee.map((item) => (
@@ -287,7 +296,7 @@ export default async function DestinationDetailPage({
       {/* Activities */}
       <section className="bg-[var(--paper)] py-20">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <SectionHead kicker="On site">Activities</SectionHead>
+          <SectionHead kicker={page.activities.kicker}>{withTitle(page.activities.title, destination.title)}</SectionHead>
           <RevealSide as="div" className="grid grid-cols-1 sm:grid-cols-2 gap-3.5" x={48}>
             {destination.activities.map((item) => (
               <div
@@ -309,12 +318,12 @@ export default async function DestinationDetailPage({
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.08] mix-blend-soft-light"
-          style={{ backgroundImage: "url('/images/bg/bg-deer.png')" }}
+          style={bg(page.amenities.background)}
         />
         <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-14">
           <div>
-            <SectionHead kicker="On-site amenities" tone="dark">
-              What&apos;s there — and what isn&apos;t
+            <SectionHead kicker={page.amenities.kicker} tone="dark">
+              {withTitle(page.amenities.title, destination.title)}
             </SectionHead>
             <RevealSide as="div" className="flex flex-col gap-3" x={48}>
               {destination.facility.map((item) => (
@@ -328,8 +337,8 @@ export default async function DestinationDetailPage({
             </RevealSide>
           </div>
           <div>
-            <SectionHead kicker="Accommodation" tone="dark">
-              Where to stay
+            <SectionHead kicker={page.amenities.stayKicker} tone="dark">
+              {withTitle(page.amenities.stayTitle, destination.title)}
             </SectionHead>
             <RevealSide as="div" x={48}>
               <div className="bg-white/[0.08] border border-white/[0.18] rounded-[10px] p-7">
@@ -345,7 +354,7 @@ export default async function DestinationDetailPage({
       {/* Conservation & Eco-Practices */}
       <section className="bg-[var(--paper)] py-20">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <SectionHead kicker="Tread lightly">Conservation &amp; eco-practices</SectionHead>
+          <SectionHead kicker={page.conservation.kicker}>{withTitle(page.conservation.title, destination.title)}</SectionHead>
           <ScrollReveal as="div" y={16}>
             <p className="max-w-[64ch] text-[15.5px] text-[var(--ink-soft)] leading-relaxed mb-11 text-justify">
               {destination.conservationNotes}
@@ -371,7 +380,7 @@ export default async function DestinationDetailPage({
       {nearby.length > 0 ? (
         <section
           className="relative overflow-hidden bg-cover bg-center py-20 text-[var(--sand)]"
-          style={{ backgroundImage: "url('/images/bg/bg-nearby.jpg')" }}
+          style={bg(page.nearby.background)}
         >
           <div
             aria-hidden="true"
@@ -379,8 +388,8 @@ export default async function DestinationDetailPage({
             style={{ background: "linear-gradient(160deg, rgba(15,43,30,0.88), rgba(10,33,24,0.82))" }}
           />
           <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-            <SectionHead kicker="While you're here" tone="dark">
-              Nearby places
+            <SectionHead kicker={page.nearby.kicker} tone="dark">
+              {withTitle(page.nearby.title, destination.title)}
             </SectionHead>
             <RevealSide
               as="div"
@@ -402,7 +411,7 @@ export default async function DestinationDetailPage({
                 // separator (spaces on both sides, so "eco-tourism" survives).
                 const label = text.split(/[:(]| [–—-] /)[0].trim();
                 const fallbackImage =
-                  NEARBY_FALLBACK_IMAGES[index % NEARBY_FALLBACK_IMAGES.length];
+                  page.nearby.fallbackImages[index % page.nearby.fallbackImages.length];
 
                 return (
                   <div key={text} className={wrapperClass}>
@@ -418,7 +427,7 @@ export default async function DestinationDetailPage({
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/[0.35] to-black/10" />
                         <div className="absolute inset-0 flex flex-col justify-end p-4">
                           <span className="mb-3 w-fit rounded-full glass-panel-soft px-4 py-1.5 font-label-md text-[11px] uppercase tracking-widest text-white">
-                            Nearby
+                            {page.nearby.badge}
                           </span>
                           <h3 className="mb-3 font-headline-md text-lg leading-snug text-white drop-shadow-sm line-clamp-2">
                             {label}
@@ -440,7 +449,7 @@ export default async function DestinationDetailPage({
       {/* Safety & Travel Tips */}
       <section className="bg-[var(--paper)] py-20">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <SectionHead kicker="Before you go">Safety &amp; travel tips</SectionHead>
+          <SectionHead kicker={page.safety.kicker}>{withTitle(page.safety.title, destination.title)}</SectionHead>
           <RevealSide as="div" className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-4" x={56}>
             <div
               className="rounded-[10px] p-8 border row-span-2"
@@ -451,7 +460,7 @@ export default async function DestinationDetailPage({
             >
               <div className="flex items-center gap-2.5 text-[var(--coral)] font-bold text-[16px] mb-3">
                 <span className="material-symbols-outlined text-[20px]">emergency</span>
-                Emergency: 112
+                {page.safety.emergencyLabel}
               </div>
               <p className="text-[14px] leading-relaxed" style={{ color: "#6b3822" }}>
                 {destination.hospital}

@@ -6,14 +6,15 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
-  Badge,
+  StatusSwitch,
+  type ContentStatus,
   SecondaryButton,
   IconButton,
   Modal,
   Pagination,
   inputClass,
 } from "@/components/admin/AdminUI";
-import { deleteDestinationAction, toggleDestinationStatusAction } from "./actions";
+import { deleteDestinationAction, setDestinationStatusAction } from "./actions";
 
 export type Row = {
   slug: string;
@@ -87,9 +88,9 @@ export function DestinationsTable({
     });
   }
 
-  function toggleStatus(slug: string) {
+  function changeStatus(slug: string, status: ContentStatus) {
     startTransition(async () => {
-      await toggleDestinationStatusAction(slug);
+      await setDestinationStatusAction(slug, status);
       router.refresh();
     });
   }
@@ -151,11 +152,12 @@ export function DestinationsTable({
                   </td>
                   <td className="px-5 py-3 text-on-surface-variant">{row.region}</td>
                   <td className="px-5 py-3">
-                    <button onClick={() => toggleStatus(row.slug)} disabled={isPending}>
-                      <Badge tone={row.status === "PUBLISHED" ? "success" : "warning"}>
-                        {row.status === "PUBLISHED" ? "Published" : "Draft"}
-                      </Badge>
-                    </button>
+                    <StatusSwitch
+                      compact
+                      status={row.status}
+                      onChange={(s) => changeStatus(row.slug, s)}
+                      disabled={isPending}
+                    />
                   </td>
                   <td className="px-5 py-3">
                     <div className="flex justify-end gap-2">

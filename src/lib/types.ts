@@ -1,11 +1,5 @@
-export type Region =
-  | "South Andaman"
-  | "Diglipur"
-  | "Mayabunder"
-  | "Middle Andaman"
-  | "Baratang"
-  | "Little Andaman"
-  | "Swaraj Dweep";
+/** Region name; the list of regions is managed in the admin (destinations page content). */
+export type Region = string;
 
 export interface Destination {
   slug: string;
@@ -36,6 +30,8 @@ export interface Destination {
    * center crop of a portrait source lands on an illegible patch. */
   heroImagePosition?: string;
   galleryImages?: string[];
+  /** Caption per gallery image, index-aligned with `galleryImages`. */
+  galleryTitles?: string[];
 }
 
 export interface ActivityEquipmentGroup {
@@ -67,4 +63,14 @@ export interface Activity {
   guideCallout?: string;
   guideBullets?: string[];
   galleryImages?: string[];
+  /** Caption per gallery image, index-aligned with `galleryImages`. */
+  galleryTitles?: string[];
+  /** Hero banner styling set in the admin; absent means the default photo hero. */
+  heroBackground?: HeroBackground;
+}
+
+export interface HeroBackground {
+  type: "image" | "color" | "plain";
+  color: string;
+  overlay: { enabled: boolean; color: string; opacity: number };
 }

@@ -9,6 +9,7 @@ import {
   faRoute,
 } from "@fortawesome/free-solid-svg-icons";
 import { GoogleMap } from "@/components/destinations/GoogleMap";
+import type { DestinationPageContent } from "@/lib/content/destinations";
 import { RevealSide } from "@/components/ui/RevealSide";
 
 // Its CSS is imported in app/layout.tsx. Without this, Font Awesome injects an
@@ -24,9 +25,12 @@ fontAwesomeConfig.autoAddCss = false;
 export function DestinationMapSection({
   title,
   overview,
+  content,
 }: {
   title: string;
   overview: string;
+  /** Labels and background, managed in the admin (destination page layout). */
+  content: DestinationPageContent["location"];
 }) {
   const query = `${title}, Andaman and Nicobar Islands, India`;
   const viewMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
@@ -37,7 +41,10 @@ export function DestinationMapSection({
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-repeat opacity-50 mix-blend-soft-light"
-        style={{ backgroundImage: "url('/images/bg/footprint-bg.jpg')", backgroundSize: "600px" }}
+        style={{
+          backgroundImage: content.background ? `url('${content.background}')` : undefined,
+          backgroundSize: "600px",
+        }}
       />
       <RevealSide as="div" className="relative grid grid-cols-1 lg:grid-cols-12" x={64}>
         {/* Map */}
@@ -75,7 +82,7 @@ export function DestinationMapSection({
         <div className="relative flex flex-col justify-center px-margin-mobile py-12 md:px-margin-desktop lg:col-span-4 lg:px-14 lg:py-0">
           <span className="relative mb-5 inline-flex w-fit items-center gap-2 rounded-full bg-white/[0.08] px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--lagoon-light)]">
             <FontAwesomeIcon icon={faLeaf} className="text-[12px]" />
-            Discover
+            {content.kicker}
           </span>
 
           <h2
@@ -97,7 +104,7 @@ export function DestinationMapSection({
                 icon={faRoute}
                 className="text-[13px] transition-transform group-hover:translate-x-0.5"
               />
-              Get Directions
+              {content.directionsLabel}
             </a>
             <a
               href={viewMapsUrl}
@@ -105,7 +112,7 @@ export function DestinationMapSection({
               rel="noopener noreferrer"
               className="group inline-flex items-center gap-2 rounded-full border border-white/25 px-5 py-3 text-[13.5px] font-semibold text-white transition-all hover:-translate-y-0.5 hover:border-white/50 hover:bg-white/10"
             >
-              View Larger Map
+              {content.largerMapLabel}
               <FontAwesomeIcon
                 icon={faArrowUpRightFromSquare}
                 className="text-[12px] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"

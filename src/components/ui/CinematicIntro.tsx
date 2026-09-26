@@ -16,17 +16,12 @@ const subscribeNoop = () => () => {};
  * element / FLIP), while the intro backdrop dissolves into the hero video.
  *
  * The hero must render its headline with `data-hero-title` and the same
- * font / line-height / line breaks (see HERO_TITLE_LINES) so the two match.
+ * font / line-height / line breaks (the same `titleLines`) so the two match.
  */
-
-const INTRO_VIDEO = "/videos/bg-banner.mp4";
 
 // Only play the full cinematic opener once per browser session; later visits
 // to the homepage (e.g. navigating back via the header) skip straight to the hero.
 const INTRO_SEEN_KEY = "andaman:intro-seen";
-
-/** Shared headline, one entry per rendered line. */
-export const HERO_TITLE_LINES = ["Discover Andaman", "& Nicobar Islands"];
 
 // Delay so the intro starts as the PageLoader (2.5s + 0.5s fade) clears.
 const LOADER_DELAY = 2.6;
@@ -43,9 +38,13 @@ interface CinematicIntroProps {
   /** Fired the moment the headline lands in the hero — show the hero content now. */
   onReveal?: () => void;
   onComplete?: () => void;
+  /** Headline, one entry per rendered line; the hero must render the same lines. */
+  titleLines: string[];
+  /** Background video behind the intro. */
+  video: string;
 }
 
-export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
+export function CinematicIntro({ onReveal, onComplete, titleLines, video }: CinematicIntroProps) {
   const [mounted, setMounted] = useState(true);
   // Read on the client only; the server (and hydration) always renders the overlay.
   const introSeen = useSyncExternalStore(
@@ -279,7 +278,7 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
       <div data-intro-backdrop className="absolute inset-0 bg-black">
         <div data-intro-bg className="absolute inset-0 will-change-transform">
           <video
-            src={INTRO_VIDEO}
+            src={video}
             autoPlay
             muted
             loop
@@ -336,7 +335,7 @@ export function CinematicIntro({ onReveal, onComplete }: CinematicIntroProps) {
             className="hero-title w-fit text-left leading-[1.05] will-change-transform"
             style={{ fontSize: "clamp(2.1rem, 8.5vw, 7.5rem)" }}
           >
-            {HERO_TITLE_LINES.map((line, li) => (
+            {titleLines.map((line, li) => (
               <span key={li} className="block overflow-hidden whitespace-nowrap">
                 {line.split("").map((ch, ci) => (
                   <span key={ci} data-word-char className="inline-block will-change-transform">

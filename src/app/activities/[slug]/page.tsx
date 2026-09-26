@@ -8,8 +8,13 @@ import { DestinationHero } from "@/components/destinations/DestinationHero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { RevealSide } from "@/components/ui/RevealSide";
 import { GridReveal } from "@/components/ui/GridReveal";
-import { getActivitiesBySlugs, getActivityBySlug } from "@/lib/data/activities";
-import { getDestinationsBySlugs } from "@/lib/data/destinations";
+import { getPublishedActivities, pickBySlugs } from "@/lib/data/activities-db";
+import { getPublishedDestinations } from "@/lib/data/destinations-db";
+import { getPageContent } from "@/lib/content/page-content-db";
+import { withTitle } from "@/lib/content/normalize";
+
+// Rendered per request from the database; the queries are cached in the *-db modules.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -17,7 +22,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const activity = getActivityBySlug(slug);
+  const activity = (await getPublishedActivities()).find((a) => a.slug === slug);
   if (!activity) return {};
   return {
     title: activity.title,
@@ -63,14 +68,20 @@ export default async function ActivityDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const activity = getActivityBySlug(slug);
+  const [activities, destinations, page] = await Promise.all([
+    getPublishedActivities(),
+    getPublishedDestinations(),
+    getPageContent("activity-page"),
+  ]);
+  const activity = activities.find((a) => a.slug === slug);
 
   if (!activity) {
     notFound();
   }
 
-  const availableAt = getDestinationsBySlugs(activity.destinationSlugs);
-  const related = getActivitiesBySlugs(activity.relatedActivitySlugs);
+  const availableAt = pickBySlugs(destinations, activity.destinationSlugs);
+  const related = pickBySlugs(activities, activity.relatedActivitySlugs);
+  const gallery = activity.galleryImages ?? [activity.heroImage];
 
   return (
     <div className="editorial">
@@ -78,6 +89,7 @@ export default async function ActivityDetailPage({
       <DestinationHero
         title={activity.title}
         image={activity.heroImage}
+        background={activity.heroBackground}
         scrollTargetId="activity-overview"
         breadcrumbs={[
           { label: "Home", href: "/" },
@@ -92,7 +104,7 @@ export default async function ActivityDetailPage({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 opacity-[0.35] mix-blend-multiply"
           style={{
-            backgroundImage: "url('/images/bg/bg-patter-act.jpg')",
+            backgroundImage: page.overview.background ? `url('${page.overview.background}')` : undefined,
             backgroundSize: "480px",
             maskImage: "radial-gradient(ellipse at center, black 40%, transparent 85%)",
             WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 85%)",
@@ -103,7 +115,7 @@ export default async function ActivityDetailPage({
             <div className="lg:col-span-8">
               <ScrollReveal as="div" y={28}>
                 <span className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-[var(--sand)] px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
-                  Official Activity Profile
+                  {page.overview.badge}
                 </span>
                 <p className="mb-6 max-w-2xl text-[16px] leading-relaxed text-[var(--ink-soft)]">
                   {activity.tagline}
@@ -120,7 +132,7 @@ export default async function ActivityDetailPage({
                     <span className="material-symbols-outlined text-[18px]">schedule</span>
                   </span>
                   <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--lagoon)]">
-                    Duration
+                    {page.overview.durationLabel}
                   </div>
                   <p className="mt-1 text-[15px] text-[var(--ink)]">{activity.duration}</p>
                 </div>
@@ -129,7 +141,7 @@ export default async function ActivityDetailPage({
                     <span className="material-symbols-outlined text-[18px]">trending_up</span>
                   </span>
                   <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--lagoon)]">
-                    Difficulty
+                    {page.overview.difficultyLabel}
                   </div>
                   <p className="mt-1 text-[15px] text-[var(--ink)]">{activity.difficulty}</p>
                 </div>
@@ -149,7 +161,7 @@ export default async function ActivityDetailPage({
               <RevealSide as="div" className="flex flex-col gap-5" x={48}>
                 <div className="rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-6">
                   <h4 className="mb-4 text-[12.5px] font-bold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
-                    Equipment Provided
+                    {page.overview.equipmentTitle}
                   </h4>
                   <ul className="flex flex-col gap-3">
                     {activity.equipmentProvided.map((item) => (
@@ -167,17 +179,22 @@ export default async function ActivityDetailPage({
                 </div>
                 <div className="rounded-2xl bg-[var(--sand)] p-6">
                   <h4 className="mb-3 text-[12.5px] font-bold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
-                    Permit Requirements
+                    {page.overview.permitTitle}
                   </h4>
                   <p className="mb-5 text-[14px] leading-relaxed text-[var(--ink-soft)]">
                     {activity.permitNote}
                   </p>
-                  <button
-                    type="button"
-                    className="w-full rounded-full bg-[var(--forest-deep)] px-5 py-3 text-[13.5px] font-semibold text-white transition-colors hover:bg-[var(--forest-mid)]"
-                  >
-                    Apply for Permit
-                  </button>
+                  {page.overview.permitButtonLabel && page.overview.permitButtonHref ? (
+                    <a
+                      href={page.overview.permitButtonHref}
+                      {...(/^https?:\/\//i.test(page.overview.permitButtonHref)
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                      className="block w-full rounded-full bg-[var(--forest-deep)] px-5 py-3 text-center text-[13.5px] font-semibold text-white transition-colors hover:bg-[var(--forest-mid)]"
+                    >
+                      {page.overview.permitButtonLabel}
+                    </a>
+                  ) : null}
                 </div>
               </RevealSide>
             </div>
@@ -192,8 +209,8 @@ export default async function ActivityDetailPage({
           className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(rgba(250,249,244,0.14)_1px,transparent_1px)] [background-size:14px_14px]"
         />
         <div className="relative mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
-          <SectionHead kicker="Non-negotiable" tone="dark">
-            Mandatory Eco-Guidelines
+          <SectionHead kicker={page.guidelines.kicker} tone="dark">
+            {withTitle(page.guidelines.title, activity.title)}
           </SectionHead>
           <RevealSide as="div" className="grid grid-cols-1 gap-4 md:grid-cols-2" x={48}>
             {activity.guidelines.map((guideline) => (
@@ -220,10 +237,11 @@ export default async function ActivityDetailPage({
       <section className="bg-[var(--paper)] py-16">
         <ScrollReveal as="div" y={24}>
           <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
-            <SectionHead kicker="Gallery">{activity.title} in frame</SectionHead>
+            <SectionHead kicker={page.gallery.kicker}>{withTitle(page.gallery.title, activity.title)}</SectionHead>
           </div>
           <DestinationGallery
-            images={activity.galleryImages ?? [activity.heroImage]}
+            images={gallery}
+            captions={activity.galleryImages ? activity.galleryTitles : undefined}
             title={activity.title}
           />
         </ScrollReveal>
@@ -235,22 +253,26 @@ export default async function ActivityDetailPage({
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-repeat opacity-25"
-            style={{ backgroundImage: "url('/images/bg/leaf-bg.jpg')", backgroundSize: "420px" }}
+            style={
+              page.destinations.background
+                ? { backgroundImage: `url('${page.destinations.background}')`, backgroundSize: "420px" }
+                : undefined
+            }
           />
           <div className="relative mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
             <ScrollReveal as="div" className="mb-10 text-center" y={24}>
               <span className="mx-auto mb-3 inline-flex w-fit items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
                 <span className="material-symbols-outlined text-[14px]">map</span>
-                Where to go
+                {page.destinations.chip}
               </span>
               <h2
                 className="mb-3 text-[clamp(1.6rem,3vw,2.25rem)] leading-tight font-semibold text-[var(--ink)]"
                 style={{ fontFamily: "var(--font-fraunces), serif" }}
               >
-                Available at these Destinations
+                {withTitle(page.destinations.title, activity.title)}
               </h2>
               <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-[var(--ink-soft)]">
-                Documented sites where this activity is practiced under forest-department guidelines.
+                {page.destinations.body}
               </p>
             </ScrollReveal>
             <GridReveal
@@ -270,7 +292,7 @@ export default async function ActivityDetailPage({
       {related.length > 0 ? (
         <section className="bg-[var(--paper)] py-20">
           <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
-            <SectionHead kicker="Keep exploring">Explore More Activities</SectionHead>
+            <SectionHead kicker={page.related.kicker}>{withTitle(page.related.title, activity.title)}</SectionHead>
             <GridReveal
               className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
               columns={{ base: 1, sm: 2, lg: 3 }}

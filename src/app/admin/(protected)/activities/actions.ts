@@ -1,10 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { requireUser, logAudit } from "@/lib/auth";
-import type { ContentStatus } from "@prisma/client";
+import type { BackgroundType, ContentStatus } from "@prisma/client";
+import type { BackgroundConfig } from "@/components/admin/AdminUI";
+import { ACTIVITIES_TAG } from "@/lib/data/activities-db";
 
 async function getClientIp() {
   const hdrs = await headers();
@@ -18,7 +20,8 @@ export type ActivityInput = {
   title: string;
   tagline: string;
   icon: string;
-  heroImage: string;
+  /** Hero banner background; `image` holds the hero image path. */
+  heroBackground: BackgroundConfig;
   overview: string[];
   duration: string;
   difficulty: string;
@@ -30,6 +33,13 @@ export type ActivityInput = {
   guideBody: string;
   guideBullets: string[];
   galleryImages: string[];
+  galleryTitles: string[];
+};
+
+const HERO_BACKGROUND_TYPE: Record<BackgroundConfig["type"], BackgroundType> = {
+  image: "IMAGE",
+  color: "COLOR",
+  plain: "PLAIN",
 };
 
 export async function saveActivityAction(originalSlug: string | null, input: ActivityInput) {
@@ -45,7 +55,14 @@ export async function saveActivityAction(originalSlug: string | null, input: Act
     title: input.title,
     tagline: input.tagline,
     icon: input.icon,
-    heroImage: input.heroImage,
+    // The hero image path is kept even when another background type is chosen, so
+    // switching back to "Image" doesn't lose it (and cards/listings still use it).
+    heroImage: input.heroBackground.image,
+    heroBackgroundType: HERO_BACKGROUND_TYPE[input.heroBackground.type],
+    heroBackgroundColor: input.heroBackground.color,
+    heroOverlayEnabled: input.heroBackground.overlay.enabled,
+    heroOverlayColor: input.heroBackground.overlay.color,
+    heroOverlayOpacity: input.heroBackground.overlay.opacity,
     overview: input.overview,
     duration: input.duration,
     difficulty: input.difficulty,
@@ -56,6 +73,7 @@ export async function saveActivityAction(originalSlug: string | null, input: Act
     guideBody: input.guideBody,
     guideBullets: input.guideBullets,
     galleryImages: input.galleryImages,
+    galleryTitles: input.galleryImages.map((_, i) => input.galleryTitles[i]?.trim() ?? ""),
   };
 
   const isNew = !originalSlug;
@@ -85,6 +103,7 @@ export async function saveActivityAction(originalSlug: string | null, input: Act
     message: isNew ? `Created activity "${saved.title}"` : `Updated activity "${saved.title}"`,
   });
 
+  updateTag(ACTIVITIES_TAG);
   revalidatePath("/admin/activities");
   revalidatePath(`/admin/activities/${saved.slug}`);
 
@@ -106,15 +125,17 @@ export async function deleteActivityAction(slug: string) {
     message: `Deleted activity "${activity.title}"`,
   });
 
+  updateTag(ACTIVITIES_TAG);
   revalidatePath("/admin/activities");
 }
 
-export async function toggleActivityStatusAction(slug: string) {
+export async function setActivityStatusAction(slug: string, nextStatus: ContentStatus) {
   const user = await requireUser();
   const ip = await getClientIp();
 
-  const current = await prisma.activity.findUniqueOrThrow({ where: { slug } });
-  const nextStatus: ContentStatus = current.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
+  if (nextStatus !== "PUBLISHED" && nextStatus !== "DRAFT") {
+    throw new Error("Invalid status.");
+  }
   const updated = await prisma.activity.update({ where: { slug }, data: { status: nextStatus } });
 
   await logAudit({
@@ -125,5 +146,7 @@ export async function toggleActivityStatusAction(slug: string) {
     message: `${nextStatus === "PUBLISHED" ? "Published" : "Unpublished"} activity "${updated.title}"`,
   });
 
+  updateTag(ACTIVITIES_TAG);
   revalidatePath("/admin/activities");
+  revalidatePath(`/admin/activities/${slug}`);
 }

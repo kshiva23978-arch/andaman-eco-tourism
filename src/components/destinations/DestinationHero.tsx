@@ -6,6 +6,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { RevealText } from "@/components/ui/ScrollReveal";
 import { Breadcrumbs, type Crumb } from "@/components/ui/Breadcrumbs";
+import { hexToRgba } from "@/lib/color";
+import type { HeroBackground } from "@/lib/types";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -26,9 +28,12 @@ export function DestinationHero({
   imagePosition = "center",
   breadcrumbs,
   scrollTargetId = "destination-overview",
+  background,
 }: {
   title: string;
   image: string;
+  /** Admin-set styling: photo (default), flat color, or plain, plus an optional tint. */
+  background?: HeroBackground;
   /** CSS object-position for the hero photo — useful when a source image is
    * portrait-oriented and the default center crop lands on a busy, illegible
    * patch (e.g. close-up sand texture) rather than the recognizable scene. */
@@ -38,6 +43,11 @@ export function DestinationHero({
 }) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const bgRef = useRef<HTMLDivElement | null>(null);
+  const bgType = background?.type ?? "image";
+  const overlay =
+    background && bgType !== "plain" && background.overlay.enabled
+      ? hexToRgba(background.overlay.color, background.overlay.opacity)
+      : null;
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -100,25 +110,36 @@ export function DestinationHero({
       className="relative h-[320px] md:h-[380px] w-full overflow-hidden bg-primary text-white"
     >
       <div className="absolute inset-0 overflow-hidden">
-        <div ref={bgRef} className="absolute -inset-[6%] will-change-transform">
-          <Image
-            src={image}
-            alt={title}
-            fill
-            priority
-            className="object-cover"
-            style={{ objectPosition: imagePosition }}
-            sizes="100vw"
-          />
-        </div>
         <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(15,43,30,0.15) 0%, rgba(15,43,30,0.1) 35%, rgba(15,43,30,0.65) 78%, rgba(15,43,30,0.9) 100%)",
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/[0.35] via-transparent to-transparent" />
+          ref={bgRef}
+          className="absolute -inset-[6%] will-change-transform"
+          style={bgType === "color" ? { backgroundColor: background?.color } : undefined}
+        >
+          {bgType === "image" ? (
+            <Image
+              src={image}
+              alt={title}
+              fill
+              priority
+              className="object-cover"
+              style={{ objectPosition: imagePosition }}
+              sizes="100vw"
+            />
+          ) : null}
+        </div>
+        {bgType === "image" ? (
+          <>
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(15,43,30,0.15) 0%, rgba(15,43,30,0.1) 35%, rgba(15,43,30,0.65) 78%, rgba(15,43,30,0.9) 100%)",
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/[0.35] via-transparent to-transparent" />
+          </>
+        ) : null}
+        {overlay ? <div className="absolute inset-0" style={{ background: overlay }} /> : null}
       </div>
 
       <div className="relative z-10 flex h-full items-center justify-center pb-10 px-margin-mobile text-center md:px-margin-desktop">

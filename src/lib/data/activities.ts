@@ -1,5 +1,9 @@
 import type { Activity } from "@/lib/types";
 
+/**
+ * Initial activity data, used only by `prisma/seed.ts` to fill a fresh database.
+ * The site reads activities from the database (see activities-db.ts).
+ */
 export const activities: Activity[] = [
   {
     slug: "scuba-snorkeling",
@@ -342,20 +346,3 @@ export const activities: Activity[] = [
   },
 ];
 
-export function getActivityBySlug(slug: string): Activity | undefined {
-  return activities.find((a) => a.slug === slug);
-}
-
-export function getActivitiesBySlugs(slugs: string[]): Activity[] {
-  return slugs
-    .map((slug) => getActivityBySlug(slug))
-    .filter((a): a is Activity => Boolean(a));
-}
-
-/** Curated subset for the homepage teaser grid. */
-export const featuredActivitySlugs = [
-  "scuba-snorkeling",
-  "rainforest-trekking",
-  "mangrove-walks",
-  "dark-sky-stargazing",
-];

@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { regions } from "@/lib/data/destinations";
 import {
   Card,
   PageHeader,
@@ -15,9 +14,15 @@ import {
   TagListEditor,
   GalleryEditor,
   FormField,
+  StatusSwitch,
   inputClass,
+  type ContentStatus,
 } from "@/components/admin/AdminUI";
-import { saveDestinationAction, type DestinationInput } from "../actions";
+import {
+  saveDestinationAction,
+  setDestinationStatusAction,
+  type DestinationInput,
+} from "../actions";
 
 const TABS = ["Overview", "Access & Fees", "Facilities", "Eco & Safety", "Gallery & Media"] as const;
 type Tab = (typeof TABS)[number];
@@ -26,7 +31,7 @@ const BLANK: DestinationInput = {
   slug: "",
   title: "",
   subtitle: "",
-  region: "South Andaman",
+  region: "",
   rangeDivision: "",
   overview: "",
   accessRoad: "",
@@ -47,24 +52,51 @@ const BLANK: DestinationInput = {
   image: "/images/alternate/alternate-image-destinations.jpg",
   heroImagePosition: "",
   galleryImages: [],
+  galleryTitles: [],
 };
 
 export function DestinationEditorClient({
   initialData,
   originalSlug,
   status,
+  regions,
 }: {
   initialData: DestinationInput | null;
   originalSlug: string | null;
   status: "PUBLISHED" | "DRAFT" | null;
+  /** Region names managed under Pages & Sections → Destinations page. */
+  regions: string[];
 }) {
   const router = useRouter();
   const isNew = !originalSlug;
-  const [form, setForm] = useState<DestinationInput>(initialData ?? BLANK);
+  const [form, setForm] = useState<DestinationInput>(
+    initialData ?? { ...BLANK, region: regions[0] ?? "" },
+  );
+  // A region since removed from the list stays selectable, so it isn't silently changed.
+  const regionOptions =
+    !form.region || regions.includes(form.region) ? regions : [form.region, ...regions];
   const [tab, setTab] = useState<Tab>("Overview");
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [currentStatus, setCurrentStatus] = useState<ContentStatus>(status ?? "DRAFT");
+  const [statusPending, startStatusTransition] = useTransition();
+
+  function changeStatus(next: ContentStatus) {
+    if (!originalSlug) return;
+    const previous = currentStatus;
+    setError(null);
+    setCurrentStatus(next);
+    startStatusTransition(async () => {
+      try {
+        await setDestinationStatusAction(originalSlug, next);
+        router.refresh();
+      } catch (err) {
+        setCurrentStatus(previous);
+        setError(err instanceof Error ? err.message : "Couldn't change the status.");
+      }
+    });
+  }
 
   function set<K extends keyof DestinationInput>(key: K, value: DestinationInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -156,9 +188,9 @@ export function DestinationEditorClient({
                     value={form.region}
                     onChange={(e) => set("region", e.target.value)}
                   >
-                    {regions.map((r) => (
+                    {regionOptions.map((r) => (
                       <option key={r} value={r}>
-                        {r}
+                        {regions.includes(r) ? r : `${r} (not in region list)`}
                       </option>
                     ))}
                   </select>
@@ -321,10 +353,13 @@ export function DestinationEditorClient({
                   placeholder="e.g. center 30%"
                 />
               </FormField>
-              <FormField label="Gallery images" hint="Additional photos shown in the destination's gallery strip.">
+              <FormField label="Gallery images" hint="Photos shown in the destination's gallery. Give each a title — it's shown as the caption on the site.">
                 <GalleryEditor
                   images={form.galleryImages ?? []}
-                  onChange={(v) => set("galleryImages", v)}
+                  titles={form.galleryTitles ?? []}
+                  onChange={(images, titles) =>
+                    setForm((f) => ({ ...f, galleryImages: images, galleryTitles: titles }))
+                  }
                 />
               </FormField>
             </div>
@@ -335,16 +370,26 @@ export function DestinationEditorClient({
           <Card className="p-4">
             <p className="mb-2 text-xs font-semibold uppercase text-on-surface-variant">Status</p>
             {isNew ? (
-              <Badge tone="warning">New — saved as Draft</Badge>
+              <>
+                <Badge tone="warning">New — saved as Draft</Badge>
+                <p className="mt-3 text-xs text-on-surface-variant">
+                  Create the destination first, then publish it from here.
+                </p>
+              </>
             ) : (
-              <Badge tone={status === "PUBLISHED" ? "success" : "warning"}>
-                {status === "PUBLISHED" ? "Published" : "Draft"}
-              </Badge>
+              <>
+                <StatusSwitch
+                  status={currentStatus}
+                  onChange={changeStatus}
+                  disabled={statusPending}
+                />
+                <p className="mt-3 text-xs text-on-surface-variant">
+                  {currentStatus === "PUBLISHED"
+                    ? "Live on the public site. Switch to Draft to hide it."
+                    : "Hidden from the public site until published."}
+                </p>
+              </>
             )}
-            <p className="mt-3 text-xs text-on-surface-variant">
-              Toggle publish state from the Destinations list. Changes here save straight to the
-              database.
-            </p>
           </Card>
           <Card className="overflow-hidden">
             <div className="relative aspect-video w-full bg-black/5">

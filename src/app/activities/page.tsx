@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getActivityBySlug } from "@/lib/data/activities";
+import { getPublishedActivities } from "@/lib/data/activities-db";
+import { getPageContent } from "@/lib/content/page-content-db";
+import { groupAnchor, type CoastalPanel as CoastalPanelContent } from "@/lib/content/activities";
+import type { Activity } from "@/lib/types";
 import { RevealText, ScrollReveal } from "@/components/ui/ScrollReveal";
 import { RevealSide } from "@/components/ui/RevealSide";
 import { GridReveal } from "@/components/ui/GridReveal";
-import { ActivitiesHero, type HeroSlide } from "@/components/activities/ActivitiesHero";
+import { ActivitiesHero } from "@/components/activities/ActivitiesHero";
 import { ActivityGuideSection } from "@/components/activities/ActivityGuideSection";
 
 export const metadata: Metadata = {
@@ -12,80 +15,6 @@ export const metadata: Metadata = {
   description:
     "Discover the natural wonders of the Andaman & Nicobar archipelago through responsible exploration and conservation practices.",
 };
-
-const HERO_SLIDES: HeroSlide[] = [
-  {
-    image: "/images/activitiy-slider/scuba.png",
-    eyebrow: "Marine · Diving",
-    title: "Dive Beneath the",
-    accent: "Coral Gardens",
-    description:
-      "Descend with certified marine naturalists into reefs monitored for health — a strict no-touch policy keeps every dive a conservation act.",
-    href: "/activities/scuba-snorkeling",
-    cta: "Scuba & Snorkeling",
-  },
-  {
-    image: "/images/activitiy-slider/trekking.png",
-    eyebrow: "Terrestrial · Rainforest",
-    title: "Walk the Ancient",
-    accent: "Rainforest Trails",
-    description:
-      "Follow marked trails through primary evergreen forest with local guides who read the canopy, the tracks and the silence.",
-    href: "/activities/rainforest-trekking",
-    cta: "Rainforest Trekking",
-  },
-  {
-    image: "/images/activitiy-slider/wildlife.png",
-    eyebrow: "Terrestrial · Wildlife",
-    title: "Meet the Islands'",
-    accent: "Endemic Wildlife",
-    description:
-      "Dawn and dusk windows, no playback calls, respectful distances — observe birds and forest life the way researchers do.",
-    href: "/activities/avian-observation",
-    cta: "Avian Observation",
-  },
-  {
-    image: "/images/activitiy-slider/omount-manipur.png",
-    eyebrow: "Terrestrial · Summit Trek",
-    title: "Climb Toward",
-    accent: "Mount Manipur",
-    description:
-      "A guided ascent through cloud forest to the archipelago's high ridgelines, with panoramic views over the Andaman Sea.",
-    href: "/destinations/mount-manipur-national-park",
-    cta: "Explore the Park",
-  },
-  {
-    image: "/images/activitiy-slider/light-house.png",
-    eyebrow: "Marine · Coastal Voyages",
-    title: "Sail the Quiet",
-    accent: "Island Coastlines",
-    description:
-      "Low-wake, low-noise boat transits past lighthouses and mangrove channels — powered by local operators who know these waters.",
-    href: "/activities/sustainable-boating",
-    cta: "Sustainable Boating",
-  },
-];
-
-interface GuideEntry {
-  slug: string;
-  reverse: boolean;
-  tone: "light" | "dark";
-}
-
-const MARINE_ACTIVITIES: GuideEntry[] = [
-  { slug: "scuba-snorkeling", reverse: false, tone: "light" },
-  { slug: "sustainable-boating", reverse: true, tone: "dark" },
-  { slug: "ocean-surfing", reverse: false, tone: "light" },
-  { slug: "glass-bottom-boating", reverse: true, tone: "dark" },
-];
-
-const TERRESTRIAL_ACTIVITIES: GuideEntry[] = [
-  { slug: "rainforest-trekking", reverse: false, tone: "light" },
-  { slug: "mangrove-walks", reverse: true, tone: "dark" },
-  { slug: "quiet-water-kayaking", reverse: false, tone: "light" },
-  { slug: "avian-observation", reverse: true, tone: "dark" },
-  { slug: "dark-sky-stargazing", reverse: false, tone: "light" },
-];
 
 function SectionHead({
   kicker,
@@ -117,44 +46,65 @@ function SectionHead({
   );
 }
 
-function GuideSections({ entries }: { entries: GuideEntry[] }) {
+/** One activity block per entry, alternating image side and light/dark tone. */
+function GuideSections({ activities }: { activities: Activity[] }) {
   return (
     <>
-      {entries.map(({ slug, reverse, tone }) => {
-        const activity = getActivityBySlug(slug);
-        if (!activity) return null;
-        return (
-          <ActivityGuideSection
-            key={slug}
-            href={`/activities/${activity.slug}`}
-            image={activity.heroImage}
-            imageAlt={activity.title}
-            icon={activity.icon}
-            title={activity.title}
-            duration={activity.duration}
-            difficulty={activity.difficulty}
-            body={activity.guideBody}
-            bullets={activity.guideBullets}
-            callout={activity.guideCallout}
-            reverse={reverse}
-            tone={tone}
-          />
-        );
-      })}
+      {activities.map((activity, index) => (
+        <ActivityGuideSection
+          key={activity.slug}
+          href={`/activities/${activity.slug}`}
+          image={activity.heroImage}
+          imageAlt={activity.title}
+          icon={activity.icon}
+          title={activity.title}
+          duration={activity.duration}
+          difficulty={activity.difficulty}
+          body={activity.guideBody}
+          bullets={activity.guideBullets}
+          callout={activity.guideCallout}
+          reverse={index % 2 === 1}
+          tone={index % 2 === 1 ? "dark" : "light"}
+        />
+      ))}
     </>
   );
 }
 
-export default function ActivitiesGuidePage() {
+// Rendered per request from the database; the queries are cached.
+export const dynamic = "force-dynamic";
+
+export default async function ActivitiesGuidePage() {
+  const [published, content] = await Promise.all([getPublishedActivities(), getPageContent("activities")]);
+  const bySlug = new Map(published.map((a) => [a.slug, a]));
+  const { hero, principles, coastal, cta } = content;
+
+  // Admin-defined groups, then any published activity not in a group, so none go missing.
+  const grouped = new Set(content.groups.flatMap((g) => g.slugs));
+  const leftovers = published.filter((a) => !grouped.has(a.slug));
+  const groups = [
+    ...content.groups.map((g) => ({
+      ...g,
+      activities: g.slugs.map((s) => bySlug.get(s)).filter((a): a is Activity => Boolean(a)),
+    })),
+    ...(leftovers.length ? [{ ...content.otherGroup, slugs: [], activities: leftovers }] : []),
+  ]
+    .filter((g) => g.activities.length > 0)
+    .map((g, i) => ({ ...g, anchor: groupAnchor(g.navLabel || g.title, i) }));
+
   return (
     <div className="editorial">
       {/* Hero */}
-      <ActivitiesHero slides={HERO_SLIDES} />
+      {hero.slides.length > 0 ? <ActivitiesHero slides={hero.slides} /> : null}
 
       {/* Conservation Principles */}
       <section
         className="relative overflow-hidden bg-[var(--paper)] bg-repeat py-20"
-        style={{ backgroundImage: "url('/images/bg/bg-patter-act.jpg')", backgroundSize: "480px" }}
+        style={
+          principles.background
+            ? { backgroundImage: `url('${principles.background}')`, backgroundSize: "480px" }
+            : undefined
+        }
       >
         {/* Fade the pattern in from the hero's wave-divider color so the seam disappears */}
         <div
@@ -169,24 +119,16 @@ export default function ActivitiesGuidePage() {
           >
             <span className="mb-3 inline-flex w-fit items-center gap-2 rounded-full bg-[var(--sand)] px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
               <span className="material-symbols-outlined text-[14px]">eco</span>
-              Core Mandate
+              {principles.chip}
             </span>
             <RevealText
               as="h2"
               className="mb-4 text-[clamp(1.75rem,3.4vw,2.5rem)] leading-tight text-[var(--ink)] font-semibold"
               style={{ fontFamily: "var(--font-fraunces), serif" }}
             >
-              Conservation First
+              {principles.title}
             </RevealText>
-            <p className="text-[15px] leading-relaxed text-[var(--ink-soft)]">
-              As a protected ecological zone, the Andaman &amp; Nicobar
-              Administration prioritizes environmental integrity. Every
-              activity detailed in this guide is governed by strict
-              environmental laws to ensure the longevity of our unique
-              biodiversity. Visitors are expected to adhere to the &lsquo;Leave
-              No Trace&rsquo; protocol in all terrestrial and marine
-              environments.
-            </p>
+            <p className="text-[15px] leading-relaxed text-[var(--ink-soft)]">{principles.body}</p>
           </RevealSide>
           <RevealSide
             as="div"
@@ -194,14 +136,12 @@ export default function ActivitiesGuidePage() {
             x={56}
             style={{ background: "linear-gradient(160deg, var(--lagoon), var(--forest-mid))" }}
           >
-            <span className="material-symbols-outlined text-4xl text-white">
-              nature_people
-            </span>
+            <span className="material-symbols-outlined text-4xl text-white">{principles.awarenessIcon}</span>
             <h3 className="text-[20px] font-semibold text-white" style={{ fontFamily: "var(--font-fraunces), serif" }}>
-              Impact Awareness
+              {principles.awarenessTitle}
             </h3>
             <ul className="flex flex-col gap-2.5 text-[14px] text-white/90">
-              {["No single-use plastics", "Minimal noise pollution", "Respect wildlife distances"].map((item) => (
+              {principles.awarenessItems.map((item) => (
                 <li key={item} className="flex items-start gap-2">
                   <span className="material-symbols-outlined text-[16px] pt-0.5 flex-shrink-0">
                     check_circle
@@ -215,36 +155,32 @@ export default function ActivitiesGuidePage() {
       </section>
 
       {/* Jump-to nav */}
-      <div className="sticky top-0 z-30 border-b border-[var(--line)] bg-[var(--paper)]/90 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-container-max items-center gap-3 overflow-x-auto px-margin-mobile py-3 no-scrollbar md:px-margin-desktop">
-          <a
-            href="#marine-activities"
-            className="flex-shrink-0 rounded-full bg-[var(--sand)] px-4 py-2 text-[13px] font-semibold text-[var(--forest-mid)] transition-colors hover:bg-[var(--lagoon)] hover:text-white"
-          >
-            Marine Activities
-          </a>
-          <a
-            href="#terrestrial-activities"
-            className="flex-shrink-0 rounded-full bg-[var(--sand)] px-4 py-2 text-[13px] font-semibold text-[var(--forest-mid)] transition-colors hover:bg-[var(--lagoon)] hover:text-white"
-          >
-            Terrestrial Activities
-          </a>
+      {groups.length > 1 ? (
+        <div className="sticky top-0 z-30 border-b border-[var(--line)] bg-[var(--paper)]/90 backdrop-blur-sm">
+          <div className="mx-auto flex max-w-container-max items-center gap-3 overflow-x-auto px-margin-mobile py-3 no-scrollbar md:px-margin-desktop">
+            {groups.map((group) => (
+              <a
+                key={group.anchor}
+                href={`#${group.anchor}`}
+                className="flex-shrink-0 rounded-full bg-[var(--sand)] px-4 py-2 text-[13px] font-semibold text-[var(--forest-mid)] transition-colors hover:bg-[var(--lagoon)] hover:text-white"
+              >
+                {group.navLabel || group.title}
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
 
-      <section id="marine-activities" className="bg-[var(--paper)] pt-16 scroll-mt-16">
-        <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
-          <SectionHead kicker="In the water">Marine Activities</SectionHead>
+      {groups.map((group) => (
+        <div key={group.anchor}>
+          <section id={group.anchor} className="bg-[var(--paper)] pt-16 scroll-mt-16">
+            <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+              <SectionHead kicker={group.kicker}>{group.title}</SectionHead>
+            </div>
+          </section>
+          <GuideSections activities={group.activities} />
         </div>
-      </section>
-      <GuideSections entries={MARINE_ACTIVITIES} />
-
-      <section id="terrestrial-activities" className="bg-[var(--paper)] pt-16 scroll-mt-16">
-        <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
-          <SectionHead kicker="On land">Terrestrial Activities</SectionHead>
-        </div>
-      </section>
-      <GuideSections entries={TERRESTRIAL_ACTIVITIES} />
+      ))}
 
       {/* Coastal Management */}
       <section className="bg-[var(--paper)] py-24">
@@ -252,52 +188,24 @@ export default function ActivitiesGuidePage() {
           <ScrollReveal as="div" className="mb-14 text-center" y={24}>
             <span className="mx-auto mb-3 inline-flex w-fit items-center gap-2 rounded-full bg-[var(--sand)] px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.08em] text-[var(--forest-mid)]">
               <span className="material-symbols-outlined text-[14px]">beach_access</span>
-              Shorelines
+              {coastal.chip}
             </span>
             <h2
               className="mb-3 text-[clamp(1.75rem,3.4vw,2.5rem)] leading-tight font-semibold"
               style={{ fontFamily: "var(--font-fraunces), serif" }}
             >
-              Coastal Management
+              {coastal.title}
             </h2>
-            <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-[var(--ink-soft)]">
-              Beaches like Radhanagar and Elephant Beach are fragile
-              ecosystems. Proper coastal conduct ensures these shores remain
-              pristine for generations.
-            </p>
+            <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-[var(--ink-soft)]">{coastal.body}</p>
           </ScrollReveal>
           <GridReveal
             className="grid grid-cols-1 gap-5 md:grid-cols-3"
             columns={{ base: 1, sm: 1, lg: 3 }}
             y={48}
           >
-            <CoastalPanel
-              icon="gavel"
-              title="Zone Regulations"
-              rows={[
-                "No camping on beach",
-                "Restricted night entry",
-                "Permit required for research",
-              ]}
-            />
-            <CoastalPanel
-              icon="recycling"
-              title="Waste Management"
-              rows={[
-                "Carry back all non-biodegradables",
-                "Public bins for organic waste",
-                "Zero-litter enforcement",
-              ]}
-            />
-            <CoastalPanel
-              icon="shield_with_heart"
-              title="Safety & Wildlife"
-              rows={[
-                "Watch for nesting turtles",
-                "Swim only in designated areas",
-                "Adhere to lifeguard flags",
-              ]}
-            />
+            {coastal.panels.map((panel, i) => (
+              <CoastalPanel key={`${panel.title}-${i}`} {...panel} />
+            ))}
           </GridReveal>
         </div>
       </section>
@@ -313,35 +221,27 @@ export default function ActivitiesGuidePage() {
             className="mb-4 text-[clamp(1.75rem,3.4vw,2.25rem)] leading-tight text-[var(--sand)] font-semibold"
             style={{ fontFamily: "var(--font-fraunces), serif" }}
           >
-            Ready to explore responsibly?
+            {cta.title}
           </h2>
-          <p className="mb-7 text-[15px] text-white/75">
-            Browse destinations paired with these activities and plan a trip that leaves the islands as you found them.
-          </p>
-          <Link
-            href="/destinations"
-            className="group inline-flex items-center gap-2 rounded-full bg-[var(--lagoon)] px-7 py-3.5 text-[14px] font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-white hover:text-[var(--forest-deep)]"
-          >
-            Browse Destinations
-            <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-0.5">
-              arrow_forward
-            </span>
-          </Link>
+          <p className="mb-7 text-[15px] text-white/75">{cta.body}</p>
+          {cta.buttonLabel && cta.buttonHref ? (
+            <Link
+              href={cta.buttonHref}
+              className="group inline-flex items-center gap-2 rounded-full bg-[var(--lagoon)] px-7 py-3.5 text-[14px] font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-white hover:text-[var(--forest-deep)]"
+            >
+              {cta.buttonLabel}
+              <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-0.5">
+                arrow_forward
+              </span>
+            </Link>
+          ) : null}
         </ScrollReveal>
       </section>
     </div>
   );
 }
 
-function CoastalPanel({
-  icon,
-  title,
-  rows,
-}: {
-  icon: string;
-  title: string;
-  rows: string[];
-}) {
+function CoastalPanel({ icon, title, rows }: CoastalPanelContent) {
   return (
     <div className="group rounded-[20px] border border-[var(--line)] bg-[var(--paper)] p-7 transition-all duration-300 hover:-translate-y-1.5 hover:border-[var(--lagoon)]/40 hover:shadow-[0_20px_40px_-16px_rgba(15,43,30,0.25)]">
       <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--sand)] text-[var(--forest-mid)] transition-colors duration-300 group-hover:bg-[var(--forest-mid)] group-hover:text-[var(--sand)]">

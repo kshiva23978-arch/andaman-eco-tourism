@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { requireUser, logAudit } from "@/lib/auth";
 import type { LabelSide } from "@prisma/client";
+import { MAP_PINS_TAG } from "@/lib/data/map-pins-db";
 
 async function getClientIp() {
   const hdrs = await headers();
@@ -51,5 +52,6 @@ export async function savePinsAction(pins: MapPinInput[]) {
     message: `Updated homepage map pins (${pins.length} total)`,
   });
 
+  updateTag(MAP_PINS_TAG);
   revalidatePath("/admin/pages/map");
 }

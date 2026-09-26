@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { logout } from "@/app/admin/login/actions";
+import { NotificationsMenu, ProfileMenu, SearchButton } from "./HeaderControls";
 
 const NAV_SECTIONS: {
   label: string;
@@ -37,7 +38,14 @@ export function AdminShell({
   currentUser,
 }: {
   children: React.ReactNode;
-  currentUser: { name: string; role: string };
+  currentUser: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    canViewLogs: boolean;
+    canManageSettings: boolean;
+  };
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -146,35 +154,14 @@ export function AdminShell({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            <button
-              type="button"
-              className="hidden items-center gap-2 rounded-lg border border-black/10 px-3 py-2 text-sm text-on-surface-variant hover:bg-black/5 sm:flex"
-            >
-              <span className="material-symbols-outlined text-[18px]">search</span>
-              Search content…
-            </button>
-            <button
-              type="button"
-              className="relative rounded-lg p-2 text-on-surface-variant hover:bg-black/5"
-              aria-label="Notifications"
-            >
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-coral bg-[#e8734a]" />
-            </button>
-            <div className="flex items-center gap-2 rounded-lg border border-black/10 py-1.5 pl-1.5 pr-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
-                {currentUser.name
-                  .split(" ")
-                  .map((p) => p[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </div>
-              <div className="hidden text-left leading-tight sm:block">
-                <p className="text-xs font-semibold text-on-surface">{currentUser.name}</p>
-                <p className="text-[11px] text-on-surface-variant">{currentUser.role}</p>
-              </div>
-            </div>
+            <SearchButton navLinks={NAV_SECTIONS.flatMap((s) => s.items)} />
+            {currentUser.canViewLogs && <NotificationsMenu userId={currentUser.id} />}
+            <ProfileMenu
+              name={currentUser.name}
+              email={currentUser.email}
+              role={currentUser.role}
+              canManageSettings={currentUser.canManageSettings}
+            />
           </div>
         </header>
 

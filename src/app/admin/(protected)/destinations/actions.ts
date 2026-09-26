@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { requireUser, logAudit } from "@/lib/auth";
 import type { ContentStatus } from "@prisma/client";
+import { DESTINATIONS_TAG } from "@/lib/data/destinations-db";
 
 async function getClientIp() {
   const hdrs = await headers();
@@ -36,6 +37,7 @@ export type DestinationInput = {
   image: string;
   heroImagePosition?: string;
   galleryImages: string[];
+  galleryTitles: string[];
 };
 
 export async function saveDestinationAction(
@@ -74,6 +76,7 @@ export async function saveDestinationAction(
     image: input.image,
     heroImagePosition: input.heroImagePosition || null,
     galleryImages: input.galleryImages,
+    galleryTitles: input.galleryImages.map((_, i) => input.galleryTitles[i]?.trim() ?? ""),
   };
 
   const isNew = !originalSlug;
@@ -92,6 +95,7 @@ export async function saveDestinationAction(
       : `Updated destination "${saved.title}"`,
   });
 
+  updateTag(DESTINATIONS_TAG);
   revalidatePath("/admin/destinations");
   revalidatePath(`/admin/destinations/${saved.slug}`);
 
@@ -113,15 +117,17 @@ export async function deleteDestinationAction(slug: string) {
     message: `Deleted destination "${destination.title}"`,
   });
 
+  updateTag(DESTINATIONS_TAG);
   revalidatePath("/admin/destinations");
 }
 
-export async function toggleDestinationStatusAction(slug: string) {
+export async function setDestinationStatusAction(slug: string, nextStatus: ContentStatus) {
   const user = await requireUser();
   const ip = await getClientIp();
 
-  const current = await prisma.destination.findUniqueOrThrow({ where: { slug } });
-  const nextStatus: ContentStatus = current.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
+  if (nextStatus !== "PUBLISHED" && nextStatus !== "DRAFT") {
+    throw new Error("Invalid status.");
+  }
   const updated = await prisma.destination.update({
     where: { slug },
     data: { status: nextStatus },
@@ -135,5 +141,7 @@ export async function toggleDestinationStatusAction(slug: string) {
     message: `${nextStatus === "PUBLISHED" ? "Published" : "Unpublished"} destination "${updated.title}"`,
   });
 
+  updateTag(DESTINATIONS_TAG);
   revalidatePath("/admin/destinations");
+  revalidatePath(`/admin/destinations/${slug}`);
 }

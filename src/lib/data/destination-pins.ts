@@ -13,7 +13,8 @@
 export type LabelSide = "left" | "right";
 
 export interface DestinationPin {
-  slug: string;
+  /** Destination the pin opens; admin-created pins may have none (label only). */
+  slug?: string;
   /** Short map label (full titles are too long to sit on the map). */
   label: string;
   lat: number;

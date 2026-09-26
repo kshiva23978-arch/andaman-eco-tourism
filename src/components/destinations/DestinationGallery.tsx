@@ -12,9 +12,21 @@ function stepImage(current: number | null, delta: 1 | -1, count: number): number
   return (current + delta + count) % count;
 }
 
+/** Title strip over the bottom of a gallery image; only rendered when the image has a title. */
+function CaptionOverlay({ text }: { text: string }) {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent px-4 pb-3 pt-10 text-left">
+      <p className="line-clamp-2 font-label-md text-[13px] leading-snug text-white drop-shadow-sm">
+        {text}
+      </p>
+    </div>
+  );
+}
+
 function GalleryTile({
   src,
   alt,
+  caption,
   index,
   onOpen,
   sizes,
@@ -23,6 +35,7 @@ function GalleryTile({
 }: {
   src: string;
   alt: string;
+  caption?: string;
   index: number;
   onOpen: (index: number) => void;
   sizes: string;
@@ -44,6 +57,7 @@ function GalleryTile({
         sizes={sizes}
       />
       <div className="absolute inset-0 bg-black/0 transition duration-300 group-hover:bg-black/10" />
+      {caption ? <CaptionOverlay text={caption} /> : null}
     </button>
   );
 }
@@ -64,10 +78,17 @@ function ShowAllButton({ onClick }: { onClick: () => void }) {
 export function DestinationGallery({
   images,
   title = "Destination",
+  captions,
 }: {
   images: string[];
   title?: string;
+  /** Optional per-image titles (index-aligned); blank entries fall back to `title`. */
+  captions?: string[];
 }) {
+  /** The image's own title, if it has one. */
+  const captionAt = (index: number) => captions?.[index]?.trim() || undefined;
+  /** Alt text: the image's title, falling back to the page title. */
+  const captionFor = (index: number) => captionAt(index) || title;
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
   // The lightbox portals into document.body, which only exists on the client.
   const mounted = useSyncExternalStore(
@@ -120,7 +141,7 @@ export function DestinationGallery({
               >
                 <Image
                   src={src}
-                  alt={title}
+                  alt={captionFor(i)}
                   fill
                   // Eager rather than `priority`: this list is hidden from sm up, and a
                   // <link rel="preload"> would warn as unused there.
@@ -128,6 +149,7 @@ export function DestinationGallery({
                   className="object-cover"
                   sizes="(min-width: 640px) 1px, calc(100vw - 2rem)"
                 />
+                {captionAt(i) ? <CaptionOverlay text={captionAt(i)!} /> : null}
               </button>
             ))}
           </div>
@@ -138,7 +160,8 @@ export function DestinationGallery({
             <div className="relative aspect-[16/9] max-h-[560px] overflow-hidden">
               <GalleryTile
                 src={images[0]}
-                alt={title}
+                alt={captionFor(0)}
+                caption={captionAt(0)}
                 index={0}
                 onOpen={setSelectedImage}
                 sizes="100vw"
@@ -149,20 +172,21 @@ export function DestinationGallery({
             <div className="relative">
               {images.length === 2 ? (
                 <div className="grid h-[320px] grid-cols-2 gap-2 overflow-hidden sm:h-[420px] lg:h-[560px]">
-                  <GalleryTile src={images[0]} alt={title} index={0} onOpen={setSelectedImage} sizes="50vw" priority />
-                  <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="50vw" />
+                  <GalleryTile src={images[0]} alt={captionFor(0)} caption={captionAt(0)} index={0} onOpen={setSelectedImage} sizes="50vw" priority />
+                  <GalleryTile src={images[1]} alt={captionFor(1)} caption={captionAt(1)} index={1} onOpen={setSelectedImage} sizes="50vw" />
                 </div>
               ) : images.length === 3 ? (
                 <div className="grid h-[340px] grid-cols-3 gap-2 overflow-hidden sm:h-[440px] lg:h-[600px]">
-                  <GalleryTile src={images[0]} alt={title} index={0} onOpen={setSelectedImage} sizes="34vw" priority className="col-span-1" />
-                  <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="33vw" className="col-span-1" />
-                  <GalleryTile src={images[2]} alt={title} index={2} onOpen={setSelectedImage} sizes="33vw" className="col-span-1" />
+                  <GalleryTile src={images[0]} alt={captionFor(0)} caption={captionAt(0)} index={0} onOpen={setSelectedImage} sizes="34vw" priority className="col-span-1" />
+                  <GalleryTile src={images[1]} alt={captionFor(1)} caption={captionAt(1)} index={1} onOpen={setSelectedImage} sizes="33vw" className="col-span-1" />
+                  <GalleryTile src={images[2]} alt={captionFor(2)} caption={captionAt(2)} index={2} onOpen={setSelectedImage} sizes="33vw" className="col-span-1" />
                 </div>
               ) : images.length <= 6 ? (
                 <div className="grid h-[420px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden sm:h-[480px] lg:h-[640px]">
                   <GalleryTile
                     src={images[0]}
-                    alt={title}
+                    alt={captionFor(0)}
+                    caption={captionAt(0)}
                     index={0}
                     onOpen={setSelectedImage}
                     sizes="50vw"
@@ -173,7 +197,8 @@ export function DestinationGallery({
                     <GalleryTile
                       key={src + i}
                       src={src}
-                      alt={title}
+                      alt={captionFor(i + 1)}
+                      caption={captionAt(i + 1)}
                       index={i + 1}
                       onOpen={setSelectedImage}
                       sizes="25vw"
@@ -186,26 +211,28 @@ export function DestinationGallery({
                 <div className="grid h-[560px] grid-cols-3 grid-rows-3 gap-2 overflow-hidden sm:h-[620px] lg:h-[760px]">
                   <GalleryTile
                     src={images[0]}
-                    alt={title}
+                    alt={captionFor(0)}
+                    caption={captionAt(0)}
                     index={0}
                     onOpen={setSelectedImage}
                     sizes="34vw"
                     priority
                     className="col-start-1 row-span-2"
                   />
-                  <GalleryTile src={images[1]} alt={title} index={1} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-1" />
-                  <GalleryTile src={images[2]} alt={title} index={2} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-2" />
+                  <GalleryTile src={images[1]} alt={captionFor(1)} caption={captionAt(1)} index={1} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-1" />
+                  <GalleryTile src={images[2]} alt={captionFor(2)} caption={captionAt(2)} index={2} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-2" />
                   <GalleryTile
                     src={images[3]}
-                    alt={title}
+                    alt={captionFor(3)}
+                    caption={captionAt(3)}
                     index={3}
                     onOpen={setSelectedImage}
                     sizes="33vw"
                     className="col-start-3 row-span-2"
                   />
-                  <GalleryTile src={images[4]} alt={title} index={4} onOpen={setSelectedImage} sizes="34vw" className="col-start-1 row-start-3" />
-                  <GalleryTile src={images[5]} alt={title} index={5} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-3" />
-                  <GalleryTile src={images[6]} alt={title} index={6} onOpen={setSelectedImage} sizes="33vw" className="col-start-3 row-start-3" />
+                  <GalleryTile src={images[4]} alt={captionFor(4)} caption={captionAt(4)} index={4} onOpen={setSelectedImage} sizes="34vw" className="col-start-1 row-start-3" />
+                  <GalleryTile src={images[5]} alt={captionFor(5)} caption={captionAt(5)} index={5} onOpen={setSelectedImage} sizes="33vw" className="col-start-2 row-start-3" />
+                  <GalleryTile src={images[6]} alt={captionFor(6)} caption={captionAt(6)} index={6} onOpen={setSelectedImage} sizes="33vw" className="col-start-3 row-start-3" />
                 </div>
               )}
 
@@ -285,7 +312,7 @@ export function DestinationGallery({
                 >
                   <Image
                     src={images[selectedImage]}
-                    alt={title}
+                    alt={captionFor(selectedImage)}
                     fill
                     className="object-cover"
                     sizes="(min-width: 1152px) 1024px, 100vw"
@@ -310,7 +337,7 @@ export function DestinationGallery({
 
               {/* Caption */}
               <p className="pb-5 text-center font-body-md text-[13px] text-white/70">
-                {title} - Destination gallery
+                {captionAt(selectedImage) || `${title} - Destination gallery`}
               </p>
             </div>,
             document.body

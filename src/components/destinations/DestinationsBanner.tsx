@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import type { DestinationsListContent } from "@/lib/content/destinations";
+import { withCount } from "@/lib/content/normalize";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -19,31 +21,28 @@ if (typeof window !== "undefined") {
  * tilt in 3D toward the pointer.
  */
 
-const FLOATING_CARDS = [
+// Fixed slots for the three floating photo cards; their photos and labels come from the admin.
+const CARD_SLOTS = [
   {
-    src: "/images/destinations/radhanagar.png",
-    label: "Radhanagar Beach",
     className: "right-[6%] top-[10%] w-[34%] rotate-[-6deg] md:right-[16%] md:top-[9%] md:w-[240px] lg:w-[280px]",
     depth: 1.1,
   },
   {
-    src: "/images/destinations/turtle.jpg",
-    label: "Cuthbert Bay",
     className: "right-[38%] top-[38%] w-[28%] rotate-[5deg] md:right-[30%] md:top-[36%] md:w-[190px] lg:w-[220px]",
     depth: 1.6,
   },
   {
-    src: "/images/destinations/coral-fish.jpg",
-    label: "Jolly Buoy",
     className: "right-[4%] top-[58%] w-[30%] rotate-[3deg] md:right-[3%] md:top-[57%] md:w-[210px] lg:w-[240px]",
     depth: 2.1,
   },
 ];
 
 export function DestinationsBanner({
+  content,
   destinationCount,
   regionCount,
 }: {
+  content: DestinationsListContent["banner"];
   destinationCount: number;
   regionCount: number;
 }) {
@@ -180,7 +179,7 @@ export function DestinationsBanner({
         <div
           data-bg
           className="absolute -inset-[6%] bg-cover bg-center will-change-transform"
-          style={{ backgroundImage: "url(/images/bg/beach.jpg)" }}
+          style={content.backgroundImage ? { backgroundImage: `url(${content.backgroundImage})` } : undefined}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/85 via-primary/45 to-primary/10" />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-black/20" />
@@ -188,14 +187,16 @@ export function DestinationsBanner({
 
       {/* Floating destination photos — mid/foreground depths */}
       <div className="pointer-events-none absolute inset-0 hidden sm:block [transform-style:preserve-3d]">
-        {FLOATING_CARDS.map((card) => (
-          <div key={card.src} data-depth={card.depth} className={`absolute will-change-transform ${card.className}`}>
+        {CARD_SLOTS.map((slot, i) => ({ ...slot, ...content.cards[i] }))
+          .filter((card) => card.image)
+          .map((card, i) => (
+          <div key={i} data-depth={card.depth} className={`absolute will-change-transform ${card.className}`}>
             <figure
               data-card
               className="overflow-hidden rounded-2xl border border-white/25 bg-white/10 shadow-[0_30px_60px_-18px_rgba(0,0,0,0.6)] backdrop-blur-sm will-change-transform [transform-style:preserve-3d]"
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden">
-                <Image src={card.src} alt="" fill sizes="(min-width: 1024px) 280px, (min-width: 768px) 240px, 34vw" className="object-cover" />
+                <Image src={card.image} alt="" fill sizes="(min-width: 1024px) 280px, (min-width: 768px) 240px, 34vw" className="object-cover" />
               </div>
               <figcaption className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-semibold tracking-wide text-white/90">
                 <span className="material-symbols-outlined text-[14px]">location_on</span>
@@ -213,13 +214,13 @@ export function DestinationsBanner({
             <div data-fade className="mb-5 flex items-center gap-3 text-white/75">
               <span className="h-px w-10 bg-white/60" />
               <span className="font-label-md text-[11px] uppercase tracking-[0.3em]">
-                Andaman &amp; Nicobar Islands
+                {content.eyebrow}
               </span>
             </div>
 
             <h1 className="hero-title text-4xl leading-[1.05] sm:text-5xl md:text-6xl lg:text-7xl">
-              {["Destinations", "Directory"].map((word, i) => (
-                <span key={word} className="block overflow-hidden">
+              {[content.titleLine1, content.titleLine2].filter(Boolean).map((word, i) => (
+                <span key={i} className="block overflow-hidden">
                   <span data-word className={`inline-block will-change-transform ${i === 1 ? "text-emerald-200" : ""}`}>
                     {word}
                   </span>
@@ -228,22 +229,21 @@ export function DestinationsBanner({
             </h1>
 
             <p data-fade className="mt-5 max-w-md text-base text-white/85 md:text-lg">
-              Every officially documented beach, reef, sanctuary and forest trail across the
-              archipelago — explore them all, region by region.
+              {content.body}
             </p>
 
             <div data-fade className="mt-7 flex flex-wrap items-center gap-3">
               <span className="rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-[12px] font-semibold backdrop-blur">
-                {destinationCount} destinations
+                {withCount(content.destinationsLabel, destinationCount)}
               </span>
               <span className="rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-[12px] font-semibold backdrop-blur">
-                {regionCount} regions
+                {withCount(content.regionsLabel, regionCount)}
               </span>
               <Link
                 href="#destinations-explorer"
                 className="group ml-1 inline-flex items-center gap-2 font-label-md text-label-md text-white"
               >
-                Start exploring
+                {content.ctaLabel}
                 <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-y-1">
                   arrow_downward
                 </span>

@@ -19,6 +19,13 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Don't advertise the framework/version to scanners.
   poweredByHeader: false,
+  experimental: {
+    // Media uploads go through a Server Action, one file per request (videos up to 50 MB;
+    // see src/lib/uploads.ts). The extra headroom covers multipart overhead.
+    serverActions: { bodySizeLimit: "52mb" },
+    // The proxy buffers request bodies; keep it from truncating those uploads.
+    proxyClientMaxBodySize: "52mb",
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

@@ -73,10 +73,11 @@ function significantWords(text: string): string[] {
  */
 export function findNearbyDestination(
   nearbyText: string,
-  currentSlug: string
+  currentSlug: string,
+  pool: Destination[] = destinations
 ): Destination | undefined {
   const mentionSquash = squash(nearbyText);
-  const candidates = destinations.filter((d) => d.slug !== currentSlug && d.title.length > 3);
+  const candidates = pool.filter((d) => d.slug !== currentSlug && d.title.length > 3);
 
   // Pass 1: one of the two squashed strings contains the other — covers an
   // exact title mention, a short title embedded in a longer one ("Limestone

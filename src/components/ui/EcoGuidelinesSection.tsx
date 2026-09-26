@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Chip } from "@/components/ui/Chip";
 import { DecorativeLeaf } from "@/components/ui/DecorativeLeaf";
+import { AccentText } from "@/components/ui/AccentText";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -18,7 +19,18 @@ interface Guideline {
 
 const ACCENTS = ["#22c55e", "#0ea5e9", "#f97316", "#a855f7"];
 
-export function EcoGuidelinesSection({ guidelines }: { guidelines: Guideline[] }) {
+export function EcoGuidelinesSection({
+  chip,
+  title,
+  intro,
+  guidelines,
+}: {
+  chip: string;
+  /** Wrap words in *stars* to color them. */
+  title: string;
+  intro: string;
+  guidelines: Guideline[];
+}) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -85,15 +97,12 @@ export function EcoGuidelinesSection({ guidelines }: { guidelines: Guideline[] }
       <div className="relative max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <div ref={headerRef} className="mx-auto mb-12 max-w-2xl text-center">
           <Chip variant="secondary" icon="shield" className="mb-3">
-            Responsible Travel
+            {chip}
           </Chip>
           <h2 className="font-headline-lg text-2xl md:text-headline-xl text-black tracking-tight mb-4">
-            <span className="text-emerald-700">Eco</span>-Guidelines
+            <AccentText text={title} accentClassName="text-emerald-700" />
           </h2>
-          <p className="text-on-surface-variant font-body-md text-body-md">
-            Traveling to a sensitive ecological zone requires a commitment to responsibility.
-            Please adhere to these official guidelines to help preserve our natural heritage.
-          </p>
+          <p className="text-on-surface-variant font-body-md text-body-md">{intro}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[0.9fr_1.1fr] items-start">

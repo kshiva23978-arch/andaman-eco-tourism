@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -14,10 +13,18 @@ import {
   TagListEditor,
   CardListEditor,
   GalleryEditor,
+  BackgroundEditor,
+  DEFAULT_BACKGROUND,
+  backgroundStyle,
+  overlayStyle,
   FormField,
+  StatusSwitch,
+  SlugPicker,
   inputClass,
+  type ContentStatus,
+  type SlugOption,
 } from "@/components/admin/AdminUI";
-import { saveActivityAction, type ActivityInput } from "../actions";
+import { saveActivityAction, setActivityStatusAction, type ActivityInput } from "../actions";
 
 const TABS = ["Overview", "Guidelines", "Equipment & Permits", "Related Content", "Gallery & Media"] as const;
 type Tab = (typeof TABS)[number];
@@ -27,7 +34,7 @@ const BLANK: ActivityInput = {
   title: "",
   tagline: "",
   icon: "hiking",
-  heroImage: "/images/alternate/alternate-image-destinations.jpg",
+  heroBackground: { ...DEFAULT_BACKGROUND, overlay: { ...DEFAULT_BACKGROUND.overlay, enabled: false } },
   overview: [],
   duration: "",
   difficulty: "",
@@ -39,16 +46,19 @@ const BLANK: ActivityInput = {
   guideBody: "",
   guideBullets: [],
   galleryImages: [],
+  galleryTitles: [],
 };
 
 export function ActivityEditorClient({
   initialData,
   originalSlug,
   status,
+  options,
 }: {
   initialData: ActivityInput | null;
   originalSlug: string | null;
   status: "PUBLISHED" | "DRAFT" | null;
+  options: { destinations: SlugOption[]; activities: SlugOption[] };
 }) {
   const router = useRouter();
   const isNew = !originalSlug;
@@ -57,6 +67,24 @@ export function ActivityEditorClient({
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [currentStatus, setCurrentStatus] = useState<ContentStatus>(status ?? "DRAFT");
+  const [statusPending, startStatusTransition] = useTransition();
+
+  function changeStatus(next: ContentStatus) {
+    if (!originalSlug) return;
+    const previous = currentStatus;
+    setError(null);
+    setCurrentStatus(next);
+    startStatusTransition(async () => {
+      try {
+        await setActivityStatusAction(originalSlug, next);
+        router.refresh();
+      } catch (err) {
+        setCurrentStatus(previous);
+        setError(err instanceof Error ? err.message : "Couldn't change the status.");
+      }
+    });
+  }
 
   function set<K extends keyof ActivityInput>(key: K, value: ActivityInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -223,18 +251,27 @@ export function ActivityEditorClient({
 
           {tab === "Related Content" && (
             <div>
-              <FormField label="Available at destinations (slugs)">
-                <TagListEditor
-                  items={form.destinationSlugs}
+              <FormField
+                label="Available at destinations"
+                hint="Shown as destination cards on the activity page, in this order."
+              >
+                <SlugPicker
+                  value={form.destinationSlugs}
                   onChange={(v) => set("destinationSlugs", v)}
-                  placeholder="e.g. jolly-buoy-island"
+                  options={options.destinations}
+                  placeholder="Search destinations…"
                 />
               </FormField>
-              <FormField label="Related activities (slugs)">
-                <TagListEditor
-                  items={form.relatedActivitySlugs}
+              <FormField
+                label="Related activities"
+                hint={'Shown under "Explore More Activities" on the activity page, in this order.'}
+              >
+                <SlugPicker
+                  value={form.relatedActivitySlugs}
                   onChange={(v) => set("relatedActivitySlugs", v)}
-                  placeholder="e.g. glass-bottom-boating"
+                  options={options.activities}
+                  exclude={[form.slug]}
+                  placeholder="Search activities…"
                 />
               </FormField>
             </div>
@@ -242,22 +279,23 @@ export function ActivityEditorClient({
 
           {tab === "Gallery & Media" && (
             <div>
-              <FormField label="Hero / background image" hint="Shown as the full-width banner at the top of the activity page.">
-                <div className="flex items-center gap-4">
-                  <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-black/5">
-                    <Image src={form.heroImage} alt="" fill sizes="128px" className="object-cover" />
-                  </div>
-                  <input
-                    className={inputClass}
-                    value={form.heroImage}
-                    onChange={(e) => set("heroImage", e.target.value)}
-                  />
-                </div>
+              <FormField
+                label="Hero background"
+                hint="The full-width banner at the top of the activity page: a photo, a flat color, or plain. Add a color overlay to tint it."
+              >
+                <BackgroundEditor
+                  value={form.heroBackground}
+                  onChange={(v) => set("heroBackground", v)}
+                  allowPlain
+                />
               </FormField>
-              <FormField label="Gallery images">
+              <FormField label="Gallery images" hint="Give each image a title — it's shown as the caption on the site.">
                 <GalleryEditor
                   images={form.galleryImages}
-                  onChange={(v) => set("galleryImages", v)}
+                  titles={form.galleryTitles}
+                  onChange={(images, titles) =>
+                    setForm((f) => ({ ...f, galleryImages: images, galleryTitles: titles }))
+                  }
                 />
               </FormField>
             </div>
@@ -268,20 +306,40 @@ export function ActivityEditorClient({
           <Card className="p-4">
             <p className="mb-2 text-xs font-semibold uppercase text-on-surface-variant">Status</p>
             {isNew ? (
-              <Badge tone="warning">New — saved as Draft</Badge>
+              <>
+                <Badge tone="warning">New — saved as Draft</Badge>
+                <p className="mt-3 text-xs text-on-surface-variant">
+                  Create the activity first, then publish it from here.
+                </p>
+              </>
             ) : (
-              <Badge tone={status === "PUBLISHED" ? "success" : "warning"}>
-                {status === "PUBLISHED" ? "Published" : "Draft"}
-              </Badge>
+              <>
+                <StatusSwitch
+                  status={currentStatus}
+                  onChange={changeStatus}
+                  disabled={statusPending}
+                />
+                <p className="mt-3 text-xs text-on-surface-variant">
+                  {currentStatus === "PUBLISHED"
+                    ? "Live on the public site. Switch to Draft to hide it."
+                    : "Hidden from the public site until published."}
+                </p>
+              </>
             )}
-            <p className="mt-3 text-xs text-on-surface-variant">
-              Toggle publish state from the Activities list. Changes here save straight to the
-              database.
-            </p>
           </Card>
           <Card className="overflow-hidden">
-            <div className="relative aspect-video w-full bg-black/5">
-              <Image src={form.heroImage} alt="" fill sizes="280px" className="object-cover" />
+            <div
+              className="relative flex aspect-video w-full items-end bg-black/5 p-3"
+              style={backgroundStyle(form.heroBackground)}
+            >
+              <div className="absolute inset-0" style={overlayStyle(form.heroBackground)} />
+              <span
+                className={`relative text-sm font-semibold ${
+                  form.heroBackground.type === "plain" ? "text-on-surface" : "text-white"
+                }`}
+              >
+                {form.title || "Untitled"}
+              </span>
             </div>
             <div className="p-3">
               <p className="text-sm font-semibold text-on-surface">{form.title || "Untitled"}</p>

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, roleHasPermission } from "@/lib/auth";
 import { AdminShell } from "@/components/admin/AdminShell";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -15,8 +15,22 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
     redirect("/admin/login");
   }
 
+  const [canViewLogs, canManageSettings] = await Promise.all([
+    roleHasPermission(user.role, "view_logs"),
+    roleHasPermission(user.role, "manage_settings"),
+  ]);
+
   return (
-    <AdminShell currentUser={{ name: user.name, role: ROLE_LABELS[user.role] ?? user.role }}>
+    <AdminShell
+      currentUser={{
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: ROLE_LABELS[user.role] ?? user.role,
+        canViewLogs,
+        canManageSettings,
+      }}
+    >
       {children}
     </AdminShell>
   );
